@@ -78,11 +78,10 @@ Icon _actIcon = new Icon(Icons.storage);
         duration: const Duration(milliseconds: 500), vsync: this);
     CheckLoadingPagesAssert();
     Global_timer = new Timer.periodic(
-        Duration(seconds: 1),
+        Duration(seconds: 2),
             (Timer timer) =>
-            setState(() {
-              TimerService();
-            }));
+              TimerService()
+            );
   }
 
   List<Widget> CheckLoadingPagesAssert({String loadPageError}){
@@ -152,7 +151,6 @@ if(Global_RefreshPage == true)
         buildersss(true);
       });
     }
-
   else if(Global_ACT_TO_REFRESH == ACT_PAGE.LOADED_PAGES )
     {
       setState(() {
@@ -161,9 +159,6 @@ if(Global_RefreshPage == true)
     }
   Global_RefreshPage = false;
 }
-
-
-
 }
 
 
@@ -364,20 +359,12 @@ g_readedWebside.sort(
   //*******************************APPPPP****************************************
   @override
   Widget build(BuildContext context) {
-
-
-
     Global_width = MediaQuery.of(context).size.width;
     Global_height = MediaQuery.of(context).size.height;
-
     isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-
-
     try {
       if (!firstAppStart) {
-
         loadFromWebside();
-
         firstAppStart = true;
       }
     } catch (ex) {}
