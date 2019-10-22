@@ -16,6 +16,7 @@ import '../Globals.dart';
 import 'WebPortal.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Elements/GoogleSignIn.dart';
 
 class WebsideInfo {
   String URL = "", TITTLE = "", HREF = "", DATE = "", DESCRIPTION = "";
@@ -137,7 +138,7 @@ class WebsideInfo {
     }
   }
 
-  String ToJsonString() {
+  String toJson() {
     String JsonStr = '{ "DATE" : "' +
         this.DATE.replaceAll("\n", "") +
         '", "URL" :"' +
@@ -158,7 +159,7 @@ class WebsideInfo {
 
     return JsonStr;
   }
-}
+} //class
 
 Future<List<WebsideInfo>> GetWebsideInfos(WebPortal WEB) async {
   List<WebsideInfo> websideCheeck = new List<WebsideInfo>();
@@ -233,19 +234,19 @@ void _SaveDataToFirebase(String data) async {
     final databaseReference = Firestore.instance;
     await databaseReference
         .collection("dataFromBaseWebs")
-        .document(Global_googleUser.email)
-        .setData({'id': Global_googleUser.email, 'description': data});
+        .document(Global_GoogleSign.getGoogleUserEmail())
+        .setData({'id': Global_GoogleSign.getGoogleUserEmail(), 'description': data});
   } catch (ex) {
     assert(ex);
   }
 }
 
-Future<List<String>> _LoadDataToFirebase() async {
+Future<List<String>> _LoadDataFromFirebase() async {
   try {
     final databaseReference = Firestore.instance;
     DocumentSnapshot retval = await databaseReference
         .collection("dataFromBaseWebs")
-        .document(Global_googleUser.email)
+        .document(Global_GoogleSign.getGoogleUserEmail())
         .get();
     List val = jsonDecode(retval.data["description"].toString());
 
@@ -264,10 +265,10 @@ Future<List<String>> _LoadDataToFirebase() async {
 Future<bool> save_WebsideArch(List<WebsideInfo> webObj) async {
   List<String> ObjSave = new List<String>();
   for (WebsideInfo objectVal in webObj) {
-    ObjSave.add(objectVal.ToJsonString());
+    ObjSave.add(objectVal.toJson());
   }
 
-  if (Global_googleUser != null) {
+  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
     _SaveDataToFirebase(jsonEncode(ObjSave));
   } else {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -281,8 +282,8 @@ Future<List<WebsideInfo>> load_WebsideArch() async {
   List<WebsideInfo> redadWebs = new List<WebsideInfo>();
   List<String> loadedWevs = new List<String>();
 
-  if (Global_googleUser != null) {
-    loadedWevs = await _LoadDataToFirebase();
+  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+    loadedWevs = await _LoadDataFromFirebase();
   } else {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -303,18 +304,6 @@ Future<List<WebsideInfo>> load_WebsideArch() async {
 
   return redadWebs;
 }
-
-Animatable<Color> background = TweenSequence<Color>(
-  [
-    TweenSequenceItem(
-      weight: 1.0,
-      tween: ColorTween(
-        begin: Colors.black,
-        end: Colors.white,
-      ),
-    ),
-  ],
-);
 
 int savedFileContainsThisWebside(WebsideInfo p_act) {
   int i = 0;

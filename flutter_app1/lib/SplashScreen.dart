@@ -7,9 +7,10 @@ import 'Class/WebPortal.dart';
 import 'Class/WebsideInfo.dart';
 import 'Globals.dart';
 import 'package:package_info/package_info.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:toast/toast.dart';
+
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+import 'Elements/GoogleSignIn.dart';
 
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key}) : super(key: key);
@@ -21,123 +22,163 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreen extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   AnimationController animController;
+  Timer _timer;
+  bool runApp = true;
+  bool _tryLoadGoogleAcc = true;
+  int caunt = 0;
+  List<Widget> buttonlist;
 
   @override
   void initState() {
     super.initState();
     animController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
+    _timerStart();
   }
 
-  bool runApp = true;
+  _timerStart() {
+    setState(() {
+      buttonlist = retButtons(true);
+    });
+    _timer = new Timer.periodic(
+        Duration(seconds: 2), (Timer timer) => TimerService());
+    animController.repeat(period: Duration(milliseconds: 1000));
+  }
+
+  _timerStop() {
+    _timer.cancel();
+    animController.stop();
+    caunt = 0;
+    setState(() {
+      buttonlist = retButtons(false);
+    });
+    _tryLoadGoogleAcc = false;
+  }
+
+  TimerService() {
+    if (_tryLoadGoogleAcc == true) {
+      caunt++;
+      if (caunt > 10) {
+        _timerStop();
+      }
+    }
+  }
 
   setVrtsionApp() async {
     Global_packageInfo = await PackageInfo.fromPlatform();
   }
 
-  static FirebaseAuth _auth = FirebaseAuth.instance;
-  static GoogleSignIn _googleSignIn = GoogleSignIn();
+  tryLoginAutomaticly() async {
+    bool isSignIn = await Global_GoogleSign.getActLoginStat();
+    if (isSignIn == true) {
+      _tryLoadGoogleAcc = true;
+      try {
+        Global_GoogleSign.TryLogInbyGoogle(context);
+      } catch (ex) {
+        assert(ex);
+        setState(() {
+          _tryLoadGoogleAcc = false;
+        });
+      }
+    } else {
+      setState(() {
+        _tryLoadGoogleAcc = false;
+      });
+    }
+  }
 
-  static Future<FirebaseUser> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+  List<Widget> retButtons(bool load) {
+    if (load == true) {
+      return [
+        Container(
+          child: RotationTransition(
+            turns: Tween(begin: 0.0, end: 1.0).animate(animController),
+            child: CircularProgressIndicator(value: 0.4),
+          ),
+        ),
+      ];
+    } else {
+      return [
+        FlatButton(
+          onPressed: () {
+            Global_GoogleSign.TryLogInbyGoogle(context);
+            _timerStop();
+          },
+          color: Colors.blueAccent,
+          child: Row(
+            // Repl
+            mainAxisAlignment: MainAxisAlignment.center,
+            // ace with a Row for horizontal icon + text
+            children: <Widget>[
+              Icon(FontAwesomeIcons.google),
+              Text("  Sign in by Google")
+            ],
+          ),
+        ),
+        Container(
+          height: 20,
+        ),
+        FlatButton(
+          onPressed: () async {
+            _timerStart();
+            _tryLoadGoogleAcc = true;
+            if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+              await Global_GoogleSign.SignOutGoogle(context);
+            }
+            await LoadFromStorage();
+            _timerStop();
+            await Navigator.of(context).pushNamed('/mainScreen');
 
-      AuthCredential authCredential = GoogleAuthProvider.getCredential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      AuthResult fire = (await _auth.signInWithCredential(authCredential));
-
-      final FirebaseUser user = fire.user;
-      assert(user.email != null);
-      assert(user.displayName != null);
-
-      assert(await user.getIdToken() != null);
-
-      final FirebaseUser currentUser = await _auth.currentUser();
-      assert(user.uid == currentUser.uid);
-      return user;
-    } catch (ex) {
-      assert(ex);
+          },
+          color: Colors.orange,
+          child: Row(
+            // Replace with a
+            mainAxisAlignment: MainAxisAlignment.center,
+            // Row for horizontal icon + text
+            children: <Widget>[
+              Icon(Icons.person),
+              Text("  Sign in like a guest")
+            ],
+          ),
+        ),
+      ];
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    buttonlist = retButtons(_tryLoadGoogleAcc);
     setVrtsionApp();
-
-    Timer(Duration(seconds: 2), () {
-      if (runApp || !Navigator.of(context).canPop()) {
-        //   Navigator.of(context).pushNamed('/mainScreen');
-        runApp = false;
-      }
-    });
+    if (runApp) {
+      _timerStart();
+      runApp = false;
+      tryLoginAutomaticly();
+    }
 
     return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
+      backgroundColor: Colors.black,
+      body: Center(
           child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: <Widget>[
+        padding: const EdgeInsets.all(8),
+        children: <Widget>[
           Center(
-          child: Container(
-              height: 200.00,
-              margin: new EdgeInsets.only(top: 100),
-              child: Image(
-                image: AssetImage("images/my_logo.png"),
-              )),
-        ),
-        Container(
-          height: 50,
-          child: const Center(
-              child: Text('Welcome in WordPress News Collector APP')),
-        ),
-
-            FlatButton(
-              onPressed: () async {
-                try {
-                  Global_googleUser = await signInWithGoogle();
-                  await LoadFromStorage();
-                  await Navigator.of(context).pushNamed('/mainScreen');
-                } catch (ex) {
-                  assert(ex);
-                  Toast.show("Please sign in or login like guest", context,
-                      duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-                }
-              },
-              color: Colors.blueAccent,
-
-              child: Row( // Repl
-                mainAxisAlignment: MainAxisAlignment.center,// ace with a Row for horizontal icon + text
-                children: <Widget>[
-                  Icon(Icons.lock),
-                  Text("Sign in by Google")
-                ],
-              ),
-            ),
-
-Container(height: 20,),
-            FlatButton(
-              onPressed: () async {
-                Global_googleUser = null;
-                await LoadFromStorage();
-                await Navigator.of(context).pushNamed('/mainScreen');
-              },
-              color: Colors.orange,
-
-              child: Row( // Replace with a
-                mainAxisAlignment: MainAxisAlignment.center,// Row for horizontal icon + text
-                children: <Widget>[
-                  Icon(Icons.person),
-                  Text("Sign in like a guest")
-                ],
-              ),
-            ),
-
-
-          ],
-        )),);
+            child: Container(
+                height: 200.00,
+                margin: new EdgeInsets.only(top: 100),
+                child: Image(
+                  image: AssetImage("images/my_logo.png"),
+                )),
+          ),
+          Container(
+            height: 50,
+            child: const Center(
+                child: Text('Welcome in WordPress News Collector APP')),
+          ),
+          Column(
+            children: buttonlist,
+          )
+        ],
+      )),
+    );
   }
 }

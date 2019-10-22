@@ -9,7 +9,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
 class ShowMoreInfo extends StatefulWidget {
   ShowMoreInfo({Key key}) : super(key: key);
 
@@ -19,55 +18,39 @@ class ShowMoreInfo extends StatefulWidget {
 
 class _ShowMoreInfo extends State<ShowMoreInfo>
     with SingleTickerProviderStateMixin {
+  WebsideInfo WebInfo;
+  bool _init = true;
 
-   WebsideInfo WebInfo;
-   bool _init = true;
   @override
   void initState() {
     super.initState();
-
-
-
-
   }
 
-  String Comments = "...";
+  String commentsCaunter = "...";
+
   _getMoreInfo(WebsideInfo web) async {
     try {
-      final response =
-      await http.get(
+      final response = await http.get(
           "https://" + web.DOMAIN + "/wp-json/wp/v2/comments?post=" + web.ID);
       if (response.statusCode == 200) {
         List<dynamic> retJson = json.decode(response.body);
 
         setState(() {
-          Comments = retJson.length.toString();
+          commentsCaunter = retJson.length.toString();
         });
 
-
         for (dynamic items in retJson) {
-          try {
-
-          }
-          catch (ex) {}
+          try {} catch (ex) {}
         }
       }
-    }
-    catch(ex)
-    {
+    } catch (ex) {
       setState(() {
-        Comments = "N/A";
+        commentsCaunter = "N/A";
       });
     }
-
-
   }
 
-
-
   Widget ShowMoreInfo_Fun(WebsideInfo p_webInfo, BuildContext context) {
-
-
     return Container(
         width: Global_width,
         margin: new EdgeInsets.all(0),
@@ -90,74 +73,46 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             ),
           ),
           Container(
-            margin: new EdgeInsets.only(bottom: 10 , top: 5 , left: 5 , right: 5),
+            margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
               p_webInfo.TITTLE,
               style: TextStyle(fontSize: 20),
             ),
           ),
           Container(
-            margin: new EdgeInsets.only(bottom: 10 , top: 5 , left: 5 , right: 5),
+            margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
               p_webInfo.DESCRIPTION,
               style: TextStyle(fontSize: 14),
             ),
           ),
-
           Align(
-
-         child: Row(
-mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Text(Comments, style: TextStyle(fontSize: 20),),
-              Container(width: 10,),
-              Icon(
-                Icons.forum,
-                color: p_webInfo.getColor(),
-                size: 30.0,
-                semanticLabel: 'Comments in post',
-              ),
-Container(width: 10,),
-            ],
-
-          ),
-
-          ),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  margin: new EdgeInsets.only(top: 20, left: 5, right: 5),
-                  child: FlatButton(
-                    color: Colors.greenAccent,
-                    child: new Text(
-                      "Hide",
-                      style: TextStyle(
-                        color: Colors.black,
-                      ),
-                    ),
-                    onPressed: () => Navigator.pop(context, true),
-                  ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Text(
+                  commentsCaunter,
+                  style: TextStyle(fontSize: 20),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  margin: new EdgeInsets.only(top: 20, left: 5, right: 5),
-                  child: FlatButton(
-                      color: Colors.blueAccent,
-                      child: new Text(
-                        "Read more",
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                      onPressed: () => launchURL(p_webInfo.URL)),
+                Container(
+                  width: 10,
                 ),
-              ),
-            ],
+                Icon(
+                  Icons.forum,
+                  color: p_webInfo.getColor(),
+                  size: 30.0,
+                  semanticLabel: 'Comments in post',
+                ),
+                Container(
+                  width: 10,
+                ),
+              ],
+            ),
           ),
+
+
+
+
 
 
 
@@ -168,12 +123,42 @@ Container(width: 10,),
   @override
   Widget build(BuildContext context) {
     WebInfo = ModalRoute.of(context).settings.arguments;
-    if(_init){
+    if (_init) {
       _getMoreInfo(WebInfo);
       _init = false;
     }
 
+    void pressButton(int press){
+
+      if  (press == 0){
+        Navigator.pop(context, true);
+      }
+      else
+        {
+          launchURL(WebInfo.URL);
+        }
+    }
+
+
+
+
     return Scaffold(
+        bottomNavigationBar:BottomNavigationBar(
+          items: [
+        BottomNavigationBarItem(
+        icon: Icon(Icons.arrow_left,color: Colors.greenAccent),
+        title: new Text('Back'),
+
+    ),
+
+    BottomNavigationBarItem(
+    icon: Icon(Icons.pages,color: Colors.blueAccent),
+    title: new Text('See more'),
+
+    ),
+          ],
+    onTap: (press)=>pressButton(press),
+        ),
         backgroundColor: Colors.black,
         body: ShowMoreInfo_Fun(WebInfo, context));
   }

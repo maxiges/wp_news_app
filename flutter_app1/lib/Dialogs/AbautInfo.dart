@@ -14,31 +14,21 @@ import '../Utils/ColorPicker.dart';
 
 import 'package:toast/toast.dart';
 
-
-double _getSize(context){
-
-  if(MediaQuery.of(context).size.height>400)
-    return 400.0;
-
+double _getWidgetSize(context) {
+  if (MediaQuery.of(context).size.height > 400) return 400.0;
   return MediaQuery.of(context).size.height;
-
 }
 
-aboutInfoDialog( dynamic context) async {
+aboutInfoDialog(dynamic context) async {
   bool shouldUpdate = await showDialog(
       context: context,
-      child:   AlertDialog(
-
+      child: AlertDialog(
         contentPadding: const EdgeInsets.all(0),
         titlePadding: const EdgeInsets.all(0),
         content: Container(
           width: MediaQuery.of(context).size.width,
-          height: _getSize(context),
-
-
+          height: _getWidgetSize(context),
           child: Column(
-
-
             children: <Widget>[
               Center(
                   child: Container(
@@ -49,8 +39,20 @@ aboutInfoDialog( dynamic context) async {
               ))),
               Center(
                 child: Container(
-                  child: Text(Global_packageInfo.appName+" v." + Global_packageInfo.version,
+                  child: Text(
+                      Global_packageInfo.appName +
+                          " v." +
+                          Global_packageInfo.version +
+                          Global_packageInfo.buildNumber,
                       style: new TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center),
+                  margin: EdgeInsets.only(top: 10, bottom: 20),
+                ),
+              ),
+              Center(
+                child: Container(
+                  child: Text("Rev." + Global_packageInfo.buildNumber,
+                      style: new TextStyle(fontSize: 14),
                       textAlign: TextAlign.center),
                   margin: EdgeInsets.only(top: 10, bottom: 20),
                 ),
@@ -59,65 +61,49 @@ aboutInfoDialog( dynamic context) async {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-
-                child:Column(
-
-              children: <Widget>[
-                Container(
-                  child: Text('App created by: Mateusz "maxiges"',
-                      style: new TextStyle(fontSize: 14),
-                      textAlign: TextAlign.center),
-                  margin: EdgeInsets.only(top: 10, bottom: 5, left: 5),
-                ),
-                Container(
-                  child: Text('Email: maxiges10@gmail.com',
-                      style: new TextStyle(fontSize: 14),
-                      textAlign: TextAlign.center),
-                  margin: EdgeInsets.only(top: 10, bottom: 5 , left: 5),
-                ),
-              ],
-                ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          child: Text('App created by: Mateusz "maxiges"',
+                              style: new TextStyle(fontSize: 14),
+                              textAlign: TextAlign.center),
+                          margin: EdgeInsets.only(top: 10, bottom: 5, left: 5),
+                        ),
+                        Container(
+                          child: Text('Email: maxiges10@gmail.com',
+                              style: new TextStyle(fontSize: 14),
+                              textAlign: TextAlign.center),
+                          margin: EdgeInsets.only(top: 10, bottom: 5, left: 5),
+                        ),
+                      ],
+                    ),
                   ),
-
                   Container(
-                      margin:EdgeInsets.only(top: 10, bottom: 5 , right: 5),
-                      child:
-                  Image(
-                    image: AssetImage('images/my_logo.png'),
-                    height: 50,
-                    width: 50,
-                  )),
-
-
-
+                      margin: EdgeInsets.only(top: 10, bottom: 5, right: 5),
+                      child: Image(
+                        image: AssetImage('images/my_logo.png'),
+                        height: 40,
+                        width: 40,
+                      )),
                 ],
               ),
-
-
-
-
               Expanded(
-    child:          Align(
-
+                  child: Align(
                 child: FlatButton(
                   padding: const EdgeInsets.all(15),
-
-                 color: Colors.blueAccent,
+                  color: Colors.blueAccent,
                   child: new Text(
                     "    Cancel    ",
                   ),
                   onPressed: () => Navigator.pop(context, false),
                 ),
                 alignment: FractionalOffset.bottomCenter,
-              )
-  ),
+              )),
               Container(
                 height: 10,
               )
             ],
           ),
-
-
         ),
       ));
 }

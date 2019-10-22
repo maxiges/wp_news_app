@@ -9,142 +9,118 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-
-
+import '../Elements/GoogleSignIn.dart';
 class WebPortal {
   String url;
   String decColor;
+
   WebPortal(this.url, this.decColor);
+
   Color getColor() {
     try {
       return colorPalet[this.decColor];
     } catch (ex) {}
     return Colors.black;
   }
-  void tryRead(String JsonString)
-  {
+
+  void tryRead(String JsonString) {
     try {
       Map<String, dynamic> user = jsonDecode(JsonString);
       this.url = user["URL"];
       this.decColor = user["Color"];
-    }
-    catch(ex)
-    {
+    } catch (ex) {
       this.url = "";
       this.decColor = "red";
     }
   }
-  String toJsonString() {
-    String JsonStr = '{ "URL" : "' +
+
+  String toJson() {
+    String jsonStr = '{ "URL" : "' +
         this.url.replaceAll("\n", "") +
         '", "Color" :"' +
         this.decColor.replaceAll("\n", "") +
         '"}';
-    return JsonStr;
+    return jsonStr;
   }
 } //class  WebPortal
 
-
-
-
-void _SaveDataToFirebase(String data)async{
+void _SaveDataToFirebase(String data) async {
   try {
     final databaseReference = Firestore.instance;
-      await databaseReference.collection("dataFromBase")
-          .document(Global_googleUser.email)
-          .setData({
-        'id': Global_googleUser.email,
-        'description': data
-      });
-  }
-  catch(ex){
+    await databaseReference
+        .collection("dataFromBase")
+        .document(Global_GoogleSign.getGoogleUserEmail())
+        .setData({'id': Global_GoogleSign.getGoogleUserEmail(), 'description': data});
+  } catch (ex) {
     assert(ex);
   }
 }
 
-Future<List<String>> _LoadDataToFirebase()async{
+Future<List<String>> _LoadDataFromFirebase() async {
   try {
     final databaseReference = Firestore.instance;
-   DocumentSnapshot retval =  await databaseReference.collection("dataFromBase")
-        .document(Global_googleUser.email)
+    DocumentSnapshot retval = await databaseReference
+        .collection("dataFromBase")
+        .document(Global_GoogleSign.getGoogleUserEmail())
         .get();
-   List<String> valll =  retval.data["description"].toString().split(";");
+    List<String> valll = retval.data["description"].toString().split(";");
     return valll;
-  }
-  catch(ex){
+  } catch (ex) {
     assert(ex);
   }
 }
 
-
-Future<bool> saveWebPorts(List<WebPortal> list ) async
-{
+Future<bool> saveWebPorts(List<WebPortal> list) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   List<String> objSave = new List<String>();
 
   for (WebPortal objectVal in list) {
-    objSave.add(objectVal.toJsonString());
-
+    objSave.add(objectVal.toJson());
   }
 
-  if(Global_googleUser != null)
-  {
-    try{
-      _SaveDataToFirebase(objSave.reduce((value, element) => value + ';' + element));
-    }catch(ex){
+  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+    try {
+      _SaveDataToFirebase(
+          objSave.reduce((value, element) => value + ';' + element));
+    } catch (ex) {
       assert(ex);
     }
+  } else {
+    prefs.remove("SavedWebs");
+    return prefs.setStringList("SavedWebs", objSave);
   }
-  else
-    {
-      prefs.remove("SavedWebs");
-      return prefs.setStringList("SavedWebs", objSave);
-    }
-
-
-
 }
+
 Future<List<WebPortal>> loadWebPorts() async {
-
   List<String> loadedWevs = new List<String>();
-
-
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  if(Global_googleUser != null)
-  {
-    try{
-     loadedWevs = await _LoadDataToFirebase();
-    }catch(ex){
-      assert(ex);
-    }
-  }
-  else {
+  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
     try {
-       loadedWevs = prefs.getStringList("SavedWebs");
-    }
-    catch (ex) {
-      assert(ex);
-    }
-  }
-
-
-    List<WebPortal> redadWebs = new List<WebPortal>();
-    try {
-
-      for (String JsonString in loadedWevs) {
-        WebPortal newSavedPage =
-        new WebPortal("", "");
-        newSavedPage.tryRead(JsonString);
-        if (newSavedPage.url.length > 0) {
-          redadWebs.add(newSavedPage);
-        }
-      }
+      loadedWevs = await _LoadDataFromFirebase();
     } catch (ex) {
-      print(ex.toString());
+      assert(ex);
     }
+  } else {
+    try {
+      loadedWevs = prefs.getStringList("SavedWebs");
+    } catch (ex) {
+      assert(ex);
+    }
+  }
 
-    return redadWebs;
+  List<WebPortal> redadWebs = new List<WebPortal>();
+  try {
+    for (String JsonString in loadedWevs) {
+      WebPortal newSavedPage = new WebPortal("", "");
+      newSavedPage.tryRead(JsonString);
+      if (newSavedPage.url.length > 0) {
+        redadWebs.add(newSavedPage);
+      }
+    }
+  } catch (ex) {
+    print(ex.toString());
+  }
 
+  return redadWebs;
 }

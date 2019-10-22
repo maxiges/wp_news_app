@@ -8,8 +8,8 @@ import 'Class/WebPortal.dart';
 import 'package:package_info/package_info.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-
+import 'Elements/GoogleSignIn.dart';
+import "HomePage.dart";
 
 enum ACT_PAGE {
   none,
@@ -23,18 +23,18 @@ List<WebsideInfo> Global_savedWebside = new List<WebsideInfo>();
 double Global_width = 0;
 double Global_height = 0;
 Timer Global_timer;
-bool Global_RefreshPage = true;
+bool Global_RefreshPage = false;
 
 ACT_PAGE Global_ACT_TO_REFRESH = ACT_PAGE.LOADED_PAGES;
 
 
 MyHomePage Global_MyHomePage = new MyHomePage(title: 'WP news APP');
 
+
+
 PackageInfo Global_packageInfo;
+GoogleSign Global_GoogleSign = new GoogleSign();
 
-
-
-FirebaseUser Global_googleUser;
 
 Map<String, Color> colorPalet =   {
   "black": Colors.black,
@@ -56,9 +56,10 @@ Map<String, Color> colorPalet =   {
 } ;
 
 
-void LoadFromStorage() async {
-  Global_savedWebside = await load_WebsideArch();
+ LoadFromStorage() async {
   Global_webList = await loadWebPorts();
+  Global_savedWebside = await load_WebsideArch();
+
 }
 
 
