@@ -39,15 +39,9 @@ class _MyHomePageState extends State<MyHomePage>
   int actLoadedPages = 0;
   Icon _actIcon = new Icon(Icons.storage);
 
-  @protected
-  @mustCallSuper
-  void deactivate(){
-    Global_timer.cancel();
-    rotationController.stop();
-  }
-  @protected
-  @mustCallSuper
+
   void dispose() {
+    super.dispose();
     Global_timer.cancel();
     rotationController.stop();
   }
@@ -60,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage>
     CheckLoadingPagesAssert();
 
     Global_timer = new Timer.periodic(
-        Duration(seconds: 1), (Timer timer) => TimerService());
+        Duration(microseconds: 100), (Timer timer) => TimerService());
   }
 
   void TimerService() {
@@ -78,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage>
     }
 
     if (Global_RefreshPage == true) {
-
+      Global_RefreshPage = false;
       if (Global_ACT_TO_REFRESH == ACT_PAGE.SAVED_PAGES) {
         setState(() {
           buildersss(true);
@@ -88,9 +82,6 @@ class _MyHomePageState extends State<MyHomePage>
           buildersss(false);
         });
       }
-
-      Global_RefreshPage = false;
-
     }
 
 

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Elements/GoogleSignIn.dart';
+
 class WebPortal {
   String url;
   String decColor;
@@ -50,7 +51,10 @@ void _SaveDataToFirebase(String data) async {
     await databaseReference
         .collection("dataFromBase")
         .document(Global_GoogleSign.getGoogleUserEmail())
-        .setData({'id': Global_GoogleSign.getGoogleUserEmail(), 'description': data});
+        .setData({
+      'id': Global_GoogleSign.getGoogleUserEmail(),
+      'description': data
+    });
   } catch (ex) {
     assert(ex);
   }
@@ -71,7 +75,6 @@ Future<List<String>> _LoadDataFromFirebase() async {
 }
 
 Future<bool> saveWebPorts(List<WebPortal> list) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
   List<String> objSave = new List<String>();
 
   for (WebPortal objectVal in list) {
@@ -85,10 +88,10 @@ Future<bool> saveWebPorts(List<WebPortal> list) async {
     } catch (ex) {
       assert(ex);
     }
-  } else {
-    prefs.remove("SavedWebs");
-    return prefs.setStringList("SavedWebs", objSave);
   }
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove("SavedWebs");
+  return prefs.setStringList("SavedWebs", objSave);
 }
 
 Future<List<WebPortal>> loadWebPorts() async {

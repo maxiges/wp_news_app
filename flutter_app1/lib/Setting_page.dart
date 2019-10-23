@@ -119,6 +119,7 @@ class _Setting_page extends State<Setting_page>
     if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
       return Center(
           child: Container(
+        width: 300,
         margin: EdgeInsets.only(top: 30, bottom: 10, left: 10, right: 10),
         child: FlatButton(
           onPressed: () {
@@ -131,10 +132,14 @@ class _Setting_page extends State<Setting_page>
             // ace with a Row for horizontal icon + text
             children: <Widget>[
               Icon(FontAwesomeIcons.google),
-              Text(
-                "  Sign out " + Global_GoogleSign.getGoogleUser(),
+              Container(
+                width: 5,
+              ),
+              Flexible(
+                  child: Text(
+                "Sign out " + Global_GoogleSign.getGoogleUser(),
                 style: TextStyle(fontSize: 18),
-              )
+              )),
             ],
           ),
         ),

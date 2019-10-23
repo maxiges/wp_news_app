@@ -30,6 +30,10 @@ class _PagesToTab extends State<PagesToTab>
     with SingleTickerProviderStateMixin {
   AnimationController animationControl;
 
+  double _width ;
+  double rowWidth ;
+  double rowheight = 100;
+
   @override
   void initState() {
     super.initState();
@@ -37,11 +41,10 @@ class _PagesToTab extends State<PagesToTab>
         duration: const Duration(milliseconds: 100), vsync: this);
   }
 
-  double rowWidth = Global_width - 100 - 20;
 
-  double rowheight = 100;
 
   Widget GetPageDescrWidget() {
+
     if (rowWidth < 500) {
       return (Align(
         alignment: Alignment.center,
@@ -133,6 +136,9 @@ class _PagesToTab extends State<PagesToTab>
   }
 
   Widget build(BuildContext context) {
+    _width = MediaQuery.of(context).size.width;
+    rowWidth= _width - 100 - 20;
+
     animationControl.forward();
     String orderFunct = "Save for later ?";
     Color yesColor = Colors.greenAccent;

@@ -28,6 +28,11 @@ class _SplashScreen extends State<SplashScreen>
   int caunt = 0;
   List<Widget> buttonlist;
 
+  var _width;
+  var _height;
+
+
+
   @override
   void initState() {
     super.initState();
@@ -99,7 +104,9 @@ class _SplashScreen extends State<SplashScreen>
       ];
     } else {
       return [
-        FlatButton(
+        Container(
+          width: 300,
+        child:FlatButton(
           onPressed: () {
             Global_GoogleSign.TryLogInbyGoogle(context);
             _timerStop();
@@ -115,10 +122,13 @@ class _SplashScreen extends State<SplashScreen>
             ],
           ),
         ),
+        ),
         Container(
           height: 20,
         ),
-        FlatButton(
+        Container(
+    width: 300,
+       child: FlatButton(
           onPressed: () async {
             _timerStart();
             _tryLoadGoogleAcc = true;
@@ -141,12 +151,16 @@ class _SplashScreen extends State<SplashScreen>
             ],
           ),
         ),
+        ),
       ];
     }
   }
 
   @override
   Widget build(BuildContext context) {
+
+    _width = MediaQuery.of(context).size.width;
+    _height = MediaQuery.of(context).size.height;
     buttonlist = retButtons(_tryLoadGoogleAcc);
     setVrtsionApp();
     if (runApp) {
@@ -154,6 +168,12 @@ class _SplashScreen extends State<SplashScreen>
       runApp = false;
       tryLoginAutomaticly();
     }
+    double _imageSize = 200;
+    double _imageTopMargin = 100;
+    if(_height< 700)
+      {
+        _imageTopMargin = 10;
+      }
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -163,8 +183,8 @@ class _SplashScreen extends State<SplashScreen>
         children: <Widget>[
           Center(
             child: Container(
-                height: 200.00,
-                margin: new EdgeInsets.only(top: 100),
+                height: _imageSize,
+                margin: new EdgeInsets.only(top: _imageTopMargin),
                 child: Image(
                   image: AssetImage("images/my_logo.png"),
                 )),

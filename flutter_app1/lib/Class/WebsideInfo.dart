@@ -235,7 +235,10 @@ void _SaveDataToFirebase(String data) async {
     await databaseReference
         .collection("dataFromBaseWebs")
         .document(Global_GoogleSign.getGoogleUserEmail())
-        .setData({'id': Global_GoogleSign.getGoogleUserEmail(), 'description': data});
+        .setData({
+      'id': Global_GoogleSign.getGoogleUserEmail(),
+      'description': data
+    });
   } catch (ex) {
     assert(ex);
   }
@@ -269,13 +272,16 @@ Future<bool> save_WebsideArch(List<WebsideInfo> webObj) async {
   }
 
   if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
-    _SaveDataToFirebase(jsonEncode(ObjSave));
-  } else {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    prefs.remove("SaverURLS");
-    return prefs.setStringList("SaverURLS", ObjSave);
+    try {
+      _SaveDataToFirebase(jsonEncode(ObjSave));
+    } catch (ex) {
+      assert(ex);
+    }
   }
+
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove("SaverURLS");
+  return prefs.setStringList("SaverURLS", ObjSave);
 }
 
 Future<List<WebsideInfo>> load_WebsideArch() async {
@@ -286,7 +292,6 @@ Future<List<WebsideInfo>> load_WebsideArch() async {
     loadedWevs = await _LoadDataFromFirebase();
   } else {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-
     loadedWevs = prefs.getStringList("SaverURLS");
   }
 
