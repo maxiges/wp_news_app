@@ -1,4 +1,3 @@
-
 import 'Class/WebsideInfo.dart';
 import 'dart:async';
 import 'main.dart';
@@ -11,12 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'Elements/GoogleSignIn.dart';
 import "HomePage.dart";
 
-enum ACT_PAGE {
-  none,
-  LOADED_PAGES,
-  SAVED_PAGES,
-  SETTINGS
-}
+enum ACT_PAGE { none, LOADED_PAGES, SAVED_PAGES, SETTINGS }
+
 List<WebPortal> Global_webList = new List<WebPortal>();
 List<WebsideInfo> Global_savedWebside = new List<WebsideInfo>();
 
@@ -27,16 +22,16 @@ bool Global_RefreshPage = false;
 
 ACT_PAGE Global_ACT_TO_REFRESH = ACT_PAGE.LOADED_PAGES;
 
-
 MyHomePage Global_MyHomePage = new MyHomePage(title: 'WP news APP');
-
-
 
 PackageInfo Global_packageInfo;
 GoogleSign Global_GoogleSign = new GoogleSign();
 
-
-Map<String, Color> colorPalet =   {
+const String Global_NoImageAvater =
+    "https://secure.gravatar.com/avatar/d187e7d1ad82bca50f490848dc98f1e3?s=96&d=mm&r=g";
+const String Global_NoImagePost =
+    "https://icon-library.net/images/no-image-available-icon/no-image-available-icon-6.jpg";
+Map<String, Color> colorPalet = {
   "black": Colors.black,
   "black26": Colors.black26,
   "grey": Colors.grey,
@@ -52,19 +47,12 @@ Map<String, Color> colorPalet =   {
   "blue": Colors.blue,
   "blueAccent": Colors.blueAccent,
   "purple": Colors.deepPurple,
+};
 
-} ;
-
-
- LoadFromStorage() async {
+LoadFromStorage() async {
   Global_webList = await loadWebPorts();
   Global_savedWebside = await load_WebsideArch();
-
 }
-
-
-
-
 
 String GetStringColor(Color color) {
   String findname = "black";
@@ -83,3 +71,26 @@ String GetStringColor(Color color) {
   return findname;
 }
 
+String RemoveAllHTMLVal(String str) {
+  str = str.replaceAll("\u0105", "ą");
+  str = str.replaceAll("\u0107", "ć");
+  str = str.replaceAll("\u0119", "ę");
+  str = str.replaceAll("\u0142", "ł");
+  str = str.replaceAll("\u0144", "ń");
+  str = str.replaceAll("\u00f3", "ó");
+  str = str.replaceAll("\u015b", "ś");
+  str = str.replaceAll("\u017a", "ź");
+  str = str.replaceAll("\u017c", "ż");
+  str = str.replaceAll("\r", "");
+  str = str.replaceAll("\n", "");
+  str = str.replaceAll("&#8211;", " ");
+  str = str.replaceAll("&#8217;", " ");
+  str = str.replaceAll("&#8230;", " ");
+  str = str.replaceAll("&#8222;", " ");
+  str = str.replaceAll("&#8221;", " ");
+  str = str.replaceAll("<p>", " ");
+  str = str.replaceAll("<br />", "\r\n");
+  str = str.replaceAll("</p>", " ");
+  str = str.replaceAll("[&hellip;]", " ");
+  return str;
+}

@@ -2,24 +2,22 @@ import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_database/firebase_database.dart';
-
 import '../Globals.dart';
-
 import 'WebPortal.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Elements/GoogleSignIn.dart';
 
 class WebsideInfo {
-  String URL = "", TITTLE = "", HREF = "", DATE = "", DESCRIPTION = "";
+  String URL = "",
+      TITTLE = "",
+      IMAGEHREF = Global_NoImagePost,
+      DATE = "",
+      DESCRIPTION = "";
   String LinkColor = "";
   String DOMAIN = "";
   String ID = "";
@@ -27,56 +25,18 @@ class WebsideInfo {
   WebsideInfo(
       {this.URL = "",
       this.TITTLE = "",
-      this.HREF = "",
+      this.IMAGEHREF = "",
       this.DATE = "",
       this.LinkColor = "",
       this.DESCRIPTION = "",
       this.ID = "",
       this.DOMAIN = ""}) {
-    this.TITTLE = this.TITTLE.replaceAll("\u0105", "ą");
-    this.TITTLE = this.TITTLE.replaceAll("\u0107", "ć");
-    this.TITTLE = this.TITTLE.replaceAll("\u0119", "ę");
-    this.TITTLE = this.TITTLE.replaceAll("\u0142", "ł");
-    this.TITTLE = this.TITTLE.replaceAll("\u0144", "ń");
-    this.TITTLE = this.TITTLE.replaceAll("\u00f3", "ó");
-    this.TITTLE = this.TITTLE.replaceAll("\u015b", "ś");
-    this.TITTLE = this.TITTLE.replaceAll("\u017a", "ź");
-    this.TITTLE = this.TITTLE.replaceAll("\u017c", "ż");
+    this.TITTLE = RemoveAllHTMLVal(this.TITTLE);
+    this.DESCRIPTION = RemoveAllHTMLVal(this.DESCRIPTION);
 
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u0105", "ą");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u0107", "ć");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u0119", "ę");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u0142", "ł");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u0144", "ń");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u00f3", "ó");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u015b", "ś");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u017a", "ź");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\u017c", "ż");
-
-    this.TITTLE = this.TITTLE.replaceAll("\r", "");
-    this.TITTLE = this.TITTLE.replaceAll("\n", "");
-
-    this.TITTLE = this.TITTLE.replaceAll("&#8211;", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("&#8211;", " ");
-    this.TITTLE = this.TITTLE.replaceAll("&#8217;", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("&#8217;", " ");
-    this.TITTLE = this.TITTLE.replaceAll("&#8230;", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("&#8230;", " ");
-    this.TITTLE = this.TITTLE.replaceAll("&#8222;", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("&#8222;", " ");
-    this.TITTLE = this.TITTLE.replaceAll("&#8221;", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("&#8221;", " ");
-
-    this.TITTLE = this.TITTLE.replaceAll("<p>", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("<p>", " ");
-    this.TITTLE = this.TITTLE.replaceAll("</p>", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("</p>", " ");
-
-    this.TITTLE = this.TITTLE.replaceAll("[&hellip;]", " ");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("[&hellip;]", " ");
-
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\r", "");
-    this.DESCRIPTION = this.DESCRIPTION.replaceAll("\n", "");
+    if (this.IMAGEHREF.length < 5) {
+      this.IMAGEHREF = Global_NoImagePost;
+    }
   }
 
   Color getColor() {
@@ -84,6 +44,20 @@ class WebsideInfo {
       return colorPalet[this.LinkColor];
     } catch (ex) {}
     return Colors.black;
+  }
+
+  Color getColorText() {
+    Color act;
+    try {
+      act = colorPalet[this.LinkColor];
+    } catch (ex) {
+      act = Colors.black;
+    }
+    if (act.computeLuminance() > 0.3) {
+      return Colors.black;
+    } else {
+      return Colors.white;
+    }
   }
 
   WebsideInfo_tryRead(String JsonString) {
@@ -108,9 +82,9 @@ class WebsideInfo {
     }
 
     try {
-      this.HREF = user["HREF"];
+      this.IMAGEHREF = user["HREF"];
     } catch (ex) {
-      this.HREF = "";
+      this.IMAGEHREF = "";
     }
 
     try {
@@ -148,7 +122,7 @@ class WebsideInfo {
         '", "TITTLE" :"' +
         this.TITTLE.replaceAll("\n", "") +
         '", "HREF" :"' +
-        this.HREF.replaceAll("\n", "") +
+        this.IMAGEHREF.replaceAll("\n", "") +
         '", "DOMAIN" :"' +
         this.DOMAIN.replaceAll("\n", "") +
         '", "ID" :"' +
@@ -197,7 +171,7 @@ Future<List<WebsideInfo>> GetWebsideInfos(WebPortal WEB) async {
             websideCheeck.add(new WebsideInfo(
                 URL: items['link'],
                 TITTLE: m_article_tittle,
-                HREF: imagersc,
+                IMAGEHREF: imagersc,
                 DATE: items['date'],
                 LinkColor: GetStringColor(WEB.getColor()),
                 DESCRIPTION: m_article_descrip,

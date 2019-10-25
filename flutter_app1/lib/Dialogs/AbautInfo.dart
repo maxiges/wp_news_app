@@ -42,8 +42,7 @@ aboutInfoDialog(dynamic context) async {
                   child: Text(
                       Global_packageInfo.appName +
                           " v." +
-                          Global_packageInfo.version +
-                          Global_packageInfo.buildNumber,
+                          Global_packageInfo.version,
                       style: new TextStyle(fontSize: 18),
                       textAlign: TextAlign.center),
                   margin: EdgeInsets.only(top: 10, bottom: 20),

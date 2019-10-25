@@ -31,8 +31,6 @@ class _SplashScreen extends State<SplashScreen>
   var _width;
   var _height;
 
-
-
   @override
   void initState() {
     super.initState();
@@ -106,51 +104,50 @@ class _SplashScreen extends State<SplashScreen>
       return [
         Container(
           width: 300,
-        child:FlatButton(
-          onPressed: () {
-            Global_GoogleSign.TryLogInbyGoogle(context);
-            _timerStop();
-          },
-          color: Colors.blueAccent,
-          child: Row(
-            // Repl
-            mainAxisAlignment: MainAxisAlignment.center,
-            // ace with a Row for horizontal icon + text
-            children: <Widget>[
-              Icon(FontAwesomeIcons.google),
-              Text("  Sign in by Google")
-            ],
+          child: FlatButton(
+            onPressed: () {
+              Global_GoogleSign.TryLogInbyGoogle(context);
+              _timerStop();
+            },
+            color: Colors.blueAccent,
+            child: Row(
+              // Repl
+              mainAxisAlignment: MainAxisAlignment.center,
+              // ace with a Row for horizontal icon + text
+              children: <Widget>[
+                Icon(FontAwesomeIcons.google),
+                Text("  Sign in by Google")
+              ],
+            ),
           ),
-        ),
         ),
         Container(
           height: 20,
         ),
         Container(
-    width: 300,
-       child: FlatButton(
-          onPressed: () async {
-            _timerStart();
-            _tryLoadGoogleAcc = true;
-            if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
-              await Global_GoogleSign.SignOutGoogle(context);
-            }
-            await LoadFromStorage();
-            _timerStop();
-            await Navigator.of(context).pushNamed('/mainScreen');
-
-          },
-          color: Colors.orange,
-          child: Row(
-            // Replace with a
-            mainAxisAlignment: MainAxisAlignment.center,
-            // Row for horizontal icon + text
-            children: <Widget>[
-              Icon(Icons.person),
-              Text("  Sign in like a guest")
-            ],
+          width: 300,
+          child: FlatButton(
+            onPressed: () async {
+              _timerStart();
+              _tryLoadGoogleAcc = true;
+              if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+                await Global_GoogleSign.SignOutGoogle(context);
+              }
+              await LoadFromStorage();
+              _timerStop();
+              await Navigator.of(context).pushNamed('/mainScreen');
+            },
+            color: Colors.orange,
+            child: Row(
+              // Replace with a
+              mainAxisAlignment: MainAxisAlignment.center,
+              // Row for horizontal icon + text
+              children: <Widget>[
+                Icon(Icons.person),
+                Text("  Sign in like a guest")
+              ],
+            ),
           ),
-        ),
         ),
       ];
     }
@@ -158,7 +155,6 @@ class _SplashScreen extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-
     _width = MediaQuery.of(context).size.width;
     _height = MediaQuery.of(context).size.height;
     buttonlist = retButtons(_tryLoadGoogleAcc);
@@ -170,10 +166,9 @@ class _SplashScreen extends State<SplashScreen>
     }
     double _imageSize = 200;
     double _imageTopMargin = 100;
-    if(_height< 700)
-      {
-        _imageTopMargin = 10;
-      }
+    if (_height < 700) {
+      _imageTopMargin = 10;
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,

@@ -9,52 +9,42 @@ import '../Globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleSign {
-
   FirebaseUser _googleUser;
   FirebaseAuth _auth = FirebaseAuth.instance;
   GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _UserSigin = false;
 
-  Future<bool> getActLoginStat()async {
+  Future<bool> getActLoginStat() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _UserSigin =  prefs.getBool("GoogleSign");
+    _UserSigin = prefs.getBool("GoogleSign");
     return _UserSigin;
   }
 
-
-
-  saveActLoginStat(bool stat) async{
+  saveActLoginStat(bool stat) async {
     _UserSigin = stat;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-   prefs.setBool("GoogleSign", stat);
+    prefs.setBool("GoogleSign", stat);
   }
-
-
-
 
   Future<FirebaseUser> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn
-          .signIn();
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       AuthCredential authCredential = GoogleAuthProvider.getCredential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      AuthResult fire = (await _auth.signInWithCredential(
-          authCredential));
+      AuthResult fire = (await _auth.signInWithCredential(authCredential));
 
       final FirebaseUser user = fire.user;
-
 
       return user;
     } catch (ex) {
       assert(ex);
     }
   }
-
 
   Future<void> TryLogInbyGoogle(context) async {
     try {
@@ -86,18 +76,15 @@ class GoogleSign {
   }
 
   bool GoogleUserIsSignIn() {
-    if (_googleUser != null)
-      return true;
+    if (_googleUser != null) return true;
     return false;
   }
 
   String getGoogleUser() {
-    return _googleUser.email.substring(
-        0, _googleUser.email.indexOf("@"));
+    return _googleUser.email.substring(0, _googleUser.email.indexOf("@"));
   }
 
   String getGoogleUserEmail() {
     return _googleUser.email;
   }
-
 }

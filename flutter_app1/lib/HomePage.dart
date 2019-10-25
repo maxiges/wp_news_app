@@ -15,9 +15,6 @@ import 'Elements/PagesToTab.dart';
 import 'Class/WebPortal.dart';
 import 'Elements/GoogleSignIn.dart';
 
-
-
-
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
@@ -30,7 +27,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  var isPortrait  = true;
+  var isPortrait = true;
   List<WebsideInfo> g_readedWebside = new List<WebsideInfo>();
   List<Widget> g_webList = new List<Widget>();
   bool isOpendeSavedList = false;
@@ -38,7 +35,6 @@ class _MyHomePageState extends State<MyHomePage>
   AnimationController rotationController;
   int actLoadedPages = 0;
   Icon _actIcon = new Icon(Icons.storage);
-
 
   void dispose() {
     super.dispose();
@@ -58,17 +54,15 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void TimerService() {
-    bool isPortraitNow= MediaQuery.of(context).orientation == Orientation.portrait;
-    if ( isPortrait != isPortraitNow )
-    {
+    bool isPortraitNow =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+    if (isPortrait != isPortraitNow) {
       setState(() {
-      Global_width = MediaQuery.of(context).size.width;
-      Global_height = MediaQuery.of(context).size.height;
-      isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-      Global_RefreshPage = true;
-
-    });
-
+        Global_width = MediaQuery.of(context).size.width;
+        Global_height = MediaQuery.of(context).size.height;
+        isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+        Global_RefreshPage = true;
+      });
     }
 
     if (Global_RefreshPage == true) {
@@ -83,12 +77,7 @@ class _MyHomePageState extends State<MyHomePage>
         });
       }
     }
-
-
-
   }
-
-
 
   List<Widget> CheckLoadingPagesAssert({String loadPageError}) {
     List<Widget> retVal = List<Widget>();
@@ -104,16 +93,16 @@ class _MyHomePageState extends State<MyHomePage>
     } else {
       retVal.add(new Center(
           child: Container(
-            margin: EdgeInsets.only(top: 20, bottom: 10),
-            child: Text(
-              "LOADING " +
-                  actLoadedPages.toString() +
-                  "/" +
-                  Global_webList.length.toString() +
-                  " pages ... ",
-              style: TextStyle(fontSize: 18),
-            ),
-          )));
+        margin: EdgeInsets.only(top: 20, bottom: 10),
+        child: Text(
+          "LOADING " +
+              actLoadedPages.toString() +
+              "/" +
+              Global_webList.length.toString() +
+              " pages ... ",
+          style: TextStyle(fontSize: 18),
+        ),
+      )));
       retVal.add(Container(
         height: 30,
         decoration: BoxDecoration(
@@ -139,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage>
               // Provide an optional curve to make the animation feel smoother.
               curve: Curves.fastOutSlowIn,
               width: ((Global_width - 20) *
-                  (actLoadedPages / Global_webList.length) +
+                      (actLoadedPages / Global_webList.length) +
                   1),
             ),
           ],
@@ -148,8 +137,6 @@ class _MyHomePageState extends State<MyHomePage>
     }
     return retVal;
   }
-
-
 
   buildersss(bool tryLoadSavedLinks) {
     isOpendeSavedList = tryLoadSavedLinks;
@@ -341,8 +328,6 @@ class _MyHomePageState extends State<MyHomePage>
   //*******************************APPPPP****************************************
   @override
   Widget build(BuildContext context) {
-
-
     try {
       if (!appStarted) {
         Global_width = MediaQuery.of(context).size.width;
@@ -357,9 +342,9 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: renderAppBar(),
       body: Center(
           child: ListView(
-            padding: const EdgeInsets.all(8),
-            children: g_webList,
-          )),
+        padding: const EdgeInsets.all(8),
+        children: g_webList,
+      )),
     );
   }
 }

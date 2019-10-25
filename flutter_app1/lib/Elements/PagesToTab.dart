@@ -12,6 +12,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../Dialogs/ShowMoreInfo.dart';
 import '../main.dart';
+import '../Dialogs/DialogsPage.dart';
 
 class PagesToTab extends StatefulWidget {
   WebsideInfo p_webInfo;
@@ -30,8 +31,10 @@ class _PagesToTab extends State<PagesToTab>
     with SingleTickerProviderStateMixin {
   AnimationController animationControl;
 
-  double _width ;
-  double rowWidth ;
+  double _width;
+
+  double rowWidth;
+
   double rowheight = 100;
 
   @override
@@ -41,10 +44,7 @@ class _PagesToTab extends State<PagesToTab>
         duration: const Duration(milliseconds: 100), vsync: this);
   }
 
-
-
   Widget GetPageDescrWidget() {
-
     if (rowWidth < 500) {
       return (Align(
         alignment: Alignment.center,
@@ -137,11 +137,10 @@ class _PagesToTab extends State<PagesToTab>
 
   Widget build(BuildContext context) {
     _width = MediaQuery.of(context).size.width;
-    rowWidth= _width - 100 - 20;
+    rowWidth = _width - 100 - 20;
 
     animationControl.forward();
-    String orderFunct = "Save for later ?";
-    Color yesColor = Colors.greenAccent;
+
     bool isSaved = false;
     double moveleft = 0;
 
@@ -178,31 +177,8 @@ class _PagesToTab extends State<PagesToTab>
                     onLongPressStart: (pessDetails) {},
                     onLongPressEnd: (pressDetails) {},
                     onLongPress: () async {
-                      if (isSaved) {
-                        orderFunct = "Delete from saved ?";
-                        yesColor = Colors.redAccent;
-                      }
-                      bool shouldUpdate = await ShowDialog(
-                          orderFunct,
-                          yesColor,
-                          context,
-                          Icon(
-                            Icons.file_download,
-                            color: Colors.blue,
-                            size: 36.0,
-                          ));
-                      if (shouldUpdate) {
-                        int find =
-                            savedFileContainsThisWebside(widget.p_webInfo);
-                        if (find < 0) {
-                          Global_savedWebside.add(widget.p_webInfo);
-                        } else {
-                          Global_savedWebside.removeAt(find);
-                        }
-                        Global_RefreshPage = true;
-                        //buildersss(isOpendeSavedList);
-                        save_WebsideArch(Global_savedWebside);
-                      }
+                      await DialogSaveRemoveWebside(
+                          isSaved, context, widget.p_webInfo);
                     },
                     child: Container(
                       decoration: new BoxDecoration(
@@ -231,9 +207,9 @@ class _PagesToTab extends State<PagesToTab>
                                                   new BorderRadius.circular(
                                                       8.0),
                                               child: Hero(
-                                                tag: widget.p_webInfo.HREF,
+                                                tag: widget.p_webInfo.URL,
                                                 child: Image.network(
-                                                  widget.p_webInfo.HREF,
+                                                  widget.p_webInfo.IMAGEHREF,
                                                   fit: BoxFit.cover,
                                                   width: 75,
                                                   height: 75,

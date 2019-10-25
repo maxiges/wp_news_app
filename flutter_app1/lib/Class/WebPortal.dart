@@ -9,7 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Elements/GoogleSignIn.dart';
 
 class WebPortal {
   String url;

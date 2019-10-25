@@ -49,7 +49,7 @@ Future<bool> ShowDialog(
                           ),
                         ),
                         Expanded(
-                          child: FlatButton(),
+                          child:Container(),
                         ),
                         Expanded(
                           child: FlatButton(
