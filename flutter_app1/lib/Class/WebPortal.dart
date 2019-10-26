@@ -1,14 +1,11 @@
-import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
-
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Utils/ColorsFunc.dart';
 
 class WebPortal {
   String url;
@@ -17,10 +14,7 @@ class WebPortal {
   WebPortal(this.url, this.decColor);
 
   Color getColor() {
-    try {
-      return colorPalet[this.decColor];
-    } catch (ex) {}
-    return Colors.black;
+    return Color_GetColor(this.decColor);
   }
 
   void tryRead(String JsonString) {
@@ -44,7 +38,7 @@ class WebPortal {
   }
 } //class  WebPortal
 
-void _SaveDataToFirebase(String data) async {
+void _saveDataToFirebase(String data) async {
   try {
     final databaseReference = Firestore.instance;
     await databaseReference
@@ -59,7 +53,7 @@ void _SaveDataToFirebase(String data) async {
   }
 }
 
-Future<List<String>> _LoadDataFromFirebase() async {
+Future<List<String>> _loadDataFromFirebase() async {
   try {
     final databaseReference = Firestore.instance;
     DocumentSnapshot retval = await databaseReference
@@ -73,16 +67,16 @@ Future<List<String>> _LoadDataFromFirebase() async {
   }
 }
 
-Future<bool> saveWebPorts(List<WebPortal> list) async {
+Future<bool> WebPortal_saveWebs(List<WebPortal> list) async {
   List<String> objSave = new List<String>();
 
   for (WebPortal objectVal in list) {
     objSave.add(objectVal.toJson());
   }
 
-  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+  if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
-      _SaveDataToFirebase(
+      _saveDataToFirebase(
           objSave.reduce((value, element) => value + ';' + element));
     } catch (ex) {
       assert(ex);
@@ -93,36 +87,36 @@ Future<bool> saveWebPorts(List<WebPortal> list) async {
   return prefs.setStringList("SavedWebs", objSave);
 }
 
-Future<List<WebPortal>> loadWebPorts() async {
-  List<String> loadedWevs = new List<String>();
+Future<List<WebPortal>> WebPortal_loadWebs() async {
+  List<String> loadedWebs = new List<String>();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+  if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
-      loadedWevs = await _LoadDataFromFirebase();
+      loadedWebs = await _loadDataFromFirebase();
     } catch (ex) {
       assert(ex);
     }
   } else {
     try {
-      loadedWevs = prefs.getStringList("SavedWebs");
+      loadedWebs = prefs.getStringList("SavedWebs");
     } catch (ex) {
       assert(ex);
     }
   }
 
-  List<WebPortal> redadWebs = new List<WebPortal>();
+  List<WebPortal> readWebs = new List<WebPortal>();
   try {
-    for (String JsonString in loadedWevs) {
+    for (String JsonString in loadedWebs) {
       WebPortal newSavedPage = new WebPortal("", "");
       newSavedPage.tryRead(JsonString);
       if (newSavedPage.url.length > 0) {
-        redadWebs.add(newSavedPage);
+        readWebs.add(newSavedPage);
       }
     }
   } catch (ex) {
     print(ex.toString());
   }
 
-  return redadWebs;
+  return readWebs;
 }

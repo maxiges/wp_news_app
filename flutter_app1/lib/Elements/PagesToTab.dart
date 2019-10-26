@@ -1,25 +1,17 @@
+import 'package:WP_news_APP/Globals.dart';
 import 'package:flutter/cupertino.dart';
-
-import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'dart:async';
-
-import '../Globals.dart';
 import '../Class/WebsideInfo.dart';
-import '../Dialogs/YesNoAlert.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
-import '../Dialogs/ShowMoreInfo.dart';
-import '../main.dart';
 import '../Dialogs/DialogsPage.dart';
 
 class PagesToTab extends StatefulWidget {
   WebsideInfo p_webInfo;
   BuildContext context;
 
-  PagesToTab(WebsideInfo p_webInfo, BuildContext context) {
-    this.p_webInfo = p_webInfo;
+  PagesToTab(WebsideInfo webInfo, BuildContext context) {
+    this.p_webInfo = webInfo;
     this.context = context;
   }
 
@@ -32,10 +24,8 @@ class _PagesToTab extends State<PagesToTab>
   AnimationController animationControl;
 
   double _width;
-
-  double rowWidth;
-
-  double rowheight = 100;
+  double _rowWidth;
+  double _rowheight = 100;
 
   @override
   void initState() {
@@ -44,20 +34,20 @@ class _PagesToTab extends State<PagesToTab>
         duration: const Duration(milliseconds: 100), vsync: this);
   }
 
-  Widget GetPageDescrWidget() {
-    if (rowWidth < 500) {
+  Widget getPageDescWidget() {
+    if (_rowWidth < 500) {
       return (Align(
         alignment: Alignment.center,
         child: Text(
           widget.p_webInfo.TITTLE,
-          style: TextStyle(color: Colors.white, fontSize: 14),
+          style: TextStyle(color: GlobalTheme.textColor, fontSize: 16),
         ),
       ));
     } else {
       String description = widget.p_webInfo.DESCRIPTION;
-      if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 > (rowWidth / 2) * 90) {
+      if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 > (_rowWidth / 2) * 90) {
         description =
-            description.substring(0, (((rowWidth / 2) * 90 / 12) / 12).toInt());
+            description.substring(0, (((_rowWidth / 2) * 90 / 12) / 12).toInt());
         description = description.substring(0, description.lastIndexOf(" "));
         description += " ... ";
       }
@@ -66,10 +56,10 @@ class _PagesToTab extends State<PagesToTab>
           child: Row(
             children: <Widget>[
               Container(
-                width: rowWidth / 2 - 6,
+                width: _rowWidth / 2 - 6,
                 child: Text(
                   widget.p_webInfo.TITTLE,
-                  style: TextStyle(color: Colors.white, fontSize: 14),
+                  style: TextStyle( color: GlobalTheme.textColor , fontSize: 16),
                 ),
               ),
               Container(
@@ -78,16 +68,16 @@ class _PagesToTab extends State<PagesToTab>
                 child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                    height: rowheight * 0.8,
+                    height: _rowheight * 0.8,
                     color: widget.p_webInfo.getColor(),
                   ),
                 ),
               ),
               Container(
-                width: rowWidth / 2 - 6,
+                width: _rowWidth / 2 - 6,
                 child: Text(
                   description,
-                  style: TextStyle(color: Colors.white38, fontSize: 12),
+                  style: TextStyle(color: GlobalTheme.textColor2, fontSize: 14),
                 ),
               )
             ],
@@ -137,29 +127,22 @@ class _PagesToTab extends State<PagesToTab>
 
   Widget build(BuildContext context) {
     _width = MediaQuery.of(context).size.width;
-    rowWidth = _width - 100 - 20;
-
+    _rowWidth = _width - 100 - 20;
     animationControl.forward();
-
     bool isSaved = false;
-    double moveleft = 0;
-
-    if (savedFileContainsThisWebside(widget.p_webInfo) >= 0) {
+      if (savedFileContainsThisWebside(widget.p_webInfo) >= 0) {
       isSaved = true;
     }
     var now = new DateTime.now();
     var postData =
         DateTime.parse(widget.p_webInfo.DATE.substring(0, 10).toString());
 
-    var m_timeVal = widget.p_webInfo.DATE.substring(0, 10);
+    var timeVal = widget.p_webInfo.DATE.substring(0, 10);
     if (now.year == postData.year &&
         now.month == postData.month &&
         now.day == postData.day) {
-      m_timeVal = "TODAY";
+      timeVal = "TODAY";
     }
-
-    //   ShowMoreInfo(p_webInfo,context);
-
     return SlideTransition(
       position: Tween<Offset>(begin: Offset(0, 50), end: Offset.zero).animate(
           CurvedAnimation(parent: animationControl, curve: Curves.easeIn)),
@@ -172,18 +155,18 @@ class _PagesToTab extends State<PagesToTab>
                   margin: new EdgeInsets.only(bottom: 10),
                   child: new GestureDetector(
                     onTap: () {
-                      launchURL(widget.p_webInfo.URL);
+                      widget.p_webInfo.launchURL();
                     },
                     onLongPressStart: (pessDetails) {},
                     onLongPressEnd: (pressDetails) {},
                     onLongPress: () async {
-                      await DialogSaveRemoveWebside(
+                      await DialogsPage_saveRemoveWebside(
                           isSaved, context, widget.p_webInfo);
                     },
                     child: Container(
                       decoration: new BoxDecoration(
                         borderRadius: new BorderRadius.all(Radius.circular(10)),
-                        color: Color.fromARGB(255, 50, 50, 50),
+                        color: GlobalTheme.tabsColorPrimary
                       ),
                       child: Container(
                         margin: new EdgeInsets.all(5),
@@ -234,15 +217,16 @@ class _PagesToTab extends State<PagesToTab>
                                                 borderRadius:
                                                     new BorderRadius.all(
                                                         Radius.circular(10)),
-                                                color: Colors.black,
+                                                color: GlobalTheme.tabsDayBackground,
                                               ),
                                               width: 60,
                                               child: Center(
                                                 child: // Stroked text as border.
                                                     Text(
-                                                  m_timeVal,
+                                                  timeVal,
                                                   style: TextStyle(
-                                                    fontSize: 9,
+                                                    fontSize: 11,
+                                                    color: GlobalTheme.textColor
                                                   ),
                                                 ),
                                               ),
@@ -255,9 +239,9 @@ class _PagesToTab extends State<PagesToTab>
                                     ),
                                     //sec when was text
                                     Container(
-                                        width: rowWidth,
-                                        height: rowheight,
-                                        child: GetPageDescrWidget()),
+                                        width: _rowWidth,
+                                        height: _rowheight,
+                                        child: getPageDescWidget()),
                                   ],
                                 ),
                               ),

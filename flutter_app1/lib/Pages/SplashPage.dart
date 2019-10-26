@@ -1,16 +1,9 @@
-import 'main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
-
-import 'Class/WebPortal.dart';
-import 'Class/WebsideInfo.dart';
-import 'Globals.dart';
+import '../Globals.dart';
 import 'package:package_info/package_info.dart';
-
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'Elements/GoogleSignIn.dart';
 
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key}) : super(key: key);
@@ -25,8 +18,8 @@ class _SplashScreen extends State<SplashScreen>
   Timer _timer;
   bool runApp = true;
   bool _tryLoadGoogleAcc = true;
-  int caunt = 0;
-  List<Widget> buttonlist;
+  int counter = 0;
+  List<Widget> buttonList;
 
   var _width;
   var _height;
@@ -41,27 +34,27 @@ class _SplashScreen extends State<SplashScreen>
 
   _timerStart() {
     setState(() {
-      buttonlist = retButtons(true);
+      buttonList = retButtons(true);
     });
     _timer = new Timer.periodic(
-        Duration(seconds: 2), (Timer timer) => TimerService());
+        Duration(seconds: 2), (Timer timer) => timerService());
     animController.repeat(period: Duration(milliseconds: 1000));
   }
 
   _timerStop() {
     _timer.cancel();
     animController.stop();
-    caunt = 0;
+    counter = 0;
     setState(() {
-      buttonlist = retButtons(false);
+      buttonList = retButtons(false);
     });
     _tryLoadGoogleAcc = false;
   }
 
-  TimerService() {
+  timerService() {
     if (_tryLoadGoogleAcc == true) {
-      caunt++;
-      if (caunt > 10) {
+      counter++;
+      if (counter > 10) {
         _timerStop();
       }
     }
@@ -76,7 +69,7 @@ class _SplashScreen extends State<SplashScreen>
     if (isSignIn == true) {
       _tryLoadGoogleAcc = true;
       try {
-        Global_GoogleSign.TryLogInbyGoogle(context);
+        Global_GoogleSign.tryLogInbyGoogle(context);
       } catch (ex) {
         assert(ex);
         setState(() {
@@ -106,7 +99,7 @@ class _SplashScreen extends State<SplashScreen>
           width: 300,
           child: FlatButton(
             onPressed: () {
-              Global_GoogleSign.TryLogInbyGoogle(context);
+              Global_GoogleSign.tryLogInbyGoogle(context);
               _timerStop();
             },
             color: Colors.blueAccent,
@@ -130,8 +123,8 @@ class _SplashScreen extends State<SplashScreen>
             onPressed: () async {
               _timerStart();
               _tryLoadGoogleAcc = true;
-              if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
-                await Global_GoogleSign.SignOutGoogle(context);
+              if (Global_GoogleSign.googleUserIsSignIn() == true) {
+                await Global_GoogleSign.signOutGoogle(context);
               }
               await LoadFromStorage();
               _timerStop();
@@ -157,7 +150,7 @@ class _SplashScreen extends State<SplashScreen>
   Widget build(BuildContext context) {
     _width = MediaQuery.of(context).size.width;
     _height = MediaQuery.of(context).size.height;
-    buttonlist = retButtons(_tryLoadGoogleAcc);
+    buttonList = retButtons(_tryLoadGoogleAcc);
     setVrtsionApp();
     if (runApp) {
       _timerStart();
@@ -171,7 +164,7 @@ class _SplashScreen extends State<SplashScreen>
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: GlobalTheme.background,
       body: Center(
           child: ListView(
         padding: const EdgeInsets.all(8),
@@ -187,10 +180,10 @@ class _SplashScreen extends State<SplashScreen>
           Container(
             height: 50,
             child: const Center(
-                child: Text('Welcome in WordPress News Collector APP')),
+                child: Text('Welcome in WordPress News Collector APP' ,)),
           ),
           Column(
-            children: buttonlist,
+            children: buttonList,
           )
         ],
       )),

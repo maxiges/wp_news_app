@@ -1,19 +1,11 @@
-import 'package:WP_news_APP/Dialogs/ShowMoreInfo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import 'dart:async';
+import '../Class/WebsideInfo.dart';
+import '../Globals.dart';
+import '../Elements/PagesToTab.dart';
+import '../Class/WebPortal.dart';
 
-import 'Class/WebsideInfo.dart';
-import 'SplashScreen.dart';
-import 'Dialogs/YesNoAlert.dart';
-import 'Setting_page.dart';
-import 'Globals.dart';
-import 'Elements/PagesToTab.dart';
-import 'Class/WebPortal.dart';
-import 'Elements/GoogleSignIn.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -28,8 +20,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   var isPortrait = true;
-  List<WebsideInfo> g_readedWebside = new List<WebsideInfo>();
-  List<Widget> g_webList = new List<Widget>();
+  List<WebsideInfo> _readedWebs = new List<WebsideInfo>();
+  List<Widget> _webList = new List<Widget>();
   bool isOpendeSavedList = false;
   bool appStarted = false;
   AnimationController rotationController;
@@ -47,13 +39,13 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
     rotationController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
-    CheckLoadingPagesAssert();
+    checkLoadingPagesAssert();
 
     Global_timer = new Timer.periodic(
-        Duration(microseconds: 100), (Timer timer) => TimerService());
+        Duration(microseconds: 100), (Timer timer) => timerService());
   }
 
-  void TimerService() {
+  void timerService() {
     bool isPortraitNow =
         MediaQuery.of(context).orientation == Orientation.portrait;
     if (isPortrait != isPortraitNow) {
@@ -61,34 +53,34 @@ class _MyHomePageState extends State<MyHomePage>
         Global_width = MediaQuery.of(context).size.width;
         Global_height = MediaQuery.of(context).size.height;
         isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
-        Global_RefreshPage = true;
+        Global_refreshPage = true;
       });
     }
 
-    if (Global_RefreshPage == true) {
-      Global_RefreshPage = false;
-      if (Global_ACT_TO_REFRESH == ACT_PAGE.SAVED_PAGES) {
+    if (Global_refreshPage == true) {
+      Global_refreshPage = false;
+      if (Global_actPageToRefresh == ACT_PAGE.SAVED_PAGES) {
         setState(() {
-          buildersss(true);
+          buildTableWithPages(true);
         });
-      } else if (Global_ACT_TO_REFRESH == ACT_PAGE.LOADED_PAGES) {
+      } else if (Global_actPageToRefresh == ACT_PAGE.LOADED_PAGES) {
         setState(() {
-          buildersss(false);
+          buildTableWithPages(false);
         });
       }
     }
   }
 
-  List<Widget> CheckLoadingPagesAssert({String loadPageError}) {
+  List<Widget> checkLoadingPagesAssert({String loadPageError}) {
     List<Widget> retVal = List<Widget>();
     if (Global_webList.length < 1) {
       retVal.add(new Center(
         child: Text("No pages to load.\r\n Go to settings ",
-            style: TextStyle(fontSize: 18)),
+            style: TextStyle(fontSize: 18 , color: GlobalTheme.textColor)),
       ));
     } else if (Global_webList.length == 1) {
       retVal.add(new Center(
-        child: Text("LOADING  page ... ", style: TextStyle(fontSize: 18)),
+        child: Text("LOADING  page ... ", style: TextStyle(fontSize: 18 , color: GlobalTheme.textColor)),
       ));
     } else {
       retVal.add(new Center(
@@ -100,17 +92,17 @@ class _MyHomePageState extends State<MyHomePage>
               "/" +
               Global_webList.length.toString() +
               " pages ... ",
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(fontSize: 18 , color: GlobalTheme.textColor2),
         ),
       )));
       retVal.add(Container(
         height: 30,
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: GlobalTheme.background,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             width: 2,
-            color: Colors.white,
+            color: GlobalTheme.textColor,
           ),
         ),
         child: Row(
@@ -138,21 +130,21 @@ class _MyHomePageState extends State<MyHomePage>
     return retVal;
   }
 
-  buildersss(bool tryLoadSavedLinks) {
+  buildTableWithPages(bool tryLoadSavedLinks) {
     isOpendeSavedList = tryLoadSavedLinks;
-    List<WebsideInfo> m_WebsideInfo_load = new List<WebsideInfo>();
+    List<WebsideInfo> websideInfoLoaded = new List<WebsideInfo>();
     if (tryLoadSavedLinks) {
       _actIcon = new Icon(Icons.storage);
-      m_WebsideInfo_load = Global_savedWebside;
+      websideInfoLoaded = Global_savedWebsList;
     } else {
       _actIcon = new Icon(Icons.sd_storage);
-      m_WebsideInfo_load = g_readedWebside;
+      websideInfoLoaded = _readedWebs;
     }
     List<Widget> wid = new List<Widget>();
-    for (WebsideInfo iter in m_WebsideInfo_load) {
+    for (WebsideInfo iter in websideInfoLoaded) {
       wid.add(PagesToTab(iter, this.context));
     }
-    if (m_WebsideInfo_load.length == 0) {
+    if (websideInfoLoaded.length == 0) {
       if (!tryLoadSavedLinks) {
         if (Global_webList.length == 0) {
           wid = setAddedPages();
@@ -164,20 +156,20 @@ class _MyHomePageState extends State<MyHomePage>
       }
     }
     setState(() {
-      g_webList = wid;
+      _webList = wid;
     });
   }
 
   List<Widget> setAddedPages() {
-    List<Widget> m_ret = new List<Widget>();
-    m_ret.add(Container(
+    List<Widget> _ret = new List<Widget>();
+    _ret.add(Container(
       height: Global_height * 0.3,
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Text("You didn't add any webside \r\n Do to Settings",
-          style: new TextStyle(fontSize: 18), textAlign: TextAlign.center),
+          style:  TextStyle(fontSize: 18 , color: GlobalTheme.textColor2), textAlign: TextAlign.center ),
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Icon(
         Icons.settings,
         color: Colors.greenAccent,
@@ -185,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage>
         semanticLabel: 'No added webside',
       ),
     ));
-    return m_ret;
+    return _ret;
   }
 
   List<Widget> setErrorLoadPage() {
@@ -196,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage>
     m_ret.add(Center(
       child: Text(
           "Can't download content.\r\n Try reload or cheeck internet connection",
-          style: new TextStyle(fontSize: 18),
+          style: new TextStyle(fontSize: 18 , color: GlobalTheme.textColor2),
           textAlign: TextAlign.center),
     ));
     m_ret.add(Center(
@@ -217,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage>
     ));
     m_ret.add(Center(
       child: Text("Your saved list is empty.",
-          style: new TextStyle(fontSize: 18), textAlign: TextAlign.center),
+          style: new TextStyle(fontSize: 18 , color: GlobalTheme.textColor2), textAlign: TextAlign.center),
     ));
     m_ret.add(Center(
       child: Icon(
@@ -230,25 +222,25 @@ class _MyHomePageState extends State<MyHomePage>
     return m_ret;
   }
 
-  Future<List<WebsideInfo>> getPageAsync(WebPortal WEB) async {
-    List<WebsideInfo> retval = await GetWebsideInfos(WEB);
+  Future<List<WebsideInfo>> getPageAsync(WebPortal web) async {
+    List<WebsideInfo> retval = await WebsideInfo_GetWebInfos(web);
     for (WebsideInfo webs in retval) {
-      g_readedWebside.add(webs);
+      _readedWebs.add(webs);
     }
     setState(() {
       actLoadedPages++;
-      g_webList = CheckLoadingPagesAssert();
+      _webList = checkLoadingPagesAssert();
     });
     return retval;
   }
 
-  void loadFromWebside() async {
+  void loadFromWebs() async {
     setState(() {
       actLoadedPages = 0;
-      g_webList = CheckLoadingPagesAssert();
-      g_readedWebside.clear();
+      _webList = checkLoadingPagesAssert();
+      _readedWebs.clear();
     });
-    Global_ACT_TO_REFRESH = ACT_PAGE.LOADED_PAGES;
+    Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
     rotationController.repeat(period: Duration(milliseconds: 1000));
 
     List<Future> tasks = new List<Future>();
@@ -258,14 +250,14 @@ class _MyHomePageState extends State<MyHomePage>
     }
 
     await Future.wait(tasks);
-    g_readedWebside.sort((a, b) {
+    _readedWebs.sort((a, b) {
       DateTime dataA = DateTime.parse(a.DATE);
       DateTime dataB = DateTime.parse(b.DATE);
       if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
       return 0;
     });
 
-    Global_RefreshPage = true;
+    Global_refreshPage = true;
     rotationController.reset();
   }
 
@@ -278,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage>
           padding: const EdgeInsets.all(0),
           onPressed: () async {
             setState(() {
-              loadFromWebside();
+              loadFromWebs();
             });
           },
           icon: Icon(Icons.refresh),
@@ -287,14 +279,16 @@ class _MyHomePageState extends State<MyHomePage>
 
   PreferredSizeWidget renderAppBar() {
     String userText = "Hello guest";
-    if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+    if (Global_GoogleSign.googleUserIsSignIn() == true) {
       userText = Global_GoogleSign.getGoogleUser();
     }
     return (PreferredSize(
-        preferredSize: Size.fromHeight(30.0),
+        preferredSize: Size.fromHeight(35.0),
         child: new AppBar(
+          backgroundColor: GlobalTheme.navAccent,
+          textTheme: GlobalTheme.textTheme,
+          iconTheme: GlobalTheme.iconTheme,
           leading: refresh(),
-          backgroundColor: Colors.transparent,
           title: Center(
             child: Text(userText),
           ),
@@ -304,13 +298,13 @@ class _MyHomePageState extends State<MyHomePage>
               padding: const EdgeInsets.all(0),
               icon: _actIcon,
               onPressed: () {
-                if (Global_ACT_TO_REFRESH == ACT_PAGE.SAVED_PAGES) {
-                  Global_ACT_TO_REFRESH = ACT_PAGE.LOADED_PAGES;
+                if (Global_actPageToRefresh == ACT_PAGE.SAVED_PAGES) {
+                  Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
                 } else {
-                  Global_ACT_TO_REFRESH = ACT_PAGE.SAVED_PAGES;
+                  Global_actPageToRefresh = ACT_PAGE.SAVED_PAGES;
                 }
 
-                Global_RefreshPage = true;
+                Global_refreshPage = true;
               },
             ),
             new IconButton(
@@ -332,18 +326,18 @@ class _MyHomePageState extends State<MyHomePage>
       if (!appStarted) {
         Global_width = MediaQuery.of(context).size.width;
         Global_height = MediaQuery.of(context).size.height;
-        loadFromWebside();
+        loadFromWebs();
         appStarted = true;
       }
     } catch (ex) {}
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: GlobalTheme.background,
       appBar: renderAppBar(),
       body: Center(
           child: ListView(
         padding: const EdgeInsets.all(8),
-        children: g_webList,
+        children: _webList,
       )),
     );
   }

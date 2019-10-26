@@ -1,16 +1,12 @@
 import 'package:WP_news_APP/Globals.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 import '../Class/WebsideInfo.dart';
-import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Class/PageComments.dart';
-import 'DialogsPage.dart';
+import '../Dialogs/DialogsPage.dart';
 
 class ShowMoreInfo extends StatefulWidget {
   ShowMoreInfo({Key key}) : super(key: key);
@@ -25,11 +21,11 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   bool _init = true;
 
   double _width = 100.0, _height = 100.0;
-  List<PageComments> _CommentList = new List<PageComments>();
-  String commentsCaunter = "...";
+  List<PageComments> _commentList = new List<PageComments>();
+  String commentsCounter = "...";
   bool _isSaved = false;
   String _saveText = "Save";
-  IconData _saveREmoveIcon = Icons.save;
+  IconData _saveRemoveIcon = Icons.save;
 
   @override
   void initState() {
@@ -44,15 +40,11 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
       if (response.statusCode == 200) {
         List<dynamic> retJson = json.decode(response.body);
         setState(() {
-          commentsCaunter = retJson.length.toString();
+          commentsCounter = retJson.length.toString();
         });
-        _CommentList = new List<PageComments>();
+        _commentList = new List<PageComments>();
         for (dynamic items in retJson) {
-          String author;
-          String Avatar;
-          String Content;
-          String Id;
-          String Parent;
+          String author, avatar, content, id, parent;
           try {
             author = items["author_name"].toString();
           } catch (ex) {
@@ -60,45 +52,45 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             assert(ex);
           }
           try {
-            Id = items["id"].toString();
+            id = items["id"].toString();
           } catch (ex) {
-            Id = "";
+            id = "";
             assert(ex);
           }
           try {
-            Parent = items["parent"].toString();
+            parent = items["parent"].toString();
           } catch (ex) {
-            Parent = "";
+            parent = "";
             assert(ex);
           }
           try {
-            Avatar = items["author_avatar_urls"]["96"].toString();
+            avatar = items["author_avatar_urls"]["96"].toString();
           } catch (ex) {
-            Avatar = "N/A";
+            avatar = "N/A";
             assert(ex);
           }
           try {
-            Content = items["content"]["rendered"].toString();
+            content = items["content"]["rendered"].toString();
           } catch (ex) {
-            Content = "N/A";
+            content = "N/A";
             assert(ex);
           }
-          _CommentList.add(PageComments(
+          _commentList.add(PageComments(
               AUTHOR: author,
-              AVATARIMG: Avatar,
-              POST: Content,
-              ID: Id,
-              PARENT: Parent));
+              AVATARIMG: avatar,
+              POST: content,
+              ID: id,
+              PARENT: parent));
         }
       }
     } catch (ex) {
       setState(() {
-        commentsCaunter = "N/A";
+        commentsCounter = "N/A";
       });
     }
   }
 
-  Widget RenderTab(String Tab) {
+  Widget renderInfoTab(String Tab) {
     if (Tab == "" || Tab == null) {
       return (Container());
     } else {
@@ -116,17 +108,18 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     }
   }
 
-  Widget RenderCommentPage(PageComments comment, double margin) {
-    double _width_comment = _width - 10;
-    double _width_Avatar = 60;
+  Widget renderCommentPage(PageComments comment, double margin) {
+    double _widthComment = _width - 10;
+    double _widthAvatar = 60;
     if (_width > 600) {
-      _width_comment *= 0.9;
-      _width_Avatar = 100;
+      _widthComment *= 0.9;
+      _widthAvatar = 100;
     }
 
     dynamic ret = Icon(
       FontAwesomeIcons.chevronRight,
       size: 14,
+        color: GlobalTheme.textColor
     );
 
     if (margin == 0) {
@@ -134,9 +127,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     }
 
     return (Container(
-      width: _width_comment,
+      width: _widthComment,
       padding: EdgeInsets.all(10),
-      color: Color.fromARGB(255, 30, 30, 30),
+      color: GlobalTheme.tabsColorPrimary,
       child: Row(
         children: <Widget>[
           Container(
@@ -145,15 +138,15 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           ),
           Container(
             margin: EdgeInsets.only(right: 10),
-            width: _width_Avatar,
+            width: _widthAvatar,
             child: Column(children: <Widget>[
               Center(
                 child: Container(
                   child: Image.network(
                     comment.AVATARIMG,
                     fit: BoxFit.cover,
-                    width: _width_Avatar * 0.4,
-                    height: _width_Avatar * 0.4,
+                    width: _widthAvatar * 0.4,
+                    height: _widthAvatar * 0.4,
                   ),
                 ),
               ),
@@ -161,13 +154,14 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
                 child: SelectableText(
                   comment.AUTHOR,
                   textAlign: TextAlign.center,
+                  style: TextStyle( color: GlobalTheme.textColor),
                 ),
               )
             ]),
           ),
           Container(
             child: Flexible(
-              child: Text(comment.POST),
+              child: SelectableText(comment.POST , style: TextStyle(color: GlobalTheme.textColor),),
             ),
           )
         ],
@@ -175,7 +169,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     ));
   }
 
-  Widget _Top(WebsideInfo p_webInfo, BuildContext context) {
+  Widget _Top(WebsideInfo webInfo, BuildContext context) {
     if (_width < 600) {
       return (Column(
         children: <Widget>[
@@ -184,9 +178,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               child: new ClipRRect(
                 borderRadius: new BorderRadius.circular(8.0),
                 child: Hero(
-                  tag: p_webInfo.URL,
+                  tag: webInfo.URL,
                   child: Image.network(
-                    p_webInfo.IMAGEHREF,
+                    webInfo.IMAGEHREF,
                     fit: BoxFit.cover,
                     width: 200,
                     height: 200,
@@ -198,8 +192,8 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           Container(
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
-              p_webInfo.TITTLE,
-              style: TextStyle(fontSize: 20),
+              webInfo.TITTLE,
+              style: TextStyle(fontSize: 20 , color: GlobalTheme.textColor),
             ),
           ),
         ],
@@ -211,10 +205,11 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             width: _width - 250,
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
-              p_webInfo.TITTLE,
+              webInfo.TITTLE,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 22,
+                  color: GlobalTheme.textColor
               ),
             ),
           ),
@@ -226,9 +221,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               child: new ClipRRect(
                 borderRadius: new BorderRadius.circular(8.0),
                 child: Hero(
-                  tag: p_webInfo.URL,
+                  tag: webInfo.URL,
                   child: Image.network(
-                    p_webInfo.IMAGEHREF,
+                    webInfo.IMAGEHREF,
                     fit: BoxFit.cover,
                     width: 200,
                     height: 200,
@@ -242,61 +237,61 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     }
   }
 
-  List<Widget> GetNextComment(String parent, double margin) {
-    List<Widget> ListRendered = new List<Widget>();
+  List<Widget> getNextComment(String parent, double margin) {
+    List<Widget> renderedList = new List<Widget>();
     if (parent == null || parent == "0") {
-      ListRendered.add(Container(
+      renderedList.add(Container(
         height: 10,
       ));
-      return ListRendered;
+      return renderedList;
     }
 
-    _CommentList.forEach((Act) {
-      if (Act.PARENT == parent) {
-        ListRendered.add(RenderCommentPage(Act, margin));
-        ListRendered += GetNextComment(Act.ID, margin + 20);
+    _commentList.forEach((act) {
+      if (act.PARENT == parent) {
+        renderedList.add(renderCommentPage(act, margin));
+        renderedList += getNextComment(act.ID, margin + 20);
       }
     });
 
-    if (ListRendered.length == 0) {
-      ListRendered.add(Container(
+    if (renderedList.length == 0) {
+      renderedList.add(Container(
         height: 10,
       ));
     }
-    return ListRendered;
+    return renderedList;
   }
 
-  List<Widget> RenderComentsUi() {
-    List<Widget> ListRendered = new List<Widget>();
-    _CommentList.forEach((Act) {
-      if (Act.PARENT == "" || Act.PARENT == "0") {
-        ListRendered.add(RenderCommentPage(Act, 0.0));
-        ListRendered += GetNextComment(Act.ID, 20);
+  List<Widget> renderCommentsUi() {
+    List<Widget> renderedList = new List<Widget>();
+    _commentList.forEach((act) {
+      if (act.PARENT == "" || act.PARENT == "0") {
+        renderedList.add(renderCommentPage(act, 0.0));
+        renderedList += getNextComment(act.ID, 20);
       }
     });
 
-    if (ListRendered.length == 0) {
-      ListRendered.add(Container());
+    if (renderedList.length == 0) {
+      renderedList.add(Container());
     }
 
-    return ListRendered;
+    return renderedList;
   }
 
-  Widget ShowMoreInfo_Fun(WebsideInfo p_webInfo, BuildContext context) {
-    String _TabComments = "";
-    if (_CommentList.length > 0) {
-      _TabComments = "Coments";
+  Widget showMoreInfoTable(WebsideInfo webInfo, BuildContext context) {
+    String _tabComments = "";
+    if (_commentList.length > 0) {
+      _tabComments = "Coments";
     }
     return Container(
         width: _width,
         margin: new EdgeInsets.all(0),
         child: ListView(children: <Widget>[
-          _Top(p_webInfo, context),
+          _Top(webInfo, context),
           Container(
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
-              p_webInfo.DESCRIPTION + " ...",
-              style: TextStyle(fontSize: 14),
+              webInfo.DESCRIPTION + " ...",
+              style: TextStyle(fontSize: 14 , color: GlobalTheme.textColor),
             ),
           ),
           Align(
@@ -304,15 +299,15 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  commentsCaunter,
-                  style: TextStyle(fontSize: 20),
+                  commentsCounter,
+                  style: TextStyle(fontSize: 20 , color: GlobalTheme.textColor),
                 ),
                 Container(
                   width: 10,
                 ),
                 Icon(
                   Icons.forum,
-                  color: p_webInfo.getColor(),
+                  color: webInfo.getColor(),
                   size: 30.0,
                   semanticLabel: 'Comments in post',
                 ),
@@ -322,26 +317,26 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               ],
             ),
           ),
-          RenderTab(_TabComments),
+          renderInfoTab(_tabComments),
           Column(
-            children: RenderComentsUi(),
+            children: renderCommentsUi(),
             //   _CommentList.map((item) => RenderCommentPage(item)).toList(),
           )
         ]));
   }
 
-  cheeckThisPageIsSaved() {
+  checkThisPageIsSaved() {
     if (savedFileContainsThisWebside(WebInfo) >= 0) {
       setState(() {
         _isSaved = true;
         _saveText = "Remove";
-        _saveREmoveIcon = Icons.delete;
+        _saveRemoveIcon = Icons.delete;
       });
     } else {
       setState(() {
         _isSaved = false;
         _saveText = "Save";
-        _saveREmoveIcon = Icons.save;
+        _saveRemoveIcon = Icons.save;
       });
     }
   }
@@ -360,36 +355,38 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
       if (press == 0) {
         Navigator.pop(context, true);
       } else if (press == 1) {
-        bool ret = await DialogSaveRemoveWebside(_isSaved, context, WebInfo);
+        bool ret =
+            await DialogsPage_saveRemoveWebside(_isSaved, context, WebInfo);
         if (ret) {
-          cheeckThisPageIsSaved();
+          checkThisPageIsSaved();
         }
       } else {
-        launchURL(WebInfo.URL);
+        WebInfo.launchURL();
       }
     }
 
-    cheeckThisPageIsSaved();
+    checkThisPageIsSaved();
 
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
-          items: [
+          backgroundColor: GlobalTheme.navAccent,
+           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.arrow_left, color: Colors.greenAccent),
-              title: new Text('Back'),
+              icon: Icon(Icons.arrow_left, color: Colors.green),
+              title: new Text('Back' , style: TextStyle(color: GlobalTheme.textColor) ,),
             ),
             BottomNavigationBarItem(
-              icon: Icon(_saveREmoveIcon, color: Colors.deepPurple),
-              title: new Text(_saveText),
+              icon: Icon(_saveRemoveIcon, color: Colors.deepPurple),
+              title: new Text(_saveText , style: TextStyle(color: GlobalTheme.textColor) ),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.pages, color: Colors.blueAccent),
-              title: new Text('See more'),
+              title: new Text('See more' , style: TextStyle(color: GlobalTheme.textColor) ),
             ),
           ],
           onTap: (press) => pressButton(press),
         ),
-        backgroundColor: Colors.black,
-        body: ShowMoreInfo_Fun(WebInfo, context));
+        backgroundColor: GlobalTheme.background,
+        body: showMoreInfoTable(WebInfo, context));
   }
 }

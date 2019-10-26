@@ -1,5 +1,5 @@
 import '../Globals.dart';
-
+import '../Utils/StringUtils.dart';
 class PageComments {
   String AUTHOR, POST, AVATARIMG, ID, PARENT;
 
@@ -9,7 +9,7 @@ class PageComments {
       this.AVATARIMG = Global_NoImageAvater,
       this.ID = "",
       this.PARENT = ""}) {
-    this.POST = RemoveAllHTMLVal(this.POST);
+    this.POST = StringUtils_RemoveAllHTMLVal(this.POST);
 
     if (this.AVATARIMG.length < 5) {
       this.AVATARIMG = Global_NoImageAvater;

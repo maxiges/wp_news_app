@@ -2,26 +2,24 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:toast/toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'dart:async';
 import '../Globals.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleSign {
   FirebaseUser _googleUser;
   FirebaseAuth _auth = FirebaseAuth.instance;
   GoogleSignIn _googleSignIn = GoogleSignIn();
-  bool _UserSigin = false;
+  bool _userSignIn = false;
 
   Future<bool> getActLoginStat() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _UserSigin = prefs.getBool("GoogleSign");
-    return _UserSigin;
+    _userSignIn = prefs.getBool("GoogleSign");
+    return _userSignIn;
   }
 
   saveActLoginStat(bool stat) async {
-    _UserSigin = stat;
+    _userSignIn = stat;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool("GoogleSign", stat);
   }
@@ -37,16 +35,15 @@ class GoogleSign {
         idToken: googleAuth.idToken,
       );
       AuthResult fire = (await _auth.signInWithCredential(authCredential));
-
       final FirebaseUser user = fire.user;
-
       return user;
     } catch (ex) {
       assert(ex);
     }
+    return null;
   }
 
-  Future<void> TryLogInbyGoogle(context) async {
+  Future<void> tryLogInbyGoogle(context) async {
     try {
       _googleUser = await signInWithGoogle();
       await LoadFromStorage();
@@ -61,7 +58,7 @@ class GoogleSign {
     }
   }
 
-  Future<void> SignOutGoogle(context) async {
+  Future<void> signOutGoogle(context) async {
     try {
       await _googleSignIn.signOut();
       await _auth.signOut();
@@ -75,7 +72,7 @@ class GoogleSign {
     }
   }
 
-  bool GoogleUserIsSignIn() {
+  bool googleUserIsSignIn() {
     if (_googleUser != null) return true;
     return false;
   }

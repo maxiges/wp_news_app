@@ -1,16 +1,16 @@
-import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_database/firebase_database.dart';
 import '../Globals.dart';
 import 'WebPortal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Utils/ColorsFunc.dart';
+import '../Utils/StringUtils.dart';
+
 
 class WebsideInfo {
   String URL = "",
@@ -31,8 +31,8 @@ class WebsideInfo {
       this.DESCRIPTION = "",
       this.ID = "",
       this.DOMAIN = ""}) {
-    this.TITTLE = RemoveAllHTMLVal(this.TITTLE);
-    this.DESCRIPTION = RemoveAllHTMLVal(this.DESCRIPTION);
+    this.TITTLE = StringUtils_RemoveAllHTMLVal(this.TITTLE);
+    this.DESCRIPTION = StringUtils_RemoveAllHTMLVal(this.DESCRIPTION);
 
     if (this.IMAGEHREF.length < 5) {
       this.IMAGEHREF = Global_NoImagePost;
@@ -40,28 +40,23 @@ class WebsideInfo {
   }
 
   Color getColor() {
-    try {
-      return colorPalet[this.LinkColor];
-    } catch (ex) {}
-    return Colors.black;
+    return Color_GetColor(this.LinkColor);
   }
 
-  Color getColorText() {
-    Color act;
+  getColorText() {
+    Color actColor;
     try {
-      act = colorPalet[this.LinkColor];
+      actColor = colorPalet[this.LinkColor];
     } catch (ex) {
-      act = Colors.black;
+      actColor = Colors.black;
     }
-    if (act.computeLuminance() > 0.3) {
-      return Colors.black;
-    } else {
-      return Colors.white;
-    }
+    return Color_getColorText(actColor);
+
+
   }
 
-  WebsideInfo_tryRead(String JsonString) {
-    Map<String, dynamic> user = jsonDecode(JsonString);
+  tryParseJson(String jsonString) {
+    Map<String, dynamic> user = jsonDecode(jsonString);
 
     try {
       this.DATE = user["DATE"];
@@ -113,7 +108,7 @@ class WebsideInfo {
   }
 
   String toJson() {
-    String JsonStr = '{ "DATE" : "' +
+    String jsonStr = '{ "DATE" : "' +
         this.DATE.replaceAll("\n", "") +
         '", "URL" :"' +
         this.URL.replaceAll("\n", "") +
@@ -131,59 +126,70 @@ class WebsideInfo {
         this.LinkColor.replaceAll("\n", "") +
         '"}';
 
-    return JsonStr;
+    return jsonStr;
   }
+
+  void launchURL() async {
+    if (await canLaunch(URL)) {
+      await launch(URL);
+    } else {
+      throw 'Could not launch $URL';
+    }
+  }
+
+
+
 } //class
 
-Future<List<WebsideInfo>> GetWebsideInfos(WebPortal WEB) async {
-  List<WebsideInfo> websideCheeck = new List<WebsideInfo>();
+Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
+  List<WebsideInfo> websCheckList = new List<WebsideInfo>();
   try {
     try {
       final response =
-          await http.get("https://" + WEB.url + "/wp-json/wp/v2/posts?_embed");
+          await http.get("https://" + web.url + "/wp-json/wp/v2/posts?_embed");
       if (response.statusCode == 200) {
         List<dynamic> retJson = json.decode(response.body);
         for (dynamic items in retJson) {
           try {
-            dynamic imagersc = "";
-            String m_article_tittle = "N/A";
-            String m_article_descrip = "N/A";
-            String PostComments = "N/A";
-            String m_id = "";
+            dynamic imaSrc = "";
+            String _articleTittle = "N/A";
+            String _articleDesc = "N/A";
+            String _postComments = "N/A";
+            String _id = "";
 
             try {
-              imagersc = items['_embedded']['wp:featuredmedia'][0]
+              imaSrc = items['_embedded']['wp:featuredmedia'][0]
                   ['media_details']['sizes']['medium']['source_url'];
             } catch (ex) {}
             try {
-              m_article_tittle = items['title']['rendered'];
+              _articleTittle = items['title']['rendered'];
             } catch (ex) {}
             try {
-              m_article_descrip = items['excerpt']['rendered'];
+              _articleDesc = items['excerpt']['rendered'];
             } catch (ex) {}
             try {
-              PostComments = items['_links']['replies'][0]['href'].toString();
+              _postComments = items['_links']['replies'][0]['href'].toString();
             } catch (ex) {}
             try {
-              m_id = PostComments.substring(PostComments.lastIndexOf("=") + 1);
+              _id = _postComments.substring(_postComments.lastIndexOf("=") + 1);
             } catch (ex) {}
 
-            websideCheeck.add(new WebsideInfo(
+            websCheckList.add(new WebsideInfo(
                 URL: items['link'],
-                TITTLE: m_article_tittle,
-                IMAGEHREF: imagersc,
+                TITTLE: _articleTittle,
+                IMAGEHREF: imaSrc,
                 DATE: items['date'],
-                LinkColor: GetStringColor(WEB.getColor()),
-                DESCRIPTION: m_article_descrip,
-                ID: m_id,
-                DOMAIN: WEB.url));
+                LinkColor: Color_GetColorInString(web.getColor()),
+                DESCRIPTION: _articleDesc,
+                ID: _id,
+                DOMAIN: web.url));
           } catch (ex) {}
         }
       }
     } catch (ex) {
       print("Load Page error :" + ex);
     }
-    websideCheeck.sort((a, b) {
+    websCheckList.sort((a, b) {
       if (DateTime.parse(a.DATE).isBefore(DateTime.parse(b.DATE)) == true)
         return 1;
       else
@@ -192,18 +198,12 @@ Future<List<WebsideInfo>> GetWebsideInfos(WebPortal WEB) async {
   } catch (ex) {
     print(ex);
   }
-  return websideCheeck;
+  return websCheckList;
 }
 
-void launchURL(String URL) async {
-  if (await canLaunch(URL)) {
-    await launch(URL);
-  } else {
-    throw 'Could not launch $URL';
-  }
-}
 
-void _SaveDataToFirebase(String data) async {
+
+void _saveDataToFirebase(String data) async {
   try {
     final databaseReference = Firestore.instance;
     await databaseReference
@@ -218,7 +218,7 @@ void _SaveDataToFirebase(String data) async {
   }
 }
 
-Future<List<String>> _LoadDataFromFirebase() async {
+Future<List<String>> _loadDataFromFirebase() async {
   try {
     final databaseReference = Firestore.instance;
     DocumentSnapshot retval = await databaseReference
@@ -239,15 +239,15 @@ Future<List<String>> _LoadDataFromFirebase() async {
   }
 }
 
-Future<bool> save_WebsideArch(List<WebsideInfo> webObj) async {
+Future<bool> WebsideInfo_save(List<WebsideInfo> webObj) async {
   List<String> ObjSave = new List<String>();
   for (WebsideInfo objectVal in webObj) {
     ObjSave.add(objectVal.toJson());
   }
 
-  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
+  if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
-      _SaveDataToFirebase(jsonEncode(ObjSave));
+      _saveDataToFirebase(jsonEncode(ObjSave));
     } catch (ex) {
       assert(ex);
     }
@@ -258,36 +258,36 @@ Future<bool> save_WebsideArch(List<WebsideInfo> webObj) async {
   return prefs.setStringList("SaverURLS", ObjSave);
 }
 
-Future<List<WebsideInfo>> load_WebsideArch() async {
-  List<WebsideInfo> redadWebs = new List<WebsideInfo>();
-  List<String> loadedWevs = new List<String>();
+Future<List<WebsideInfo>> WebsideInfo_load() async {
+  List<WebsideInfo> readWebs = new List<WebsideInfo>();
+  List<String> loadedWebs = new List<String>();
 
-  if (Global_GoogleSign.GoogleUserIsSignIn() == true) {
-    loadedWevs = await _LoadDataFromFirebase();
+  if (Global_GoogleSign.googleUserIsSignIn() == true) {
+    loadedWebs = await _loadDataFromFirebase();
   } else {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    loadedWevs = prefs.getStringList("SaverURLS");
+    loadedWebs = prefs.getStringList("SaverURLS");
   }
 
   try {
-    for (String JsonString in loadedWevs) {
+    for (String JsonString in loadedWebs) {
       WebsideInfo newSavedPage = new WebsideInfo();
-      newSavedPage.WebsideInfo_tryRead(JsonString);
+      newSavedPage.tryParseJson(JsonString);
       if (newSavedPage.TITTLE.length > 0) {
-        redadWebs.add(newSavedPage);
+        readWebs.add(newSavedPage);
       }
     }
   } catch (ex) {
     print(ex.toString());
   }
 
-  return redadWebs;
+  return readWebs;
 }
 
-int savedFileContainsThisWebside(WebsideInfo p_act) {
+int savedFileContainsThisWebside(WebsideInfo act) {
   int i = 0;
-  for (WebsideInfo iter in Global_savedWebside) {
-    if (iter.TITTLE == p_act.TITTLE && iter.URL == p_act.URL) {
+  for (WebsideInfo iter in Global_savedWebsList) {
+    if (iter.TITTLE == act.TITTLE && iter.URL == act.URL) {
       return i;
     }
     i++;

@@ -1,28 +1,22 @@
 import 'package:flutter/cupertino.dart';
-
-import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
-
 import '../Globals.dart';
 import '../Class/WebsideInfo.dart';
-import 'YesNoAlert.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'ShowMoreInfo.dart';
-import '../main.dart';
+import 'YesNoDialog.dart';
 
-Future<bool> DialogSaveRemoveWebside(
+
+Future<bool> DialogsPage_saveRemoveWebside(
     bool isSaved, BuildContext context, WebsideInfo page) async {
-  String orderFunct = "Save for later ?";
+  String orderText = "Save for later ?";
   Color yesColor = Colors.greenAccent;
-
   if (isSaved) {
-    orderFunct = "Delete from saved ?";
+    orderText = "Delete from saved ?";
     yesColor = Colors.redAccent;
   }
-  bool shouldUpdate = await ShowDialog(
-      orderFunct,
+  bool shouldUpdate = await YesNoDialog_ShowDialog(
+      orderText,
       yesColor,
       context,
       Icon(
@@ -33,12 +27,12 @@ Future<bool> DialogSaveRemoveWebside(
   if (shouldUpdate) {
     int find = savedFileContainsThisWebside(page);
     if (find < 0) {
-      Global_savedWebside.add(page);
+      Global_savedWebsList.add(page);
     } else {
-      Global_savedWebside.removeAt(find);
+      Global_savedWebsList.removeAt(find);
     }
-    Global_RefreshPage = true;
-    save_WebsideArch(Global_savedWebside);
+    Global_refreshPage = true;
+    WebsideInfo_save(Global_savedWebsList);
   }
   return shouldUpdate;
 }
