@@ -17,7 +17,7 @@ Timer Global_timer;
 bool Global_refreshPage = false;
 ACT_PAGE Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
 MyHomePage Global_MyHomePage = new MyHomePage(title: 'WP news APP');
-PackageInfo Global_packageInfo;
+PackageInfo Global_packageInfo =PackageInfo(version: ".....",appName: "WP APP" ,buildNumber: "N/A" ,packageName: "N/A");
 GoogleSign Global_GoogleSign = new GoogleSign();
 const String Global_NoImageAvater =
     "https://secure.gravatar.com/avatar/d187e7d1ad82bca50f490848dc98f1e3?s=96&d=mm&r=g";

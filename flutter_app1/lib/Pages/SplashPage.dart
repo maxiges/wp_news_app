@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'dart:async';
 import '../Globals.dart';
 import 'package:package_info/package_info.dart';
@@ -30,6 +32,7 @@ class _SplashScreen extends State<SplashScreen>
     animController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
     _timerStart();
+    setVrtsionApp();
   }
 
   _timerStart() {
@@ -61,6 +64,7 @@ class _SplashScreen extends State<SplashScreen>
   }
 
   setVrtsionApp() async {
+
     Global_packageInfo = await PackageInfo.fromPlatform();
   }
 
@@ -94,6 +98,108 @@ class _SplashScreen extends State<SplashScreen>
         ),
       ];
     } else {
+      return buildLoginButtons();
+    }
+  }
+
+  List<Widget> buildLoginButtons() {
+    if (MediaQuery.of(context).size.width < 500) {
+      return [
+        Container(
+          height: 50,
+          width: MediaQuery.of(context).size.width,
+          margin: EdgeInsets.all(0),
+          child: FlatButton(
+            padding: const EdgeInsets.all(0),
+            onPressed: () {
+              Global_GoogleSign.tryLogInbyGoogle(context);
+              _timerStop();
+            },
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    color: Colors.blueAccent,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "by Google",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 50,
+                  width: 50,
+                  margin: EdgeInsets.only(left: 0, right: 50),
+                  child: Icon(FontAwesomeIcons.google, color: Colors.white),
+                  decoration: new BoxDecoration(
+                    borderRadius: new BorderRadius.only(
+                        topRight: Radius.circular(10),
+                        bottomRight: Radius.circular(10)),
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          height: 20,
+        ),
+        Container(
+          height: 50,
+          width: MediaQuery.of(context).size.width,
+          child: FlatButton(
+            padding: const EdgeInsets.all(0),
+            onPressed: () async {
+              _timerStart();
+              _tryLoadGoogleAcc = true;
+              if (Global_GoogleSign.googleUserIsSignIn() == true) {
+                await Global_GoogleSign.signOutGoogle(context);
+              }
+              await LoadFromStorage();
+              _timerStop();
+              await Navigator.of(context).pushNamed('/mainScreen');
+            },
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 50,
+                  height: 50,
+                  margin: EdgeInsets.only(left: 50, right: 0),
+                  child: Icon(Icons.person, color: Colors.white),
+                  decoration: new BoxDecoration(
+                    borderRadius: new BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        bottomLeft: Radius.circular(10)),
+                    color: Colors.orange,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    color: Colors.orange,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "like a guest",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ];
+    } else {
+      //--------------ELSE --------------------
       return [
         Container(
           width: 300,
@@ -108,8 +214,12 @@ class _SplashScreen extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               // ace with a Row for horizontal icon + text
               children: <Widget>[
-                Icon(FontAwesomeIcons.google),
-                Text("  Sign in by Google")
+                Icon(
+                  FontAwesomeIcons.google,
+                  color: Colors.white,
+                ),
+                Text("  by Google",
+                    style: TextStyle(color: Colors.white, fontSize: 20))
               ],
             ),
           ),
@@ -136,8 +246,12 @@ class _SplashScreen extends State<SplashScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               // Row for horizontal icon + text
               children: <Widget>[
-                Icon(Icons.person),
-                Text("  Sign in like a guest")
+                Icon(
+                  Icons.person,
+                  color: Colors.white,
+                ),
+                Text("  like a guest",
+                    style: TextStyle(color: Colors.white, fontSize: 20))
               ],
             ),
           ),
@@ -151,7 +265,7 @@ class _SplashScreen extends State<SplashScreen>
     _width = MediaQuery.of(context).size.width;
     _height = MediaQuery.of(context).size.height;
     buttonList = retButtons(_tryLoadGoogleAcc);
-    setVrtsionApp();
+
     if (runApp) {
       _timerStart();
       runApp = false;
@@ -161,32 +275,51 @@ class _SplashScreen extends State<SplashScreen>
     double _imageTopMargin = 100;
     if (_height < 700) {
       _imageTopMargin = 10;
+      _imageSize = 150;
     }
 
     return Scaffold(
       backgroundColor: GlobalTheme.background,
       body: Center(
-          child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: <Widget>[
-          Center(
-            child: Container(
-                height: _imageSize,
-                margin: new EdgeInsets.only(top: _imageTopMargin),
-                child: Image(
-                  image: AssetImage("images/my_logo.png"),
-                )),
-          ),
-          Container(
-            height: 50,
-            child: const Center(
-                child: Text('Welcome in WordPress News Collector APP' ,)),
-          ),
-          Column(
-            children: buttonList,
-          )
-        ],
-      )),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView(
+                children: <Widget>[
+                  Center(
+                    child: Container(
+                        height: _imageSize,
+                        margin: new EdgeInsets.only(top: _imageTopMargin),
+                        child: Image(
+                          image: AssetImage("assets/icon.png"),
+                        )),
+                  ),
+                  Container(
+                    height: 50,
+                    child: const Center(
+                        child: Text(
+                      'Sign In',
+                      style: TextStyle(fontSize: 30, color: Colors.blueAccent),
+                    )),
+                  ),
+                  Container(
+                      width: MediaQuery.of(context).size.width,
+                      child: Column(
+                        children: buttonList,
+                      )),
+                ],
+              ),
+            ),
+            Align(
+                child: Container(
+              child: Text(
+                "var:" + Global_packageInfo.version,
+                style: TextStyle(color: Colors.orange),
+              ),
+            )),
+          ],
+        ),
+      ),
     );
   }
 }

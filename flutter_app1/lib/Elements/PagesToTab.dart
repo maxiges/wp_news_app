@@ -45,9 +45,10 @@ class _PagesToTab extends State<PagesToTab>
       ));
     } else {
       String description = widget.p_webInfo.DESCRIPTION;
-      if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 > (_rowWidth / 2) * 90) {
-        description =
-            description.substring(0, (((_rowWidth / 2) * 90 / 12) / 12).toInt());
+      if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 >
+          (_rowWidth / 2) * 90) {
+        description = description.substring(
+            0, (((_rowWidth / 2) * 90 / 12) / 12).toInt());
         description = description.substring(0, description.lastIndexOf(" "));
         description += " ... ";
       }
@@ -59,7 +60,7 @@ class _PagesToTab extends State<PagesToTab>
                 width: _rowWidth / 2 - 6,
                 child: Text(
                   widget.p_webInfo.TITTLE,
-                  style: TextStyle( color: GlobalTheme.textColor , fontSize: 16),
+                  style: TextStyle(color: GlobalTheme.textColor, fontSize: 16),
                 ),
               ),
               Container(
@@ -125,12 +126,21 @@ class _PagesToTab extends State<PagesToTab>
     return retVal;
   }
 
+
+
+
+  void openMoreDetails() {
+    Navigator.of(context).pushNamed('/moreInfo', arguments: widget.p_webInfo);
+  }
+
+
+
   Widget build(BuildContext context) {
     _width = MediaQuery.of(context).size.width;
     _rowWidth = _width - 100 - 20;
     animationControl.forward();
     bool isSaved = false;
-      if (savedFileContainsThisWebside(widget.p_webInfo) >= 0) {
+    if (savedFileContainsThisWebside(widget.p_webInfo) >= 0) {
       isSaved = true;
     }
     var now = new DateTime.now();
@@ -154,8 +164,11 @@ class _PagesToTab extends State<PagesToTab>
               Container(
                   margin: new EdgeInsets.only(bottom: 10),
                   child: new GestureDetector(
-                    onTap: () {
+                    onDoubleTap: () {
                       widget.p_webInfo.launchURL();
+                    },
+                    onTap: () {
+                      openMoreDetails();
                     },
                     onLongPressStart: (pessDetails) {},
                     onLongPressEnd: (pressDetails) {},
@@ -165,9 +178,9 @@ class _PagesToTab extends State<PagesToTab>
                     },
                     child: Container(
                       decoration: new BoxDecoration(
-                        borderRadius: new BorderRadius.all(Radius.circular(10)),
-                        color: GlobalTheme.tabsColorPrimary
-                      ),
+                          borderRadius:
+                              new BorderRadius.all(Radius.circular(10)),
+                          color: GlobalTheme.tabsColorPrimary),
                       child: Container(
                         margin: new EdgeInsets.all(5),
                         child: Column(
@@ -217,7 +230,8 @@ class _PagesToTab extends State<PagesToTab>
                                                 borderRadius:
                                                     new BorderRadius.all(
                                                         Radius.circular(10)),
-                                                color: GlobalTheme.tabsDayBackground,
+                                                color: GlobalTheme
+                                                    .tabsDayBackground,
                                               ),
                                               width: 60,
                                               child: Center(
@@ -225,9 +239,9 @@ class _PagesToTab extends State<PagesToTab>
                                                     Text(
                                                   timeVal,
                                                   style: TextStyle(
-                                                    fontSize: 11,
-                                                    color: GlobalTheme.textColor
-                                                  ),
+                                                      fontSize: 11,
+                                                      color: GlobalTheme
+                                                          .textColor),
                                                 ),
                                               ),
                                               // Solid text as fill.
@@ -254,8 +268,7 @@ class _PagesToTab extends State<PagesToTab>
                 caption: 'Read more',
                 color: widget.p_webInfo.getColor(),
                 icon: Icons.more_horiz,
-                onTap: () => Navigator.of(context)
-                    .pushNamed('/moreInfo', arguments: widget.p_webInfo)),
+                onTap: () => openMoreDetails()),
           ]),
     );
   }
