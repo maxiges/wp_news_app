@@ -6,6 +6,8 @@ import 'dart:async';
 import '../Globals.dart';
 import 'package:package_info/package_info.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/foundation.dart';
+
 
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key}) : super(key: key);
@@ -278,6 +280,21 @@ class _SplashScreen extends State<SplashScreen>
       _imageSize = 150;
     }
 
+    Widget _kinderGardenBut = Container();
+    if(!kReleaseMode){
+      _kinderGardenBut = Container(
+        child: FlatButton(
+          color: Colors.lightGreen,
+          onPressed: (){
+            Navigator.of(context).pushNamed('/kinderGarden');
+          },
+          child: Text("Press go to KinderGarden "),
+        ),
+
+      );
+    }
+
+
     return Scaffold(
       backgroundColor: GlobalTheme.background,
       body: Center(
@@ -310,6 +327,9 @@ class _SplashScreen extends State<SplashScreen>
                 ],
               ),
             ),
+
+            Container( child:_kinderGardenBut),
+
             Align(
                 child: Container(
               child: Text(

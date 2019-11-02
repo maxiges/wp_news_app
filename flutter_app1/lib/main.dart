@@ -5,6 +5,8 @@ import 'Pages/SplashPage.dart';
 import 'Pages/SettingPage.dart';
 import 'Globals.dart';
 import 'Utils/ColorsFunc.dart';
+import 'Pages/KinderGarden.dart';
+
 MyApp app = MyApp();
 void main() => runApp(app);
 class MyApp extends StatelessWidget {
@@ -24,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/mainScreen': (BuildContext context) => Global_MyHomePage,
         '/settingScreen': (BuildContext context) => new SettingPage(),
         '/moreInfo': (BuildContext context) => new ShowMoreInfo(),
+        '/kinderGarden': (BuildContext context) => new KinderGarden(),
       },
     );
   }

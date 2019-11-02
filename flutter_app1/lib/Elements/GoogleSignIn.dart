@@ -30,13 +30,18 @@ class GoogleSign {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      AuthCredential authCredential = GoogleAuthProvider.getCredential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      AuthResult fire = (await _auth.signInWithCredential(authCredential));
-      final FirebaseUser user = fire.user;
-      return user;
+      if (_googleUser != null) {
+        final FirebaseUser user = await _auth.currentUser();
+        return user;
+      } else {
+        AuthCredential authCredential = GoogleAuthProvider.getCredential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        AuthResult fire = (await _auth.signInWithCredential(authCredential));
+        final FirebaseUser user = fire.user;
+        return user;
+      }
     } catch (ex) {
       assert(ex);
     }
