@@ -7,6 +7,7 @@ import 'Globals.dart';
 import 'Utils/ColorsFunc.dart';
 import 'Pages/KinderGarden.dart';
 
+
 MyApp app = MyApp();
 void main() => runApp(app);
 class MyApp extends StatelessWidget {
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ColorPicker_ThemeLoad();
+    Global_Settings.loadData();
 
     SystemChrome.setEnabledSystemUIOverlays([]); //disable
     //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);//enable

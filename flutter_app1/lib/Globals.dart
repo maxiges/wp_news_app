@@ -6,6 +6,8 @@ import 'Elements/GoogleSignIn.dart';
 import 'Pages/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'Utils/ColorsFunc.dart';
+import "Class/Settings.dart";
+
 
 enum ACT_PAGE { none, LOADED_PAGES, SAVED_PAGES, SETTINGS }
 
@@ -27,12 +29,14 @@ const String Global_NoImagePost =
 
 
 ColorsTheme GlobalTheme = GlobalThemeDart;
+Settings Global_Settings = new Settings();
+
+
 
 
 LoadFromStorage() async {
   Global_webList = await WebPortal_loadWebs();
   Global_savedWebsList = await WebsideInfo_load();
-  await ColorPicker_ThemeLoad();
 }
 
 

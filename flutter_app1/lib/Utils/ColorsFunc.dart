@@ -3,23 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-ColorPicker_ThemeSet(bool darkTheme) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setBool("DarkTheme", darkTheme);
-}
-
-ColorPicker_ThemeLoad() async {
-  try {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool("DarkTheme")) {
-      GlobalTheme = GlobalThemeDart;
-    } else {
-      GlobalTheme = GlobalThemeLight;
-    }
-  }
-  catch(ex){}
-}
-
 Map<String, Color> colorPalet = {
   "black": Colors.black,
   "black26": Colors.black26,
@@ -70,13 +53,6 @@ class ColorsTheme {
   });
 }
 
-
-
-
-
-
-
-
 ColorsTheme GlobalThemeDart = new ColorsTheme(
     background: Colors.black,
     navAccent: Color.fromARGB(255, 40, 40, 40),
@@ -101,18 +77,13 @@ ColorsTheme GlobalThemeDart = new ColorsTheme(
       backgroundColor: Colors.black,
     ));
 
-
-
-
-
-
 ColorsTheme GlobalThemeLight = new ColorsTheme(
-    background: Colors.white,
+    background: Color.fromARGB(255, 170, 170, 170),
     navAccent: Color.fromARGB(255, 200, 200, 200),
     textColor: Colors.black,
     backgroundDialog: Color.fromARGB(255, 150, 150, 150),
     textstyle: const TextStyle(color: Colors.black),
-    tabsColorPrimary: Color.fromARGB(255, 200, 220, 220),
+    tabsColorPrimary: Color.fromARGB(255, 220, 220, 220),
     tabsDayBackground: Color.fromARGB(255, 150, 150, 150),
     textColor2: Color.fromARGB(255, 60, 60, 60),
     tabs: Color.fromARGB(255, 150, 255, 255),

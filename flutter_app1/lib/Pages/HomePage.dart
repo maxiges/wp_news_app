@@ -5,7 +5,10 @@ import '../Class/WebsideInfo.dart';
 import '../Globals.dart';
 import '../Elements/PagesToTab.dart';
 import '../Class/WebPortal.dart';
-
+import 'dart:math';
+import '../Utils/Ads.dart';
+import 'package:flutter_picker/flutter_picker.dart';
+import '../Utils/WebFilter.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -28,6 +31,8 @@ class _MyHomePageState extends State<MyHomePage>
   int actLoadedPages = 0;
   Icon _actIcon = new Icon(Icons.storage);
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   void dispose() {
     super.dispose();
     Global_timer.cancel();
@@ -43,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage>
 
     Global_timer = new Timer.periodic(
         Duration(microseconds: 100), (Timer timer) => timerService());
+    webFilter.setPageFilter();
   }
 
   void timerService() {
@@ -76,11 +82,12 @@ class _MyHomePageState extends State<MyHomePage>
     if (Global_webList.length < 1) {
       retVal.add(new Center(
         child: Text("No pages to load.\r\n Go to settings ",
-            style: TextStyle(fontSize: 18 , color: GlobalTheme.textColor)),
+            style: TextStyle(fontSize: 18, color: GlobalTheme.textColor)),
       ));
     } else if (Global_webList.length == 1) {
       retVal.add(new Center(
-        child: Text("LOADING  page ... ", style: TextStyle(fontSize: 18 , color: GlobalTheme.textColor)),
+        child: Text("LOADING  page ... ",
+            style: TextStyle(fontSize: 18, color: GlobalTheme.textColor)),
       ));
     } else {
       retVal.add(new Center(
@@ -92,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage>
               "/" +
               Global_webList.length.toString() +
               " pages ... ",
-          style: TextStyle(fontSize: 18 , color: GlobalTheme.textColor2),
+          style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
         ),
       )));
       retVal.add(Container(
@@ -130,6 +137,16 @@ class _MyHomePageState extends State<MyHomePage>
     return retVal;
   }
 
+  Widget pagesToTabAdds() {
+    Ads newAds = Ads();
+    dynamic baner = newAds.getBaner();
+    return (Container(
+      margin: EdgeInsets.only(top: 0, bottom: 10),
+      color: GlobalTheme.tabsColorPrimary,
+      child: baner,
+    ));
+  }
+
   buildTableWithPages(bool tryLoadSavedLinks) {
     isOpendeSavedList = tryLoadSavedLinks;
     List<WebsideInfo> websideInfoLoaded = new List<WebsideInfo>();
@@ -140,8 +157,21 @@ class _MyHomePageState extends State<MyHomePage>
       _actIcon = new Icon(Icons.sd_storage);
       websideInfoLoaded = _readedWebs;
     }
+
     List<Widget> wid = new List<Widget>();
     for (WebsideInfo iter in websideInfoLoaded) {
+      if (webFilter.actSetFilter != "All") {
+        if (!iter.DOMAIN.contains(webFilter.actSetFilter)) {
+          continue;
+        }
+      }
+
+      if (Global_Settings.isAdsOn()) {
+        var randome = new Random();
+        if (randome.nextInt(20) == 0) {
+          wid.add(pagesToTabAdds());
+        }
+      }
       wid.add(PagesToTab(iter, this.context));
     }
     if (websideInfoLoaded.length == 0) {
@@ -167,7 +197,8 @@ class _MyHomePageState extends State<MyHomePage>
     ));
     _ret.add(Center(
       child: Text("You didn't add any webside \r\n Do to Settings",
-          style:  TextStyle(fontSize: 18 , color: GlobalTheme.textColor2), textAlign: TextAlign.center ),
+          style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
+          textAlign: TextAlign.center),
     ));
     _ret.add(Center(
       child: Icon(
@@ -188,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage>
     m_ret.add(Center(
       child: Text(
           "Can't download content.\r\n Try reload or cheeck internet connection",
-          style: new TextStyle(fontSize: 18 , color: GlobalTheme.textColor2),
+          style: new TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
           textAlign: TextAlign.center),
     ));
     m_ret.add(Center(
@@ -209,7 +240,8 @@ class _MyHomePageState extends State<MyHomePage>
     ));
     m_ret.add(Center(
       child: Text("Your saved list is empty.",
-          style: new TextStyle(fontSize: 18 , color: GlobalTheme.textColor2), textAlign: TextAlign.center),
+          style: new TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
+          textAlign: TextAlign.center),
     ));
     m_ret.add(Center(
       child: Icon(
@@ -242,9 +274,7 @@ class _MyHomePageState extends State<MyHomePage>
     });
     Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
     rotationController.repeat(period: Duration(milliseconds: 1000));
-
     List<Future> tasks = new List<Future>();
-
     for (WebPortal WEB in Global_webList) {
       tasks.add(getPageAsync(WEB));
     }
@@ -277,6 +307,29 @@ class _MyHomePageState extends State<MyHomePage>
         )));
   }
 
+  showPicker(BuildContext context) {
+    Picker picker = Picker(
+        adapter: PickerDataAdapter(data: webFilter.filterDataList),
+        changeToFirst: true,
+        textAlign: TextAlign.left,
+        textStyle: const TextStyle(color: Colors.blue),
+        selectedTextStyle: TextStyle(color: Colors.red),
+        columnPadding: const EdgeInsets.all(8.0),
+        backgroundColor: GlobalTheme.background,
+        cancelText: "Cancel",
+        headercolor: GlobalTheme.background,
+        containerColor: GlobalTheme.background,
+        cancelTextStyle: TextStyle(color: GlobalTheme.textColor),
+        confirmTextStyle: TextStyle(color: GlobalTheme.tabs),
+        onConfirm: (Picker picker, List value) {
+          setState(() {
+            webFilter.actSetFilter = picker.getSelectedValues()[0].toString();
+            Global_refreshPage = true;
+          });
+        });
+    picker.show(_scaffoldKey.currentState);
+  }
+
   PreferredSizeWidget renderAppBar() {
     String userText = "Hello guest";
     if (Global_GoogleSign.googleUserIsSignIn() == true) {
@@ -289,9 +342,41 @@ class _MyHomePageState extends State<MyHomePage>
           textTheme: GlobalTheme.textTheme,
           iconTheme: GlobalTheme.iconTheme,
           leading: refresh(),
-          title: Center(
-            child: Text(userText),
-          ),
+          title: Row(children: <Widget>[
+            Text(
+              userText,
+              style: TextStyle(fontSize: 12, color: GlobalTheme.textColor),
+              textAlign: TextAlign.center,
+            ),
+            Container(
+              margin:
+              const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
+              color: GlobalTheme.tabs,
+              width: 1,
+            ),
+            FlatButton(
+              padding:
+              const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
+              color: Colors.transparent,
+              child: Row(children: <Widget>[
+                Text(
+                  webFilter.actSetFilter,
+                  style: TextStyle(color: GlobalTheme.textColor, fontSize: 12),
+                  overflow: TextOverflow.fade,
+                  maxLines: 2,
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: GlobalTheme.textColor,
+                )
+              ]),
+              onPressed: () {
+                showPicker(context);
+              },
+            ),
+          ]),
           actions: <Widget>[
             new IconButton(
               iconSize: 30,
@@ -332,13 +417,14 @@ class _MyHomePageState extends State<MyHomePage>
     } catch (ex) {}
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: GlobalTheme.background,
       appBar: renderAppBar(),
       body: Center(
           child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: _webList,
-      )),
+            padding: const EdgeInsets.all(8),
+            children: _webList,
+          )),
     );
   }
 }

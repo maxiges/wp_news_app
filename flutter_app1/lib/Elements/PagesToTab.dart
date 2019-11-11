@@ -126,14 +126,9 @@ class _PagesToTab extends State<PagesToTab>
     return retVal;
   }
 
-
-
-
   void openMoreDetails() {
     Navigator.of(context).pushNamed('/moreInfo', arguments: widget.p_webInfo);
   }
-
-
 
   Widget build(BuildContext context) {
     _width = MediaQuery.of(context).size.width;

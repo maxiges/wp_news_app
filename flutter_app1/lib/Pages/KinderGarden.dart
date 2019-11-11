@@ -17,6 +17,8 @@ import '../Class/WebsideInfo.dart';
 
 import '../Pages/ShowMoreInfoPage.dart';
 
+import 'package:firebase_admob/firebase_admob.dart';
+
 class KinderGarden extends StatefulWidget {
   KinderGarden({Key key}) : super(key: key);
 
@@ -90,6 +92,14 @@ class _KinderGarden extends State<KinderGarden>
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAdMob.instance
+        .initialize(appId: "ca-app-pub-2632418691113458~9011907820")
+        .then((response) {
+      _myBanner
+        ..load()
+        ..show();
+    });
+
     _getBatteryLevel();
 
     return Scaffold(
@@ -106,4 +116,39 @@ class _KinderGarden extends State<KinderGarden>
       ),
     );
   }
+
+  void dispose() {
+    super.dispose();
+    _myBanner.dispose();
+  }
 }
+
+MobileAdTargetingInfo _targetingInfo = MobileAdTargetingInfo(
+  keywords: <String>[
+    'news',
+    'wordpress',
+    "bissnes",
+    "office",
+    "shoes",
+    "games"
+  ],
+  contentUrl: 'https://flutter.io',
+  birthday: DateTime.now(),
+  childDirected: false,
+  designedForFamilies: false,
+  gender: MobileAdGender.male,
+  // or MobileAdGender.female, MobileAdGender.unknown
+  testDevices: <String>[], // Android emulators are considered test devices
+);
+
+BannerAd _myBanner = BannerAd(
+  // Replace the testAdUnitId with an ad unit id from the AdMob dash.
+  // https://developers.google.com/admob/android/test-ads
+  // https://developers.google.com/admob/ios/test-ads
+  adUnitId: BannerAd.testAdUnitId,
+  size: AdSize.smartBanner,
+  targetingInfo: _targetingInfo,
+  listener: (MobileAdEvent event) {
+    print("BannerAd event is $event");
+  },
+);
