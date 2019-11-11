@@ -6,3 +6,4 @@ This app download last 10 news from wordPress webside API , and display it. User
 Earlier version was commited at bitbucket server.
 ```
 
+![Alt text](App.jpg?raw=true "App Wp News App")
