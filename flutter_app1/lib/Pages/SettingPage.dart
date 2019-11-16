@@ -171,6 +171,48 @@ class _SettingPage extends State<SettingPage>
     }
   }
 
+
+  Widget SeeLogs() {
+    return Center(
+        child: Container(
+          width: 300,
+          margin: EdgeInsets.only(
+              top: 30,
+              bottom: 10,
+              left: marginRightLeft,
+              right: marginRightLeft),
+          decoration: new BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: new BorderRadius.all(Radius.circular(30)),
+          ),
+          child: FlatButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed("/logScreen");
+            },
+            child: Row(
+              // Repl
+              mainAxisAlignment: MainAxisAlignment.center,
+              // ace with a Row for horizontal icon + text
+              children: <Widget>[
+                Icon(FontAwesomeIcons.phoneAlt,
+                    color: Color_getColorText(Colors.redAccent)),
+                Container(
+                  width: 5,
+                ),
+                Flexible(
+                    child: Text(
+                      "Show Logs",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Color_getColorText(Colors.redAccent)),
+                    )),
+              ],
+            ),
+          ),
+        ));
+  }
+
+
   Widget labelAddButtonPage() {
     return (new GestureDetector(
       onTap: () async {
@@ -336,6 +378,7 @@ class _SettingPage extends State<SettingPage>
         websList(),
         darkLightModeUi(),
         addsOnUi(),
+        SeeLogs(),
         signOutGoogle(),
         Container(
           height: 120,

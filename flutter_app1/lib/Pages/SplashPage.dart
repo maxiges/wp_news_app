@@ -7,6 +7,7 @@ import '../Globals.dart';
 import 'package:package_info/package_info.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/foundation.dart';
+import '../Utils/SaveLogs.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -77,6 +78,7 @@ class _SplashScreen extends State<SplashScreen>
       try {
         Global_GoogleSign.tryLogInbyGoogle(context);
       } catch (ex) {
+        saveLogs.write(ex);
         assert(ex);
         setState(() {
           _tryLoadGoogleAcc = false;

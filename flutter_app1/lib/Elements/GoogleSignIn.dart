@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../Globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Utils/SaveLogs.dart';
 
 class GoogleSign {
   FirebaseUser _googleUser;
@@ -43,6 +44,7 @@ class GoogleSign {
         return user;
       }
     } catch (ex) {
+      saveLogs.write(ex);
       assert(ex);
     }
     return null;
@@ -56,6 +58,7 @@ class GoogleSign {
 
       await Navigator.of(context).pushNamed('/mainScreen');
     } catch (ex) {
+      saveLogs.write(ex);
       assert(ex);
       saveActLoginStat(false);
       Toast.show("Please sign in or login like guest", context,
@@ -73,6 +76,7 @@ class GoogleSign {
         Navigator.of(context).pop();
       }
     } catch (ex) {
+      saveLogs.write(ex);
       assert(ex);
     }
   }

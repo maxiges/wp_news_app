@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/WebFilter.dart';
 
+
 class Settings {
   bool _isDarkTheme = true;
   bool _adsOn = true;

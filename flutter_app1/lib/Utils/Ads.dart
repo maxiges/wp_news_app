@@ -12,6 +12,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:admob_flutter/admob_flutter.dart';
 import 'dart:io';
+import '../Utils/SaveLogs.dart';
+
 
 class Ads {
   MobileAdTargetingInfo targetingInfo;
@@ -55,18 +57,33 @@ class Ads {
   }
 
   showBaner() {
-    FirebaseAdMob.instance.initialize(appId: getAppAdUnitId()).then((response) {
-      myBanner
-        ..load()
-        ..show();
-    });
+    try {
+      FirebaseAdMob.instance.initialize(appId: getAppAdUnitId()).then((
+          response) {
+        myBanner
+          ..load()
+          ..show();
+      });
+    }
+    catch (ex) {
+      saveLogs.write(ex);
+    }
+
+
   }
 
   Widget getBaner() {
-    return (AdmobBanner(
-      adUnitId: getBannerAdUnitId(),
-      adSize: AdmobBannerSize.BANNER,
-    ));
+    try {
+      return (AdmobBanner(
+        adUnitId: getBannerAdUnitId(),
+        adSize: AdmobBannerSize.BANNER,
+      ));
+    }
+    catch (ex) {
+      saveLogs.write(ex);
+    }
+
+
   }
 
   hideBaner() {
@@ -78,20 +95,10 @@ class Ads {
   }
 
   String getAppAdUnitId() {
-    if (Platform.isIOS) {
       return 'ca-app-pub-2632418691113458~9011907820';
-    } else if (Platform.isAndroid) {
-      return 'ca-app-pub-2632418691113458~9011907820';
-    }
-    return null;
   }
 
   String getBannerAdUnitId() {
-    if (Platform.isIOS) {
       return 'ca-app-pub-2632418691113458/1133417803';
-    } else if (Platform.isAndroid) {
-      return 'ca-app-pub-2632418691113458/1133417803';
-    }
-    return null;
   }
 }
