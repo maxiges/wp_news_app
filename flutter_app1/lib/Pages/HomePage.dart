@@ -10,6 +10,10 @@ import '../Utils/Ads.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import '../Utils/WebFilter.dart';
 
+
+
+
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
   final String title;
@@ -23,7 +27,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   var isPortrait = true;
-  List<WebsideInfo> _readedWebs = new List<WebsideInfo>();
+
   List<Widget> _webList = new List<Widget>();
   bool isOpendeSavedList = false;
   bool appStarted = false;
@@ -155,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage>
       websideInfoLoaded = Global_savedWebsList;
     } else {
       _actIcon = new Icon(Icons.sd_storage);
-      websideInfoLoaded = _readedWebs;
+      websideInfoLoaded = readedWebs;
     }
 
     List<Widget> wid = new List<Widget>();
@@ -188,6 +192,11 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       _webList = wid;
     });
+
+    if (!tryLoadSavedLinks) {
+      WebsideInfo_loadedWeb_save();
+    }
+
   }
 
   List<Widget> setAddedPages() {
@@ -257,7 +266,13 @@ class _MyHomePageState extends State<MyHomePage>
   Future<List<WebsideInfo>> getPageAsync(WebPortal web) async {
     List<WebsideInfo> retval = await WebsideInfo_GetWebInfos(web);
     for (WebsideInfo webs in retval) {
-      _readedWebs.add(webs);
+      bool add = true;
+      for (WebsideInfo loaded in readedWebs) {
+        if (loaded.URL == webs.URL) add = false;
+      }
+      if (add) {
+        readedWebs.add(webs);
+      }
     }
     setState(() {
       actLoadedPages++;
@@ -266,11 +281,13 @@ class _MyHomePageState extends State<MyHomePage>
     return retval;
   }
 
-  void loadFromWebs() async {
+  void loadFromWebs(bool append) async {
     setState(() {
       actLoadedPages = 0;
       _webList = checkLoadingPagesAssert();
-      _readedWebs.clear();
+      if (append == false) {
+        readedWebs.clear();
+      }
     });
     Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
     rotationController.repeat(period: Duration(milliseconds: 1000));
@@ -280,12 +297,14 @@ class _MyHomePageState extends State<MyHomePage>
     }
 
     await Future.wait(tasks);
-    _readedWebs.sort((a, b) {
+    readedWebs.sort((a, b) {
       DateTime dataA = DateTime.parse(a.DATE);
       DateTime dataB = DateTime.parse(b.DATE);
       if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
       return 0;
     });
+
+
 
     Global_refreshPage = true;
     rotationController.reset();
@@ -295,16 +314,23 @@ class _MyHomePageState extends State<MyHomePage>
   Widget refresh() {
     return (RotationTransition(
         turns: Tween(begin: 0.0, end: 1.0).animate(rotationController),
-        child: IconButton(
-          iconSize: 30,
-          padding: const EdgeInsets.all(0),
-          onPressed: () async {
-            setState(() {
-              loadFromWebs();
-            });
-          },
-          icon: Icon(Icons.refresh),
-        )));
+        child: GestureDetector(
+            onTap: () async {
+              setState(() {
+                loadFromWebs(true);
+              });
+            },
+            onLongPressEnd: (time)async{
+                setState(() {
+                  loadFromWebs(false);
+                });
+            },
+            child: IconButton(
+              iconSize: 30,
+              padding: const EdgeInsets.all(0),
+              icon: Icon(Icons.refresh),
+              color: GlobalTheme.textColor,
+            ))));
   }
 
   showPicker(BuildContext context) {
@@ -350,13 +376,13 @@ class _MyHomePageState extends State<MyHomePage>
             ),
             Container(
               margin:
-              const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
+                  const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
               color: GlobalTheme.tabs,
               width: 1,
             ),
             FlatButton(
               padding:
-              const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
+                  const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
               color: Colors.transparent,
               child: Row(children: <Widget>[
                 Text(
@@ -409,9 +435,10 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     try {
       if (!appStarted) {
+        WebsideInfo_loadedWeb_load();
         Global_width = MediaQuery.of(context).size.width;
         Global_height = MediaQuery.of(context).size.height;
-        loadFromWebs();
+        loadFromWebs(true);
         appStarted = true;
       }
     } catch (ex) {}
@@ -422,9 +449,9 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: renderAppBar(),
       body: Center(
           child: ListView(
-            padding: const EdgeInsets.all(8),
-            children: _webList,
-          )),
+        padding: const EdgeInsets.all(8),
+        children: _webList,
+      )),
     );
   }
 }

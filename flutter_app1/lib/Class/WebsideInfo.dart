@@ -10,6 +10,10 @@ import 'WebPortal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/StringUtils.dart';
+import '../Utils/SaveLogs.dart';
+
+List<WebsideInfo> readedWebs = new List<WebsideInfo>();
+
 
 
 class WebsideInfo {
@@ -235,7 +239,7 @@ Future<List<String>> _loadDataFromFirebase() async {
 
     return list;
   } catch (ex) {
-    assert(ex);
+    saveLogs.write(ex);
   }
 }
 
@@ -278,7 +282,7 @@ Future<List<WebsideInfo>> WebsideInfo_load() async {
       }
     }
   } catch (ex) {
-    print(ex.toString());
+    saveLogs.write(ex.toString());
   }
 
   return readWebs;
@@ -293,4 +297,41 @@ int savedFileContainsThisWebside(WebsideInfo act) {
     i++;
   }
   return -1;
+}
+
+
+
+
+Future<bool> WebsideInfo_loadedWeb_save() async {
+  List<String> ObjSave = new List<String>();
+  for (WebsideInfo objectVal in readedWebs) {
+    ObjSave.add(objectVal.toJson());
+  }
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove("SavePages");
+  return prefs.setStringList("SavePages", ObjSave);
+}
+
+
+Future<bool> WebsideInfo_loadedWeb_load() async {
+  List<WebsideInfo> readWebs = new List<WebsideInfo>();
+  List<String> loadedWebs = new List<String>();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  loadedWebs = prefs.getStringList("SavePages");
+  try {
+    for (String JsonString in loadedWebs) {
+      WebsideInfo newSavedPage = new WebsideInfo();
+      newSavedPage.tryParseJson(JsonString);
+       bool tooOld = DateTime.parse(newSavedPage.DATE).isBefore(DateTime.now().subtract(Duration(days: 2)));
+      if (newSavedPage.TITTLE.length > 0 && tooOld==false) {
+        readWebs.add(newSavedPage);
+      }
+    }
+
+    readedWebs = readWebs;
+  } catch (ex) {
+    saveLogs.write(ex.toString());
+  }
+
+
 }

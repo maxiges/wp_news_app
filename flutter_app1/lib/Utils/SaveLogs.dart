@@ -22,8 +22,10 @@ class SaveLogs {
     final file = await _localFile;
     var now = new DateTime.now();
     data = now.toString() + "   :  " + data + "  \r\n";
+    File saved = await file.writeAsString(data, mode: FileMode.append);
+    print("[ERROR🔥]"+data);
     // Write the file.
-    return file.writeAsString(data, mode: FileMode.append);
+    return saved;
   }
 
   Future<String> read() async {
