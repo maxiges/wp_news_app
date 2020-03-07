@@ -37,13 +37,12 @@ double _getMaxDialogSize(context) {
   }
 }
 
-Future<bool> SettingAddPage_ShowDialog(WebPortal web, dynamic context) async {
+Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
   pickerColor = web.getColor();
   currentColor = web.getColor();
   actUrl = web.url;
   bool shouldUpdate = await showDialog(
       context: context,
-
       builder: (context) {
         return (new AlertDialog(
             backgroundColor: Colors.transparent,
@@ -64,7 +63,6 @@ Future<bool> SettingAddPage_ShowDialog(WebPortal web, dynamic context) async {
                       child: TextFormField(
                         initialValue: web.url,
                         style: TextStyle(color: GlobalTheme.textColor),
-
                         decoration: InputDecoration(
                           icon: Icon(Icons.bookmark_border),
                           hintText: '',
@@ -112,7 +110,9 @@ Future<bool> SettingAddPage_ShowDialog(WebPortal web, dynamic context) async {
                             child: FlatButton(
                               child: new Text(
                                 "Add/Edit",
-                                style: TextStyle(color: Color_getColorText(Colors.greenAccent) ),
+                                style: TextStyle(
+                                    color:
+                                    Color_getColorText(Colors.greenAccent)),
                               ),
                               onPressed: () => Navigator.pop(context, true),
                             ),
@@ -123,9 +123,9 @@ Future<bool> SettingAddPage_ShowDialog(WebPortal web, dynamic context) async {
                                 new EdgeInsets.only(top: 20, left: 5, right: 5),
                             decoration: buttonDecor(GlobalTheme.textColor),
                             child: FlatButton(
-
                               child: new Text(
-                                "Cancel ",style: TextStyle(color: GlobalTheme.background),
+                                "Cancel ",
+                                style: TextStyle(color: GlobalTheme.background),
                               ),
                               onPressed: () => Navigator.pop(context, false),
                             ),

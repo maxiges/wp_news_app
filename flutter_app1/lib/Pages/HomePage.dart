@@ -1,3 +1,4 @@
+import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
@@ -9,10 +10,8 @@ import 'dart:math';
 import '../Utils/Ads.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import '../Utils/WebFilter.dart';
-
-
-
-
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:admob_flutter/admob_flutter.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -34,6 +33,8 @@ class _MyHomePageState extends State<MyHomePage>
   AnimationController rotationController;
   int actLoadedPages = 0;
   Icon _actIcon = new Icon(Icons.storage);
+
+  GlobalKey<ScaffoldState> scaffoldState = GlobalKey();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -96,16 +97,16 @@ class _MyHomePageState extends State<MyHomePage>
     } else {
       retVal.add(new Center(
           child: Container(
-        margin: EdgeInsets.only(top: 20, bottom: 10),
-        child: Text(
-          "LOADING " +
-              actLoadedPages.toString() +
-              "/" +
-              Global_webList.length.toString() +
-              " pages ... ",
-          style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
-        ),
-      )));
+            margin: EdgeInsets.only(top: 20, bottom: 10),
+            child: Text(
+              "LOADING " +
+                  actLoadedPages.toString() +
+                  "/" +
+                  Global_webList.length.toString() +
+                  " pages ... ",
+              style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
+            ),
+          )));
       retVal.add(Container(
         height: 30,
         decoration: BoxDecoration(
@@ -131,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage>
               // Provide an optional curve to make the animation feel smoother.
               curve: Curves.fastOutSlowIn,
               width: ((Global_width - 20) *
-                      (actLoadedPages / Global_webList.length) +
+                  (actLoadedPages / Global_webList.length) +
                   1),
             ),
           ],
@@ -143,12 +144,73 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget pagesToTabAdds() {
     Ads newAds = Ads();
-    dynamic baner = newAds.getBaner();
+    AdmobBanner _baner = newAds.getBaner();
+
+    Widget banerWidget = Container(
+      margin: EdgeInsets.only(bottom: 20.0),
+      child: AdmobBanner(
+        adUnitId: _baner.adUnitId,
+        adSize: AdmobBannerSize.BANNER,
+        listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+          handleEvent(event, args, 'baner');
+        },
+      ),
+    );
+
     return (Container(
       margin: EdgeInsets.only(top: 0, bottom: 10),
       color: GlobalTheme.tabsColorPrimary,
-      child: baner,
+      child: banerWidget,
     ));
+  }
+
+  void showSnackBar(String content) {
+    scaffoldState.currentState.showSnackBar(SnackBar(
+      content: Text(content),
+      duration: Duration(milliseconds: 1500),
+    ));
+  }
+
+  void handleEvent(AdmobAdEvent event, Map<String, dynamic> args,
+      String adType) {
+    switch (event) {
+      case AdmobAdEvent.loaded:
+        showSnackBar('New Admob $adType Ad loaded!');
+        break;
+      case AdmobAdEvent.opened:
+        showSnackBar('Admob $adType Ad opened!');
+        break;
+      case AdmobAdEvent.closed:
+        showSnackBar('Admob $adType Ad closed!');
+        break;
+      case AdmobAdEvent.failedToLoad:
+        showSnackBar('Admob $adType failed to load. :(');
+        break;
+      case AdmobAdEvent.rewarded:
+        showDialog(
+          context: scaffoldState.currentContext,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Reward callback fired. Thanks Andrew!'),
+                    Text('Type: ${args['type']}'),
+                    Text('Amount: ${args['amount']}'),
+                  ],
+                ),
+              ),
+              onWillPop: () async {
+                scaffoldState.currentState.hideCurrentSnackBar();
+                return true;
+              },
+            );
+          },
+        );
+        break;
+      default:
+    }
   }
 
   buildTableWithPages(bool tryLoadSavedLinks) {
@@ -196,7 +258,6 @@ class _MyHomePageState extends State<MyHomePage>
     if (!tryLoadSavedLinks) {
       WebsideInfo_loadedWeb_save();
     }
-
   }
 
   List<Widget> setAddedPages() {
@@ -243,16 +304,16 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   List<Widget> setNoSavedLinksDesign() {
-    List<Widget> m_ret = new List<Widget>();
-    m_ret.add(Container(
+    List<Widget> _ret = new List<Widget>();
+    _ret.add(Container(
       height: Global_height * 0.3,
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Text("Your saved list is empty.",
           style: new TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
           textAlign: TextAlign.center),
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Icon(
         Icons.save,
         color: Colors.pink,
@@ -260,7 +321,7 @@ class _MyHomePageState extends State<MyHomePage>
         semanticLabel: 'No saved pages',
       ),
     ));
-    return m_ret;
+    return _ret;
   }
 
   Future<List<WebsideInfo>> getPageAsync(WebPortal web) async {
@@ -282,32 +343,35 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void loadFromWebs(bool append) async {
-    setState(() {
-      actLoadedPages = 0;
-      _webList = checkLoadingPagesAssert();
-      if (append == false) {
-        readedWebs.clear();
+    try {
+      setState(() {
+        actLoadedPages = 0;
+        _webList = checkLoadingPagesAssert();
+        if (append == false) {
+          readedWebs.clear();
+        }
+      });
+      Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
+      rotationController.repeat(period: Duration(milliseconds: 1000));
+      List<Future> tasks = new List<Future>();
+      for (WebPortal WEB in Global_webList) {
+        tasks.add(getPageAsync(WEB));
       }
-    });
-    Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
-    rotationController.repeat(period: Duration(milliseconds: 1000));
-    List<Future> tasks = new List<Future>();
-    for (WebPortal WEB in Global_webList) {
-      tasks.add(getPageAsync(WEB));
+
+      await Future.wait(tasks);
+      readedWebs.sort((a, b) {
+        DateTime dataA = DateTime.parse(a.DATE);
+        DateTime dataB = DateTime.parse(b.DATE);
+        if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch)
+          return 1;
+        return 0;
+      });
+
+      Global_refreshPage = true;
+      rotationController.reset();
+    } catch (ex) {
+      saveLogs.error(ex.toString());
     }
-
-    await Future.wait(tasks);
-    readedWebs.sort((a, b) {
-      DateTime dataA = DateTime.parse(a.DATE);
-      DateTime dataB = DateTime.parse(b.DATE);
-      if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
-      return 0;
-    });
-
-
-
-    Global_refreshPage = true;
-    rotationController.reset();
   }
 
   //------------------------------
@@ -320,16 +384,17 @@ class _MyHomePageState extends State<MyHomePage>
                 loadFromWebs(true);
               });
             },
-            onLongPressEnd: (time)async{
-                setState(() {
-                  loadFromWebs(false);
-                });
+            onLongPressEnd: (time) async {
+              setState(() {
+                loadFromWebs(false);
+              });
             },
             child: IconButton(
               iconSize: 30,
               padding: const EdgeInsets.all(0),
               icon: Icon(Icons.refresh),
               color: GlobalTheme.textColor,
+              onPressed: () {},
             ))));
   }
 
@@ -376,13 +441,13 @@ class _MyHomePageState extends State<MyHomePage>
             ),
             Container(
               margin:
-                  const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
+              const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
               color: GlobalTheme.tabs,
               width: 1,
             ),
             FlatButton(
               padding:
-                  const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
+              const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
               color: Colors.transparent,
               child: Row(children: <Widget>[
                 Text(
@@ -449,9 +514,9 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: renderAppBar(),
       body: Center(
           child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: _webList,
-      )),
+            padding: const EdgeInsets.all(8),
+            children: _webList,
+          )),
     );
   }
 }

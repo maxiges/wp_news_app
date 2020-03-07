@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'Utils/ColorsFunc.dart';
 import "Class/Settings.dart";
 
-
 enum ACT_PAGE { none, LOADED_PAGES, SAVED_PAGES, SETTINGS }
 
 List<WebPortal> Global_webList = new List<WebPortal>();
@@ -19,27 +18,21 @@ Timer Global_timer;
 bool Global_refreshPage = false;
 ACT_PAGE Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
 MyHomePage Global_MyHomePage = new MyHomePage(title: 'WP news APP');
-PackageInfo Global_packageInfo =PackageInfo(version: ".....",appName: "WP APP" ,buildNumber: "N/A" ,packageName: "N/A");
+PackageInfo Global_packageInfo = PackageInfo(
+    version: ".....",
+    appName: "WP APP",
+    buildNumber: "N/A",
+    packageName: "N/A");
 GoogleSign Global_GoogleSign = new GoogleSign();
 const String Global_NoImageAvater =
     "https://secure.gravatar.com/avatar/d187e7d1ad82bca50f490848dc98f1e3?s=96&d=mm&r=g";
 const String Global_NoImagePost =
     "https://icon-library.net/images/no-image-available-icon/no-image-available-icon-6.jpg";
 
-
-
 ColorsTheme GlobalTheme = GlobalThemeDart;
 Settings Global_Settings = new Settings();
 
-
-
-
-LoadFromStorage() async {
+loadFromStorage() async {
   Global_webList = await WebPortal_loadWebs();
   Global_savedWebsList = await WebsideInfo_load();
 }
-
-
-
-
-

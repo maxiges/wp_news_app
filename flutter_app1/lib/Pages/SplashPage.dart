@@ -9,7 +9,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/foundation.dart';
 import '../Utils/SaveLogs.dart';
 
-
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key}) : super(key: key);
 
@@ -67,7 +66,6 @@ class _SplashScreen extends State<SplashScreen>
   }
 
   setVrtsionApp() async {
-
     Global_packageInfo = await PackageInfo.fromPlatform();
   }
 
@@ -78,8 +76,7 @@ class _SplashScreen extends State<SplashScreen>
       try {
         Global_GoogleSign.tryLogInbyGoogle(context);
       } catch (ex) {
-        saveLogs.write(ex);
-        assert(ex);
+        saveLogs.error(ex);
         setState(() {
           _tryLoadGoogleAcc = false;
         });
@@ -165,9 +162,9 @@ class _SplashScreen extends State<SplashScreen>
               if (Global_GoogleSign.googleUserIsSignIn() == true) {
                 await Global_GoogleSign.signOutGoogle(context);
               }
-              await LoadFromStorage();
+              await loadFromStorage();
               _timerStop();
-              await Navigator.of(context).pushNamed('/mainScreen');
+              await Navigator.of(context).pushReplacementNamed('/mainScreen');
             },
             child: Row(
               children: <Widget>[
@@ -240,9 +237,9 @@ class _SplashScreen extends State<SplashScreen>
               if (Global_GoogleSign.googleUserIsSignIn() == true) {
                 await Global_GoogleSign.signOutGoogle(context);
               }
-              await LoadFromStorage();
+              await loadFromStorage();
               _timerStop();
-              await Navigator.of(context).pushNamed('/mainScreen');
+              await Navigator.of(context).pushReplacementNamed('/mainScreen');
             },
             color: Colors.orange,
             child: Row(
@@ -283,19 +280,17 @@ class _SplashScreen extends State<SplashScreen>
     }
 
     Widget _kinderGardenBut = Container();
-    if(!kReleaseMode){
+    if (!kReleaseMode) {
       _kinderGardenBut = Container(
         child: FlatButton(
           color: Colors.lightGreen,
-          onPressed: (){
+          onPressed: () {
             Navigator.of(context).pushNamed('/kinderGarden');
           },
           child: Text("Press go to KinderGarden "),
         ),
-
       );
     }
-
 
     return Scaffold(
       backgroundColor: GlobalTheme.background,
@@ -329,9 +324,7 @@ class _SplashScreen extends State<SplashScreen>
                 ],
               ),
             ),
-
-            Container( child:_kinderGardenBut),
-
+            Container(child: _kinderGardenBut),
             Align(
                 child: Container(
               child: Text(

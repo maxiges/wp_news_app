@@ -11,7 +11,7 @@ description: App for collecting new article in wordpress platforms.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.14+1
+version: 1.0.16+1
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -38,7 +38,7 @@ dependencies:
   font_awesome_flutter: ^8.5.0
   flutter_local_notifications_extended: ^0.9.1
   firebase_admob: ^0.9.0+9
-  admob_flutter: ^0.3.4
+  admob_flutter: ^1.0.0-beta
   flutter_picker: ^1.1.0
   path_provider: ^1.4.2
 

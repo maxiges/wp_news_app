@@ -1,15 +1,8 @@
 import 'package:WP_news_APP/Utils/ColorsFunc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'dart:async';
-import 'package:flutter_slidable/flutter_slidable.dart';
+
 import '../Globals.dart';
-import '../Dialogs/YesNoDialog.dart';
-import '../Dialogs/SettingAddPage.dart';
-import '../Class/WebPortal.dart';
-import '../Dialogs/AbautInfo.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import "../Utils/SaveLogs.dart";
 
 class LogPage extends StatefulWidget {
@@ -20,7 +13,7 @@ class LogPage extends StatefulWidget {
 }
 
 class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
-  String _ActReadedLog = "";
+  String _actReadedLog = "";
 
   @override
   void initState() {
@@ -29,9 +22,9 @@ class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
   }
 
   logData() async {
-    _ActReadedLog = await saveLogs.read();
+    _actReadedLog = await saveLogs.read();
     setState(() {
-      _ActReadedLog += "\r\n";
+      _actReadedLog += "\r\n";
     });
   }
 
@@ -77,7 +70,7 @@ class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
           ],
         ),
         body: Text(
-          _ActReadedLog,
+          _actReadedLog,
           style: TextStyle(color: GlobalTheme.textColor),
         ));
   }

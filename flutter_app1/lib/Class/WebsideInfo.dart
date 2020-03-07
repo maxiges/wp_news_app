@@ -14,8 +14,6 @@ import '../Utils/SaveLogs.dart';
 
 List<WebsideInfo> readedWebs = new List<WebsideInfo>();
 
-
-
 class WebsideInfo {
   String URL = "",
       TITTLE = "",
@@ -55,8 +53,6 @@ class WebsideInfo {
       actColor = Colors.black;
     }
     return Color_getColorText(actColor);
-
-
   }
 
   tryParseJson(String jsonString) {
@@ -140,9 +136,6 @@ class WebsideInfo {
       throw 'Could not launch $URL';
     }
   }
-
-
-
 } //class
 
 Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
@@ -205,8 +198,6 @@ Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
   return websCheckList;
 }
 
-
-
 void _saveDataToFirebase(String data) async {
   try {
     final databaseReference = Firestore.instance;
@@ -239,7 +230,7 @@ Future<List<String>> _loadDataFromFirebase() async {
 
     return list;
   } catch (ex) {
-    saveLogs.write(ex);
+    saveLogs.error(ex);
   }
 }
 
@@ -282,7 +273,7 @@ Future<List<WebsideInfo>> WebsideInfo_load() async {
       }
     }
   } catch (ex) {
-    saveLogs.write(ex.toString());
+    saveLogs.error(ex.toString());
   }
 
   return readWebs;
@@ -299,9 +290,6 @@ int savedFileContainsThisWebside(WebsideInfo act) {
   return -1;
 }
 
-
-
-
 Future<bool> WebsideInfo_loadedWeb_save() async {
   List<String> ObjSave = new List<String>();
   for (WebsideInfo objectVal in readedWebs) {
@@ -312,7 +300,6 @@ Future<bool> WebsideInfo_loadedWeb_save() async {
   return prefs.setStringList("SavePages", ObjSave);
 }
 
-
 Future<bool> WebsideInfo_loadedWeb_load() async {
   List<WebsideInfo> readWebs = new List<WebsideInfo>();
   List<String> loadedWebs = new List<String>();
@@ -322,16 +309,22 @@ Future<bool> WebsideInfo_loadedWeb_load() async {
     for (String JsonString in loadedWebs) {
       WebsideInfo newSavedPage = new WebsideInfo();
       newSavedPage.tryParseJson(JsonString);
-       bool tooOld = DateTime.parse(newSavedPage.DATE).isBefore(DateTime.now().subtract(Duration(days: 2)));
-      if (newSavedPage.TITTLE.length > 0 && tooOld==false) {
+      bool tooOld = DateTime.parse(newSavedPage.DATE)
+          .isBefore(DateTime.now().subtract(Duration(days: 2)));
+      if (newSavedPage.TITTLE.length > 0 && tooOld == false) {
         readWebs.add(newSavedPage);
       }
     }
 
+    readWebs.sort((a, b) {
+      DateTime dataA = DateTime.parse(a.DATE);
+      DateTime dataB = DateTime.parse(b.DATE);
+      if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
+      return 0;
+    });
+
     readedWebs = readWebs;
   } catch (ex) {
-    saveLogs.write(ex.toString());
+    saveLogs.error(ex.toString());
   }
-
-
 }

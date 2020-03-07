@@ -44,8 +44,7 @@ class GoogleSign {
         return user;
       }
     } catch (ex) {
-      saveLogs.write(ex);
-      assert(ex);
+      saveLogs.error(ex);
     }
     return null;
   }
@@ -53,13 +52,12 @@ class GoogleSign {
   Future<void> tryLogInbyGoogle(context) async {
     try {
       _googleUser = await signInWithGoogle();
-      await LoadFromStorage();
+      await loadFromStorage();
       await saveActLoginStat(true);
 
-      await Navigator.of(context).pushNamed('/mainScreen');
+      await Navigator.of(context).pushReplacementNamed('/mainScreen');
     } catch (ex) {
-      saveLogs.write(ex);
-      assert(ex);
+      saveLogs.error(ex);
       saveActLoginStat(false);
       Toast.show("Please sign in or login like guest", context,
           duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
@@ -75,9 +73,9 @@ class GoogleSign {
       while (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
+      Navigator.of(context).popAndPushNamed("/splashScreen");
     } catch (ex) {
-      saveLogs.write(ex);
-      assert(ex);
+      saveLogs.error(ex);
     }
   }
 

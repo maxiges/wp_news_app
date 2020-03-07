@@ -9,7 +9,6 @@ import '../Dialogs/SettingAddPage.dart';
 import '../Class/WebPortal.dart';
 import '../Dialogs/AbautInfo.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import "../Utils/Ads.dart";
 
 class SettingPage extends StatefulWidget {
@@ -58,7 +57,7 @@ class _SettingPage extends State<SettingPage>
   }
 
   void editPage(WebPortal web) async {
-    bool istrue = await SettingAddPage_ShowDialog(web, this.context);
+    bool istrue = await settingAddPageShowDialog(web, this.context);
   }
 
   Widget websList() {
@@ -171,8 +170,7 @@ class _SettingPage extends State<SettingPage>
     }
   }
 
-
-  Widget SeeLogs() {
+  Widget seeLogs() {
     return Center(
         child: Container(
           width: 300,
@@ -212,18 +210,17 @@ class _SettingPage extends State<SettingPage>
         ));
   }
 
-
   Widget labelAddButtonPage() {
     return (new GestureDetector(
-      onTap: () async {
-        bool ischanget = await SettingAddPage_ShowDialog(
-            new WebPortal("", ""), this.context);
+      onTapDown: (e) async {
+        bool ischanget =
+        await settingAddPageShowDialog(new WebPortal("", ""), this.context);
         setState(() {
           websList();
         });
       },
       child: Align(
-        alignment: Alignment.topRight,
+        alignment: Alignment.center,
         child: Container(
           width: 40,
           height: 40,
@@ -237,6 +234,7 @@ class _SettingPage extends State<SettingPage>
             focusColor: Colors.red,
             hoverColor: Colors.orange,
             icon: Icon(Icons.add),
+            onPressed: () {},
           ),
         ),
       ),
@@ -378,7 +376,7 @@ class _SettingPage extends State<SettingPage>
         websList(),
         darkLightModeUi(),
         addsOnUi(),
-        SeeLogs(),
+        seeLogs(),
         signOutGoogle(),
         Container(
           height: 120,

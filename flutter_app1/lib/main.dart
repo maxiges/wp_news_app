@@ -11,15 +11,14 @@ import "Utils/SaveLogs.dart";
 
 MyApp app = MyApp();
 void main() => runApp(app);
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
 
   @override
   Widget build(BuildContext context) {
     try {
-      saveLogs.logIsExist();
       Global_Settings.loadData();
-
       SystemChrome.setEnabledSystemUIOverlays([]); //disable
       //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);//enable
       return MaterialApp(
@@ -32,12 +31,11 @@ class MyApp extends StatelessWidget {
           '/moreInfo': (BuildContext context) => new ShowMoreInfo(),
           '/kinderGarden': (BuildContext context) => new KinderGarden(),
           '/logScreen': (BuildContext context) => new LogPage(),
+          '/splashScreen': (BuildContext context) => new SplashScreen(),
         },
       );
+    } catch (ex) {
+      saveLogs.error(ex);
     }
-    catch (ex) {
-      saveLogs.write(ex);
-    }
-
   }
 }

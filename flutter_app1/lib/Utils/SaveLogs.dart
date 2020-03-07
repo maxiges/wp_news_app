@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 SaveLogs saveLogs = new SaveLogs();
@@ -15,38 +13,43 @@ class SaveLogs {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/logs.txt');
+    File data = File('$path/logs.txt');
+    if (!await data.exists()) {
+      data.create();
+    }
+    return data;
   }
 
-  Future<File> write(String data) async {
-    final file = await _localFile;
-    var now = new DateTime.now();
-    data = now.toString() + "   :  " + data + "  \r\n";
-    File saved = await file.writeAsString(data, mode: FileMode.append);
-    print("[ERROR🔥]"+data);
-    // Write the file.
-    return saved;
+  Future<File> info(String data) async {
+    print("[Info ]" + data + "\r\n");
+  }
+
+  error(String data) async {
+    print("[Error ⚠ ]" + data + "\r\n");
+    this._write("[Error ⚠ ]" + data + "\r\n");
+  }
+
+  _write(String data) async {
+    try {
+      final file = await _localFile;
+      var now = new DateTime.now();
+      data = now.toString() + "   :  " + data + "  \r\n";
+      await file.writeAsString(data, mode: FileMode.append);
+    } catch (ex) {
+      print("[Error ERROR ⚠ ]" + ex.toString() + "\r\n");
+    }
   }
 
   Future<String> read() async {
     try {
       final file = await _localFile;
-
       // Read the file.
       String contents = await file.readAsString();
-
       return contents;
     } catch (e) {
       return new DateTime.now().toString() +
           "Read log file error" +
           e.toString();
-    }
-  }
-
-  logIsExist() async {
-    final file = await _localFile;
-    if (await file.exists() == false) {
-      file.create();
     }
   }
 
