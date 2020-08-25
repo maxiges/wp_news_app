@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-
+import 'dart:developer';
+import 'dart:core';
 import 'package:path_provider/path_provider.dart';
 
 SaveLogs saveLogs = new SaveLogs();
@@ -21,12 +22,15 @@ class SaveLogs {
   }
 
   Future<File> info(String data) async {
-    print("[Info ]" + data + "\r\n");
+    log("[Info ]" + data + "\r\n");
   }
 
   error(String data) async {
-    print("[Error ⚠ ]" + data + "\r\n");
-    this._write("[Error ⚠ ]" + data + "\r\n");
+    var stack = StackTrace.current;
+    var stackString = "$stack";
+    List<String> stackList = stackString.split('\n');
+    log("[Error ⚠ ]" + "\r\n" + data + "\r\n" + stackString);
+    this._write("[Error ⚠ ]" + "\r\n" + data + "\r\n" + stackList[1] + "\r\n");
   }
 
   _write(String data) async {
@@ -36,7 +40,7 @@ class SaveLogs {
       data = now.toString() + "   :  " + data + "  \r\n";
       await file.writeAsString(data, mode: FileMode.append);
     } catch (ex) {
-      print("[Error ERROR ⚠ ]" + ex.toString() + "\r\n");
+      log("[Error ERROR ⚠ ]" + "\r\n" + ex.toString() + "\r\n");
     }
   }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -144,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget pagesToTabAdds() {
     Ads newAds = Ads();
-    AdmobBanner _baner = newAds.getBaner();
+    BannerAd _baner = newAds.getBaner();
 
     Widget banerWidget = Container(
       margin: EdgeInsets.only(bottom: 20.0),
@@ -325,8 +327,8 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   Future<List<WebsideInfo>> getPageAsync(WebPortal web) async {
-    List<WebsideInfo> retval = await WebsideInfo_GetWebInfos(web);
-    for (WebsideInfo webs in retval) {
+    List<WebsideInfo> retVal = await WebsideInfo_GetWebInfos(web);
+    for (WebsideInfo webs in retVal) {
       bool add = true;
       for (WebsideInfo loaded in readedWebs) {
         if (loaded.URL == webs.URL) add = false;
@@ -339,7 +341,7 @@ class _MyHomePageState extends State<MyHomePage>
       actLoadedPages++;
       _webList = checkLoadingPagesAssert();
     });
-    return retval;
+    return retVal;
   }
 
   void loadFromWebs(bool append) async {
@@ -359,11 +361,26 @@ class _MyHomePageState extends State<MyHomePage>
       }
 
       await Future.wait(tasks);
+      await Future.wait(tasks);
+      for (var i = 0; i < 10; i++) {
+        int l1 = readedWebs
+            .toSet()
+            .length;
+        sleep(const Duration(milliseconds: 250));
+        int l2 = readedWebs
+            .toSet()
+            .length;
+        if (l1 == l2) {
+          break;
+        }
+      }
+
       readedWebs.sort((a, b) {
         DateTime dataA = DateTime.parse(a.DATE);
         DateTime dataB = DateTime.parse(b.DATE);
-        if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch)
+        if (dataB.microsecondsSinceEpoch > dataA.microsecondsSinceEpoch) {
           return 1;
+        }
         return 0;
       });
 

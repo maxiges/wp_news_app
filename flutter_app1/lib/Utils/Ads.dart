@@ -58,11 +58,11 @@ class Ads {
     }
   }
 
-  AdmobBanner getBaner() {
+  BannerAd getBaner() {
     try {
-      return (AdmobBanner(
+      return (BannerAd(
         adUnitId: getBannerAdUnitId(),
-        adSize: AdmobBannerSize.BANNER,
+        size: AdSize.banner,
       ));
     } catch (ex) {
       saveLogs.error(ex.toString());

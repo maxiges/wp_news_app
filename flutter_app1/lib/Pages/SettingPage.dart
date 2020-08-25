@@ -213,8 +213,7 @@ class _SettingPage extends State<SettingPage>
   Widget labelAddButtonPage() {
     return (new GestureDetector(
       onTapDown: (e) async {
-        bool ischanget =
-        await settingAddPageShowDialog(new WebPortal("", ""), this.context);
+        settingAddPageShowDialog(new WebPortal("", ""), this.context);
         setState(() {
           websList();
         });
