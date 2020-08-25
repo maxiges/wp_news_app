@@ -1,17 +1,7 @@
-import 'package:WP_news_APP/Utils/ColorsFunc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'dart:async';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import '../Globals.dart';
-import '../Dialogs/YesNoDialog.dart';
-import '../Dialogs/SettingAddPage.dart';
-import '../Class/WebPortal.dart';
-import '../Dialogs/AbautInfo.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:admob_flutter/admob_flutter.dart';
-import 'dart:io';
+
+import '../Utils/SaveLogs.dart';
 
 class Ads {
   MobileAdTargetingInfo targetingInfo;
@@ -55,18 +45,28 @@ class Ads {
   }
 
   showBaner() {
-    FirebaseAdMob.instance.initialize(appId: getAppAdUnitId()).then((response) {
-      myBanner
-        ..load()
-        ..show();
-    });
+    try {
+      FirebaseAdMob.instance
+          .initialize(appId: getAppAdUnitId())
+          .then((response) {
+        myBanner
+          ..load()
+          ..show();
+      });
+    } catch (ex) {
+      saveLogs.error(ex.toString());
+    }
   }
 
-  Widget getBaner() {
-    return (AdmobBanner(
-      adUnitId: getBannerAdUnitId(),
-      adSize: AdmobBannerSize.BANNER,
-    ));
+  BannerAd getBaner() {
+    try {
+      return (BannerAd(
+        adUnitId: getBannerAdUnitId(),
+        size: AdSize.banner,
+      ));
+    } catch (ex) {
+      saveLogs.error(ex.toString());
+    }
   }
 
   hideBaner() {
@@ -78,20 +78,10 @@ class Ads {
   }
 
   String getAppAdUnitId() {
-    if (Platform.isIOS) {
-      return 'ca-app-pub-2632418691113458~9011907820';
-    } else if (Platform.isAndroid) {
-      return 'ca-app-pub-2632418691113458~9011907820';
-    }
-    return null;
+    return 'ca-app-pub-2632418691113458~9011907820';
   }
 
   String getBannerAdUnitId() {
-    if (Platform.isIOS) {
-      return 'ca-app-pub-2632418691113458/1133417803';
-    } else if (Platform.isAndroid) {
-      return 'ca-app-pub-2632418691113458/1133417803';
-    }
-    return null;
+    return 'ca-app-pub-2632418691113458/1133417803';
   }
 }

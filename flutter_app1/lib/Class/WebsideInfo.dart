@@ -10,7 +10,9 @@ import 'WebPortal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/StringUtils.dart';
+import '../Utils/SaveLogs.dart';
 
+List<WebsideInfo> readedWebs = new List<WebsideInfo>();
 
 class WebsideInfo {
   String URL = "",
@@ -51,8 +53,6 @@ class WebsideInfo {
       actColor = Colors.black;
     }
     return Color_getColorText(actColor);
-
-
   }
 
   tryParseJson(String jsonString) {
@@ -136,9 +136,6 @@ class WebsideInfo {
       throw 'Could not launch $URL';
     }
   }
-
-
-
 } //class
 
 Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
@@ -201,8 +198,6 @@ Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
   return websCheckList;
 }
 
-
-
 void _saveDataToFirebase(String data) async {
   try {
     final databaseReference = Firestore.instance;
@@ -235,7 +230,7 @@ Future<List<String>> _loadDataFromFirebase() async {
 
     return list;
   } catch (ex) {
-    assert(ex);
+    saveLogs.error(ex);
   }
 }
 
@@ -278,7 +273,7 @@ Future<List<WebsideInfo>> WebsideInfo_load() async {
       }
     }
   } catch (ex) {
-    print(ex.toString());
+    saveLogs.error(ex.toString());
   }
 
   return readWebs;
@@ -293,4 +288,43 @@ int savedFileContainsThisWebside(WebsideInfo act) {
     i++;
   }
   return -1;
+}
+
+Future<bool> WebsideInfo_loadedWeb_save() async {
+  List<String> ObjSave = new List<String>();
+  for (WebsideInfo objectVal in readedWebs) {
+    ObjSave.add(objectVal.toJson());
+  }
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove("SavePages");
+  return prefs.setStringList("SavePages", ObjSave);
+}
+
+Future<bool> WebsideInfo_loadedWeb_load() async {
+  List<WebsideInfo> readWebs = new List<WebsideInfo>();
+  List<String> loadedWebs = new List<String>();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  loadedWebs = prefs.getStringList("SavePages");
+  try {
+    for (String JsonString in loadedWebs) {
+      WebsideInfo newSavedPage = new WebsideInfo();
+      newSavedPage.tryParseJson(JsonString);
+      bool tooOld = DateTime.parse(newSavedPage.DATE)
+          .isBefore(DateTime.now().subtract(Duration(days: 2)));
+      if (newSavedPage.TITTLE.length > 0 && tooOld == false) {
+        readWebs.add(newSavedPage);
+      }
+    }
+
+    readWebs.sort((a, b) {
+      DateTime dataA = DateTime.parse(a.DATE);
+      DateTime dataB = DateTime.parse(b.DATE);
+      if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
+      return 0;
+    });
+
+    readedWebs = readWebs;
+  } catch (ex) {
+    saveLogs.error(ex.toString());
+  }
 }

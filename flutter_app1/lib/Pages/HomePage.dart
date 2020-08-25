@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
@@ -9,6 +12,8 @@ import 'dart:math';
 import '../Utils/Ads.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import '../Utils/WebFilter.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:admob_flutter/admob_flutter.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -23,13 +28,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   var isPortrait = true;
-  List<WebsideInfo> _readedWebs = new List<WebsideInfo>();
+
   List<Widget> _webList = new List<Widget>();
   bool isOpendeSavedList = false;
   bool appStarted = false;
   AnimationController rotationController;
   int actLoadedPages = 0;
   Icon _actIcon = new Icon(Icons.storage);
+
+  GlobalKey<ScaffoldState> scaffoldState = GlobalKey();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -92,16 +99,16 @@ class _MyHomePageState extends State<MyHomePage>
     } else {
       retVal.add(new Center(
           child: Container(
-        margin: EdgeInsets.only(top: 20, bottom: 10),
-        child: Text(
-          "LOADING " +
-              actLoadedPages.toString() +
-              "/" +
-              Global_webList.length.toString() +
-              " pages ... ",
-          style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
-        ),
-      )));
+            margin: EdgeInsets.only(top: 20, bottom: 10),
+            child: Text(
+              "LOADING " +
+                  actLoadedPages.toString() +
+                  "/" +
+                  Global_webList.length.toString() +
+                  " pages ... ",
+              style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
+            ),
+          )));
       retVal.add(Container(
         height: 30,
         decoration: BoxDecoration(
@@ -127,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage>
               // Provide an optional curve to make the animation feel smoother.
               curve: Curves.fastOutSlowIn,
               width: ((Global_width - 20) *
-                      (actLoadedPages / Global_webList.length) +
+                  (actLoadedPages / Global_webList.length) +
                   1),
             ),
           ],
@@ -139,12 +146,73 @@ class _MyHomePageState extends State<MyHomePage>
 
   Widget pagesToTabAdds() {
     Ads newAds = Ads();
-    dynamic baner = newAds.getBaner();
+    BannerAd _baner = newAds.getBaner();
+
+    Widget banerWidget = Container(
+      margin: EdgeInsets.only(bottom: 20.0),
+      child: AdmobBanner(
+        adUnitId: _baner.adUnitId,
+        adSize: AdmobBannerSize.BANNER,
+        listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+          handleEvent(event, args, 'baner');
+        },
+      ),
+    );
+
     return (Container(
       margin: EdgeInsets.only(top: 0, bottom: 10),
       color: GlobalTheme.tabsColorPrimary,
-      child: baner,
+      child: banerWidget,
     ));
+  }
+
+  void showSnackBar(String content) {
+    scaffoldState.currentState.showSnackBar(SnackBar(
+      content: Text(content),
+      duration: Duration(milliseconds: 1500),
+    ));
+  }
+
+  void handleEvent(AdmobAdEvent event, Map<String, dynamic> args,
+      String adType) {
+    switch (event) {
+      case AdmobAdEvent.loaded:
+        showSnackBar('New Admob $adType Ad loaded!');
+        break;
+      case AdmobAdEvent.opened:
+        showSnackBar('Admob $adType Ad opened!');
+        break;
+      case AdmobAdEvent.closed:
+        showSnackBar('Admob $adType Ad closed!');
+        break;
+      case AdmobAdEvent.failedToLoad:
+        showSnackBar('Admob $adType failed to load. :(');
+        break;
+      case AdmobAdEvent.rewarded:
+        showDialog(
+          context: scaffoldState.currentContext,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Reward callback fired. Thanks Andrew!'),
+                    Text('Type: ${args['type']}'),
+                    Text('Amount: ${args['amount']}'),
+                  ],
+                ),
+              ),
+              onWillPop: () async {
+                scaffoldState.currentState.hideCurrentSnackBar();
+                return true;
+              },
+            );
+          },
+        );
+        break;
+      default:
+    }
   }
 
   buildTableWithPages(bool tryLoadSavedLinks) {
@@ -155,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage>
       websideInfoLoaded = Global_savedWebsList;
     } else {
       _actIcon = new Icon(Icons.sd_storage);
-      websideInfoLoaded = _readedWebs;
+      websideInfoLoaded = readedWebs;
     }
 
     List<Widget> wid = new List<Widget>();
@@ -188,6 +256,10 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {
       _webList = wid;
     });
+
+    if (!tryLoadSavedLinks) {
+      WebsideInfo_loadedWeb_save();
+    }
   }
 
   List<Widget> setAddedPages() {
@@ -234,16 +306,16 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   List<Widget> setNoSavedLinksDesign() {
-    List<Widget> m_ret = new List<Widget>();
-    m_ret.add(Container(
+    List<Widget> _ret = new List<Widget>();
+    _ret.add(Container(
       height: Global_height * 0.3,
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Text("Your saved list is empty.",
           style: new TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
           textAlign: TextAlign.center),
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Icon(
         Icons.save,
         color: Colors.pink,
@@ -251,60 +323,96 @@ class _MyHomePageState extends State<MyHomePage>
         semanticLabel: 'No saved pages',
       ),
     ));
-    return m_ret;
+    return _ret;
   }
 
   Future<List<WebsideInfo>> getPageAsync(WebPortal web) async {
-    List<WebsideInfo> retval = await WebsideInfo_GetWebInfos(web);
-    for (WebsideInfo webs in retval) {
-      _readedWebs.add(webs);
+    List<WebsideInfo> retVal = await WebsideInfo_GetWebInfos(web);
+    for (WebsideInfo webs in retVal) {
+      bool add = true;
+      for (WebsideInfo loaded in readedWebs) {
+        if (loaded.URL == webs.URL) add = false;
+      }
+      if (add) {
+        readedWebs.add(webs);
+      }
     }
     setState(() {
       actLoadedPages++;
       _webList = checkLoadingPagesAssert();
     });
-    return retval;
+    return retVal;
   }
 
-  void loadFromWebs() async {
-    setState(() {
-      actLoadedPages = 0;
-      _webList = checkLoadingPagesAssert();
-      _readedWebs.clear();
-    });
-    Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
-    rotationController.repeat(period: Duration(milliseconds: 1000));
-    List<Future> tasks = new List<Future>();
-    for (WebPortal WEB in Global_webList) {
-      tasks.add(getPageAsync(WEB));
+  void loadFromWebs(bool append) async {
+    try {
+      setState(() {
+        actLoadedPages = 0;
+        _webList = checkLoadingPagesAssert();
+        if (append == false) {
+          readedWebs.clear();
+        }
+      });
+      Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
+      rotationController.repeat(period: Duration(milliseconds: 1000));
+      List<Future> tasks = new List<Future>();
+      for (WebPortal WEB in Global_webList) {
+        tasks.add(getPageAsync(WEB));
+      }
+
+      await Future.wait(tasks);
+      await Future.wait(tasks);
+      for (var i = 0; i < 10; i++) {
+        int l1 = readedWebs
+            .toSet()
+            .length;
+        sleep(const Duration(milliseconds: 250));
+        int l2 = readedWebs
+            .toSet()
+            .length;
+        if (l1 == l2) {
+          break;
+        }
+      }
+
+      readedWebs.sort((a, b) {
+        DateTime dataA = DateTime.parse(a.DATE);
+        DateTime dataB = DateTime.parse(b.DATE);
+        if (dataB.microsecondsSinceEpoch > dataA.microsecondsSinceEpoch) {
+          return 1;
+        }
+        return 0;
+      });
+
+      Global_refreshPage = true;
+      rotationController.reset();
+    } catch (ex) {
+      saveLogs.error(ex.toString());
     }
-
-    await Future.wait(tasks);
-    _readedWebs.sort((a, b) {
-      DateTime dataA = DateTime.parse(a.DATE);
-      DateTime dataB = DateTime.parse(b.DATE);
-      if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
-      return 0;
-    });
-
-    Global_refreshPage = true;
-    rotationController.reset();
   }
 
   //------------------------------
   Widget refresh() {
     return (RotationTransition(
         turns: Tween(begin: 0.0, end: 1.0).animate(rotationController),
-        child: IconButton(
-          iconSize: 30,
-          padding: const EdgeInsets.all(0),
-          onPressed: () async {
-            setState(() {
-              loadFromWebs();
-            });
-          },
-          icon: Icon(Icons.refresh),
-        )));
+        child: GestureDetector(
+            onTap: () async {
+              setState(() {
+                loadFromWebs(true);
+              });
+            },
+            onLongPressEnd: (time) async {
+              setState(() {
+                loadFromWebs(false);
+              });
+            },
+            child: IconButton(
+              iconSize: 30,
+              padding: const EdgeInsets.all(0),
+              icon: Icon(Icons.refresh),
+              color: GlobalTheme.textColor,
+              onPressed: () {},
+            ))));
   }
 
   showPicker(BuildContext context) {
@@ -409,9 +517,10 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     try {
       if (!appStarted) {
+        WebsideInfo_loadedWeb_load();
         Global_width = MediaQuery.of(context).size.width;
         Global_height = MediaQuery.of(context).size.height;
-        loadFromWebs();
+        loadFromWebs(true);
         appStarted = true;
       }
     } catch (ex) {}

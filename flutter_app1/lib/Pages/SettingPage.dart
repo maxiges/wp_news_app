@@ -9,7 +9,6 @@ import '../Dialogs/SettingAddPage.dart';
 import '../Class/WebPortal.dart';
 import '../Dialogs/AbautInfo.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import "../Utils/Ads.dart";
 
 class SettingPage extends StatefulWidget {
@@ -58,7 +57,7 @@ class _SettingPage extends State<SettingPage>
   }
 
   void editPage(WebPortal web) async {
-    bool istrue = await SettingAddPage_ShowDialog(web, this.context);
+    bool istrue = await settingAddPageShowDialog(web, this.context);
   }
 
   Widget websList() {
@@ -171,17 +170,56 @@ class _SettingPage extends State<SettingPage>
     }
   }
 
+  Widget seeLogs() {
+    return Center(
+        child: Container(
+          width: 300,
+          margin: EdgeInsets.only(
+              top: 30,
+              bottom: 10,
+              left: marginRightLeft,
+              right: marginRightLeft),
+          decoration: new BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: new BorderRadius.all(Radius.circular(30)),
+          ),
+          child: FlatButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed("/logScreen");
+            },
+            child: Row(
+              // Repl
+              mainAxisAlignment: MainAxisAlignment.center,
+              // ace with a Row for horizontal icon + text
+              children: <Widget>[
+                Icon(FontAwesomeIcons.phoneAlt,
+                    color: Color_getColorText(Colors.redAccent)),
+                Container(
+                  width: 5,
+                ),
+                Flexible(
+                    child: Text(
+                      "Show Logs",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Color_getColorText(Colors.redAccent)),
+                    )),
+              ],
+            ),
+          ),
+        ));
+  }
+
   Widget labelAddButtonPage() {
     return (new GestureDetector(
-      onTap: () async {
-        bool ischanget = await SettingAddPage_ShowDialog(
-            new WebPortal("", ""), this.context);
+      onTapDown: (e) async {
+        settingAddPageShowDialog(new WebPortal("", ""), this.context);
         setState(() {
           websList();
         });
       },
       child: Align(
-        alignment: Alignment.topRight,
+        alignment: Alignment.center,
         child: Container(
           width: 40,
           height: 40,
@@ -195,6 +233,7 @@ class _SettingPage extends State<SettingPage>
             focusColor: Colors.red,
             hoverColor: Colors.orange,
             icon: Icon(Icons.add),
+            onPressed: () {},
           ),
         ),
       ),
@@ -336,6 +375,7 @@ class _SettingPage extends State<SettingPage>
         websList(),
         darkLightModeUi(),
         addsOnUi(),
+        seeLogs(),
         signOutGoogle(),
         Container(
           height: 120,

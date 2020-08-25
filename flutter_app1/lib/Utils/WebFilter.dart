@@ -35,7 +35,9 @@ class WebFilter {
         PickerItem(
             text: Text(
               act.url,
-              style: TextStyle(color: GlobalTheme.textColor),
+              style: TextStyle(color: GlobalTheme.textColor, fontSize: 18),
+              overflow: TextOverflow.fade,
+              softWrap: false,
             ),
             value: act.url),
       );
