@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
-import '../Class/WebsideInfo.dart';
+import '../Class/WebsiteInfo.dart';
 import '../Globals.dart';
 import '../Elements/PagesToTab.dart';
 import '../Class/WebPortal.dart';

@@ -2,7 +2,7 @@ import 'package:WP_news_APP/Globals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../Class/WebsideInfo.dart';
+import '../Class/WebsiteInfo.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Class/PageComments.dart';
@@ -17,7 +17,7 @@ class ShowMoreInfo extends StatefulWidget {
 
 class _ShowMoreInfo extends State<ShowMoreInfo>
     with SingleTickerProviderStateMixin {
-  WebsideInfo WebInfo;
+  WebsiteInfo WebInfo;
   bool _init = true;
 
   double _width = 100.0, _height = 100.0;
@@ -32,7 +32,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     super.initState();
   }
 
-  _getMoreInfo(WebsideInfo web) async {
+  _getMoreInfo(WebsiteInfo web) async {
     try {
       String url =
           "https://" + web.DOMAIN + "/wp-json/wp/v2/comments?post=" + web.ID;
@@ -116,11 +116,8 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
       _widthAvatar = 100;
     }
 
-    dynamic ret = Icon(
-      FontAwesomeIcons.chevronRight,
-      size: 14,
-        color: GlobalTheme.textColor
-    );
+    dynamic ret = Icon(FontAwesomeIcons.chevronRight,
+        size: 14, color: GlobalTheme.textColor);
 
     if (margin == 0) {
       ret = Container();
@@ -154,14 +151,17 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
                 child: SelectableText(
                   comment.AUTHOR,
                   textAlign: TextAlign.center,
-                  style: TextStyle( color: GlobalTheme.textColor),
+                  style: TextStyle(color: GlobalTheme.textColor),
                 ),
               )
             ]),
           ),
           Container(
             child: Flexible(
-              child: SelectableText(comment.POST , style: TextStyle(color: GlobalTheme.textColor),),
+              child: SelectableText(
+                comment.POST,
+                style: TextStyle(color: GlobalTheme.textColor),
+              ),
             ),
           )
         ],
@@ -169,7 +169,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     ));
   }
 
-  Widget _Top(WebsideInfo webInfo, BuildContext context) {
+  Widget _Top(WebsiteInfo webInfo, BuildContext context) {
     if (_width < 600) {
       return (Column(
         children: <Widget>[
@@ -193,7 +193,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
               webInfo.TITTLE,
-              style: TextStyle(fontSize: 20 , color: GlobalTheme.textColor),
+              style: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
             ),
           ),
         ],
@@ -207,10 +207,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             child: Text(
               webInfo.TITTLE,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                  color: GlobalTheme.textColor
-              ),
+              style: TextStyle(fontSize: 22, color: GlobalTheme.textColor),
             ),
           ),
           Center(
@@ -277,7 +274,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     return renderedList;
   }
 
-  Widget showMoreInfoTable(WebsideInfo webInfo, BuildContext context) {
+  Widget showMoreInfoTable(WebsiteInfo webInfo, BuildContext context) {
     String _tabComments = "";
     if (_commentList.length > 0) {
       _tabComments = "Coments";
@@ -291,7 +288,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
               webInfo.DESCRIPTION + " ...",
-              style: TextStyle(fontSize: 14 , color: GlobalTheme.textColor),
+              style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
             ),
           ),
           Align(
@@ -300,7 +297,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               children: <Widget>[
                 Text(
                   commentsCounter,
-                  style: TextStyle(fontSize: 20 , color: GlobalTheme.textColor),
+                  style: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
                 ),
                 Container(
                   width: 10,
@@ -326,7 +323,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   }
 
   checkThisPageIsSaved() {
-    if (savedFileContainsThisWebside(WebInfo) >= 0) {
+    if (savedFileContainsThisWeb(WebInfo) >= 0) {
       setState(() {
         _isSaved = true;
         _saveText = "Remove";
@@ -356,7 +353,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         Navigator.pop(context, true);
       } else if (press == 1) {
         bool ret =
-            await DialogsPage_saveRemoveWebside(_isSaved, context, WebInfo);
+        await dialogsPageSaveRemoveWebsite(_isSaved, context, WebInfo);
         if (ret) {
           checkThisPageIsSaved();
         }
@@ -370,18 +367,23 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: GlobalTheme.navAccent,
-           items: [
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.arrow_left, color: Colors.green),
-              title: new Text('Back' , style: TextStyle(color: GlobalTheme.textColor) ,),
+              title: new Text(
+                'Back',
+                style: TextStyle(color: GlobalTheme.textColor),
+              ),
             ),
             BottomNavigationBarItem(
               icon: Icon(_saveRemoveIcon, color: Colors.deepPurple),
-              title: new Text(_saveText , style: TextStyle(color: GlobalTheme.textColor) ),
+              title: new Text(_saveText,
+                  style: TextStyle(color: GlobalTheme.textColor)),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.pages, color: Colors.blueAccent),
-              title: new Text('See more' , style: TextStyle(color: GlobalTheme.textColor) ),
+              title: new Text('See more',
+                  style: TextStyle(color: GlobalTheme.textColor)),
             ),
           ],
           onTap: (press) => pressButton(press),

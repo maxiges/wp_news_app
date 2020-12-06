@@ -1,4 +1,4 @@
-import 'Class/WebsideInfo.dart';
+import 'Class/WebsiteInfo.dart';
 import 'dart:async';
 import 'Class/WebPortal.dart';
 import 'package:package_info/package_info.dart';
@@ -11,7 +11,7 @@ import "Class/Settings.dart";
 enum ACT_PAGE { none, LOADED_PAGES, SAVED_PAGES, SETTINGS }
 
 List<WebPortal> Global_webList = new List<WebPortal>();
-List<WebsideInfo> Global_savedWebsList = new List<WebsideInfo>();
+List<WebsiteInfo> Global_savedWebsList = new List<WebsiteInfo>();
 double Global_width = 0;
 double Global_height = 0;
 Timer Global_timer;
@@ -34,5 +34,5 @@ Settings Global_Settings = new Settings();
 
 loadFromStorage() async {
   Global_webList = await WebPortal_loadWebs();
-  Global_savedWebsList = await WebsideInfo_load();
+  Global_savedWebsList = await webInfoLoadFromFirebase();
 }

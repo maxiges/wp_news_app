@@ -3,23 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import "../Globals.dart";
 
-Future<bool> YesNoDialog_ShowDialog(
+Future<bool> yesNoDialogShowDialog(
     String textAbove, Color yesColor, dynamic context, Icon icon) async {
   bool shouldUpdate = await showDialog(
       context: context,
-
       builder: (context) {
         return (new AlertDialog(
-          backgroundColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
             content: Container(
                 margin: new EdgeInsets.all(0),
                 padding: new EdgeInsets.all(20),
                 decoration: new BoxDecoration(
-                  borderRadius:
-                  new BorderRadius.all(Radius.circular(10)),
+                  borderRadius: new BorderRadius.all(Radius.circular(10)),
                   color: GlobalTheme.backgroundDialog,
-
-
                 ),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +38,8 @@ Future<bool> YesNoDialog_ShowDialog(
                         child: Text(
                           textAbove,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20 , color: GlobalTheme.textColor),
+                          style: TextStyle(
+                              fontSize: 20, color: GlobalTheme.textColor),
                         ),
                       ),
                       Row(
@@ -72,10 +69,8 @@ Future<bool> YesNoDialog_ShowDialog(
                           ),
                         ],
                       ),
-                    ])))
-        );
-      }
-    );
+                    ]))));
+      });
 
   try {
     if (shouldUpdate == null) {

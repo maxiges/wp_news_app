@@ -2,15 +2,15 @@ import 'package:WP_news_APP/Globals.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import '../Class/WebsideInfo.dart';
+import '../Class/WebsiteInfo.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../Dialogs/DialogsPage.dart';
 
 class PagesToTab extends StatefulWidget {
-  WebsideInfo p_webInfo;
+  WebsiteInfo p_webInfo;
   BuildContext context;
 
-  PagesToTab(WebsideInfo webInfo, BuildContext context) {
+  PagesToTab(WebsiteInfo webInfo, BuildContext context) {
     this.p_webInfo = webInfo;
     this.context = context;
   }
@@ -135,7 +135,7 @@ class _PagesToTab extends State<PagesToTab>
     _rowWidth = _width - 100 - 20;
     animationControl.forward();
     bool isSaved = false;
-    if (savedFileContainsThisWebside(widget.p_webInfo) >= 0) {
+    if (savedFileContainsThisWeb(widget.p_webInfo) >= 0) {
       isSaved = true;
     }
     var now = new DateTime.now();
@@ -168,7 +168,7 @@ class _PagesToTab extends State<PagesToTab>
                     onLongPressStart: (pessDetails) {},
                     onLongPressEnd: (pressDetails) {},
                     onLongPress: () async {
-                      await DialogsPage_saveRemoveWebside(
+                      await dialogsPageSaveRemoveWebsite(
                           isSaved, context, widget.p_webInfo);
                     },
                     child: Container(

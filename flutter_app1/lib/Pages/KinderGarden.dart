@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_local_notifications_extended/flutter_local_notifications_extended.dart';
-import '../Class/WebsideInfo.dart';
+import '../Class/WebsiteInfo.dart';
 
 import '../Pages/ShowMoreInfoPage.dart';
 
@@ -32,7 +32,7 @@ class _KinderGarden extends State<KinderGarden>
   String _batteryLevel = 'Unknown battery level.';
 
   Future onSelectNotification(String payload) async {
-    WebsideInfo webFromNot = new WebsideInfo();
+    WebsiteInfo webFromNot = new WebsiteInfo();
     webFromNot.tryParseJson(payload);
     if (payload != null) {
       //press notification
@@ -57,7 +57,7 @@ class _KinderGarden extends State<KinderGarden>
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(0, 'WP notification ',
         'Welcome this is my notification ', platformChannelSpecifics,
-        payload: new WebsideInfo(TITTLE: "Test from notification").toJson());
+        payload: new WebsiteInfo(TITTLE: "Test from notification").toJson());
   }
 
   @override
