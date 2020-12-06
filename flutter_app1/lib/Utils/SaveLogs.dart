@@ -21,7 +21,7 @@ class SaveLogs {
     return data;
   }
 
-  Future<File> info(String data) async {
+  void info(String data) async {
     log("[Info ]" + data + "\r\n");
   }
 

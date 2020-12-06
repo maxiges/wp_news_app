@@ -12,9 +12,9 @@ import '../Utils/ColorsFunc.dart';
 import '../Utils/StringUtils.dart';
 import '../Utils/SaveLogs.dart';
 
-List<WebsideInfo> readedWebs = new List<WebsideInfo>();
+List<WebsiteInfo> readedWebs = new List<WebsiteInfo>();
 
-class WebsideInfo {
+class WebsiteInfo {
   String URL = "",
       TITTLE = "",
       IMAGEHREF = Global_NoImagePost,
@@ -24,7 +24,7 @@ class WebsideInfo {
   String DOMAIN = "";
   String ID = "";
 
-  WebsideInfo(
+  WebsiteInfo(
       {this.URL = "",
       this.TITTLE = "",
       this.IMAGEHREF = "",
@@ -138,8 +138,8 @@ class WebsideInfo {
   }
 } //class
 
-Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
-  List<WebsideInfo> websCheckList = new List<WebsideInfo>();
+Future<List<WebsiteInfo>> websiteInfoGetWebInfos(WebPortal web) async {
+  List<WebsiteInfo> websCheckList = new List<WebsiteInfo>();
   try {
     try {
       final response =
@@ -171,7 +171,7 @@ Future<List<WebsideInfo>> WebsideInfo_GetWebInfos(WebPortal web) async {
               _id = _postComments.substring(_postComments.lastIndexOf("=") + 1);
             } catch (ex) {}
 
-            websCheckList.add(new WebsideInfo(
+            websCheckList.add(new WebsiteInfo(
                 URL: items['link'],
                 TITTLE: _articleTittle,
                 IMAGEHREF: imaSrc,
@@ -234,15 +234,15 @@ Future<List<String>> _loadDataFromFirebase() async {
   }
 }
 
-Future<bool> WebsideInfo_save(List<WebsideInfo> webObj) async {
-  List<String> ObjSave = new List<String>();
-  for (WebsideInfo objectVal in webObj) {
-    ObjSave.add(objectVal.toJson());
+Future<bool> webInfoSaveToFirebase(List<WebsiteInfo> webObj) async {
+  List<String> objSave = new List<String>();
+  for (WebsiteInfo objectVal in webObj) {
+    objSave.add(objectVal.toJson());
   }
 
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
-      _saveDataToFirebase(jsonEncode(ObjSave));
+      _saveDataToFirebase(jsonEncode(objSave));
     } catch (ex) {
       assert(ex);
     }
@@ -250,11 +250,11 @@ Future<bool> WebsideInfo_save(List<WebsideInfo> webObj) async {
 
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.remove("SaverURLS");
-  return prefs.setStringList("SaverURLS", ObjSave);
+  return prefs.setStringList("SaverURLS", objSave);
 }
 
-Future<List<WebsideInfo>> WebsideInfo_load() async {
-  List<WebsideInfo> readWebs = new List<WebsideInfo>();
+Future<List<WebsiteInfo>> webInfoLoadFromFirebase() async {
+  List<WebsiteInfo> readWebs = new List<WebsiteInfo>();
   List<String> loadedWebs = new List<String>();
 
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
@@ -266,7 +266,7 @@ Future<List<WebsideInfo>> WebsideInfo_load() async {
 
   try {
     for (String JsonString in loadedWebs) {
-      WebsideInfo newSavedPage = new WebsideInfo();
+      WebsiteInfo newSavedPage = new WebsiteInfo();
       newSavedPage.tryParseJson(JsonString);
       if (newSavedPage.TITTLE.length > 0) {
         readWebs.add(newSavedPage);
@@ -279,10 +279,10 @@ Future<List<WebsideInfo>> WebsideInfo_load() async {
   return readWebs;
 }
 
-int savedFileContainsThisWebside(WebsideInfo act) {
+int savedFileContainsThisWeb(WebsiteInfo act) {
   int i = 0;
-  for (WebsideInfo iter in Global_savedWebsList) {
-    if (iter.TITTLE == act.TITTLE && iter.URL == act.URL) {
+  for (WebsiteInfo iWeb in Global_savedWebsList) {
+    if (iWeb.TITTLE == act.TITTLE && iWeb.URL == act.URL) {
       return i;
     }
     i++;
@@ -290,24 +290,24 @@ int savedFileContainsThisWebside(WebsideInfo act) {
   return -1;
 }
 
-Future<bool> WebsideInfo_loadedWeb_save() async {
-  List<String> ObjSave = new List<String>();
-  for (WebsideInfo objectVal in readedWebs) {
-    ObjSave.add(objectVal.toJson());
+Future<bool> webInfoLoadedWebSave() async {
+  List<String> objSave = new List<String>();
+  for (WebsiteInfo objectVal in readedWebs) {
+    objSave.add(objectVal.toJson());
   }
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.remove("SavePages");
-  return prefs.setStringList("SavePages", ObjSave);
+  return prefs.setStringList("SavePages", objSave);
 }
 
-Future<bool> WebsideInfo_loadedWeb_load() async {
-  List<WebsideInfo> readWebs = new List<WebsideInfo>();
+Future<bool> webInfoLoadedWebLoad() async {
+  List<WebsiteInfo> readWebs = new List<WebsiteInfo>();
   List<String> loadedWebs = new List<String>();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   loadedWebs = prefs.getStringList("SavePages");
   try {
     for (String JsonString in loadedWebs) {
-      WebsideInfo newSavedPage = new WebsideInfo();
+      WebsiteInfo newSavedPage = new WebsiteInfo();
       newSavedPage.tryParseJson(JsonString);
       bool tooOld = DateTime.parse(newSavedPage.DATE)
           .isBefore(DateTime.now().subtract(Duration(days: 2)));
@@ -319,12 +319,12 @@ Future<bool> WebsideInfo_loadedWeb_load() async {
     readWebs.sort((a, b) {
       DateTime dataA = DateTime.parse(a.DATE);
       DateTime dataB = DateTime.parse(b.DATE);
-      if (dataB.millisecondsSinceEpoch > dataA.millisecondsSinceEpoch) return 1;
-      return 0;
+      return dataB.compareTo(dataA);
     });
 
     readedWebs = readWebs;
   } catch (ex) {
     saveLogs.error(ex.toString());
   }
+  return true;
 }

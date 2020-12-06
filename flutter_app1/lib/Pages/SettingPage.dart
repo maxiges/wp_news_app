@@ -36,8 +36,8 @@ class _SettingPage extends State<SettingPage>
   }
 
   Future<bool> deletePage(WebPortal web) async {
-    bool shouldUpdate = await YesNoDialog_ShowDialog(
-        "Delete webside: \r\n" + web.url,
+    bool shouldUpdate = await yesNoDialogShowDialog(
+        "Delete website: \r\n" + web.url,
         Colors.red,
         context,
         Icon(
@@ -57,7 +57,10 @@ class _SettingPage extends State<SettingPage>
   }
 
   void editPage(WebPortal web) async {
-    bool istrue = await settingAddPageShowDialog(web, this.context);
+    bool _isTrue = await settingAddPageShowDialog(web, this.context);
+    if (_isTrue) {
+      setState(() {}); //refresh widget
+    }
   }
 
   Widget websList() {
@@ -75,7 +78,7 @@ class _SettingPage extends State<SettingPage>
               child: Center(
                   child: Container(
                       color: GlobalTheme.tabsColorPrimary,
-                      //WEBSIDES
+                      //WEBSITES
                       child: Row(children: <Widget>[
                         Container(
                           width: 50,
@@ -213,10 +216,11 @@ class _SettingPage extends State<SettingPage>
   Widget labelAddButtonPage() {
     return (new GestureDetector(
       onTapDown: (e) async {
-        settingAddPageShowDialog(new WebPortal("", ""), this.context);
-        setState(() {
-          websList();
-        });
+        bool _isTrue =
+        await settingAddPageShowDialog(new WebPortal("", ""), this.context);
+        if (_isTrue) {
+          setState(() {});
+        }
       },
       child: Align(
         alignment: Alignment.center,
@@ -362,7 +366,7 @@ class _SettingPage extends State<SettingPage>
       ),
       body: ListView(children: <Widget>[
         Stack(children: [
-          label("Webside"),
+          label("Website"),
           Positioned(
             bottom: 0,
             right: 10,

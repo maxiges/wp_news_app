@@ -3,19 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
 import '../Globals.dart';
-import '../Class/WebsideInfo.dart';
+import '../Class/WebsiteInfo.dart';
 import 'YesNoDialog.dart';
 
-
-Future<bool> DialogsPage_saveRemoveWebside(
-    bool isSaved, BuildContext context, WebsideInfo page) async {
+Future<bool> dialogsPageSaveRemoveWebsite(bool isSaved, BuildContext context,
+    WebsiteInfo page) async {
   String orderText = "Save for later ?";
   Color yesColor = Colors.greenAccent;
   if (isSaved) {
     orderText = "Delete from saved ?";
     yesColor = Colors.redAccent;
   }
-  bool shouldUpdate = await YesNoDialog_ShowDialog(
+  bool shouldUpdate = await yesNoDialogShowDialog(
       orderText,
       yesColor,
       context,
@@ -25,14 +24,14 @@ Future<bool> DialogsPage_saveRemoveWebside(
         size: 36.0,
       ));
   if (shouldUpdate) {
-    int find = savedFileContainsThisWebside(page);
+    int find = savedFileContainsThisWeb(page);
     if (find < 0) {
       Global_savedWebsList.add(page);
     } else {
       Global_savedWebsList.removeAt(find);
     }
     Global_refreshPage = true;
-    WebsideInfo_save(Global_savedWebsList);
+    await webInfoSaveToFirebase(Global_savedWebsList);
   }
   return shouldUpdate;
 }

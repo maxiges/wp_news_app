@@ -4,7 +4,7 @@ import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
-import '../Class/WebsideInfo.dart';
+import '../Class/WebsiteInfo.dart';
 import '../Globals.dart';
 import '../Elements/PagesToTab.dart';
 import '../Class/WebPortal.dart';
@@ -14,6 +14,8 @@ import 'package:flutter_picker/flutter_picker.dart';
 import '../Utils/WebFilter.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:admob_flutter/admob_flutter.dart';
+import 'package:toast/toast.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -25,37 +27,53 @@ class MyHomePage extends StatefulWidget {
 
 //****************************************************************************
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var isPortrait = true;
-
   List<Widget> _webList = new List<Widget>();
   bool isOpendeSavedList = false;
   bool appStarted = false;
-  AnimationController rotationController;
+
   int actLoadedPages = 0;
   Icon _actIcon = new Icon(Icons.storage);
-
   GlobalKey<ScaffoldState> scaffoldState = GlobalKey();
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
+
+  AnimationController rotationController;
+  AnimationController refreshController;
+  Animation<double> _refreshIconSizeAnimation;
   void dispose() {
     super.dispose();
     Global_timer.cancel();
     rotationController.stop();
+    refreshController.stop();
   }
 
   @override
   void initState() {
-    super.initState();
     rotationController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
+    rotationController.reset();
+
+    refreshController = AnimationController(
+        duration: const Duration(milliseconds: 300), vsync: this);
+    refreshController.repeat(period: Duration(milliseconds: 300));
     checkLoadingPagesAssert();
+    _refreshIconSizeAnimation =
+    Tween<double>(begin: 30, end: 20).animate(refreshController)
+      ..addListener(() {
+        setState(() {
+          // The state that has changed here is the animation object’s value.
+        });
+      });
+    refreshController.reset();
 
     Global_timer = new Timer.periodic(
         Duration(microseconds: 100), (Timer timer) => timerService());
     webFilter.setPageFilter();
+    super.initState();
   }
 
   void timerService() {
@@ -217,32 +235,32 @@ class _MyHomePageState extends State<MyHomePage>
 
   buildTableWithPages(bool tryLoadSavedLinks) {
     isOpendeSavedList = tryLoadSavedLinks;
-    List<WebsideInfo> websideInfoLoaded = new List<WebsideInfo>();
+    List<WebsiteInfo> websiteInfoLoaded = new List<WebsiteInfo>();
     if (tryLoadSavedLinks) {
       _actIcon = new Icon(Icons.storage);
-      websideInfoLoaded = Global_savedWebsList;
+      websiteInfoLoaded = Global_savedWebsList;
     } else {
       _actIcon = new Icon(Icons.sd_storage);
-      websideInfoLoaded = readedWebs;
+      websiteInfoLoaded = readedWebs;
     }
 
     List<Widget> wid = new List<Widget>();
-    for (WebsideInfo iter in websideInfoLoaded) {
+    for (WebsiteInfo iWeb in websiteInfoLoaded) {
       if (webFilter.actSetFilter != "All") {
-        if (!iter.DOMAIN.contains(webFilter.actSetFilter)) {
+        if (!iWeb.DOMAIN.contains(webFilter.actSetFilter)) {
           continue;
         }
       }
 
       if (Global_Settings.isAdsOn()) {
-        var randome = new Random();
-        if (randome.nextInt(20) == 0) {
+        var ran = new Random();
+        if (ran.nextInt(20) == 0) {
           wid.add(pagesToTabAdds());
         }
       }
-      wid.add(PagesToTab(iter, this.context));
+      wid.add(PagesToTab(iWeb, this.context));
     }
-    if (websideInfoLoaded.length == 0) {
+    if (websiteInfoLoaded.length == 0) {
       if (!tryLoadSavedLinks) {
         if (Global_webList.length == 0) {
           wid = setAddedPages();
@@ -258,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage>
     });
 
     if (!tryLoadSavedLinks) {
-      WebsideInfo_loadedWeb_save();
+      webInfoLoadedWebSave();
     }
   }
 
@@ -268,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage>
       height: Global_height * 0.3,
     ));
     _ret.add(Center(
-      child: Text("You didn't add any webside \r\n Do to Settings",
+      child: Text("You didn't add any website \r\n Do to Settings",
           style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
           textAlign: TextAlign.center),
     ));
@@ -277,24 +295,24 @@ class _MyHomePageState extends State<MyHomePage>
         Icons.settings,
         color: Colors.greenAccent,
         size: 50.0,
-        semanticLabel: 'No added webside',
+        semanticLabel: 'No added website',
       ),
     ));
     return _ret;
   }
 
   List<Widget> setErrorLoadPage() {
-    List<Widget> m_ret = new List<Widget>();
-    m_ret.add(Container(
+    List<Widget> _ret = new List<Widget>();
+    _ret.add(Container(
       height: Global_height * 0.3,
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Text(
           "Can't download content.\r\n Try reload or cheeck internet connection",
           style: new TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
           textAlign: TextAlign.center),
     ));
-    m_ret.add(Center(
+    _ret.add(Center(
       child: Icon(
         Icons.signal_wifi_off,
         color: Colors.redAccent,
@@ -302,7 +320,7 @@ class _MyHomePageState extends State<MyHomePage>
         semanticLabel: 'No internet',
       ),
     ));
-    return m_ret;
+    return _ret;
   }
 
   List<Widget> setNoSavedLinksDesign() {
@@ -326,11 +344,11 @@ class _MyHomePageState extends State<MyHomePage>
     return _ret;
   }
 
-  Future<List<WebsideInfo>> getPageAsync(WebPortal web) async {
-    List<WebsideInfo> retVal = await WebsideInfo_GetWebInfos(web);
-    for (WebsideInfo webs in retVal) {
+  Future<List<WebsiteInfo>> getPageAsync(WebPortal web) async {
+    List<WebsiteInfo> _ret = await websiteInfoGetWebInfos(web);
+    for (WebsiteInfo webs in _ret) {
       bool add = true;
-      for (WebsideInfo loaded in readedWebs) {
+      for (WebsiteInfo loaded in readedWebs) {
         if (loaded.URL == webs.URL) add = false;
       }
       if (add) {
@@ -341,7 +359,7 @@ class _MyHomePageState extends State<MyHomePage>
       actLoadedPages++;
       _webList = checkLoadingPagesAssert();
     });
-    return retVal;
+    return _ret;
   }
 
   void loadFromWebs(bool append) async {
@@ -361,7 +379,6 @@ class _MyHomePageState extends State<MyHomePage>
       }
 
       await Future.wait(tasks);
-      await Future.wait(tasks);
       for (var i = 0; i < 10; i++) {
         int l1 = readedWebs
             .toSet()
@@ -375,44 +392,77 @@ class _MyHomePageState extends State<MyHomePage>
         }
       }
 
-      readedWebs.sort((a, b) {
-        DateTime dataA = DateTime.parse(a.DATE);
-        DateTime dataB = DateTime.parse(b.DATE);
-        if (dataB.microsecondsSinceEpoch > dataA.microsecondsSinceEpoch) {
-          return 1;
-        }
-        return 0;
-      });
+      reSortWebs();
 
-      Global_refreshPage = true;
       rotationController.reset();
     } catch (ex) {
       saveLogs.error(ex.toString());
     }
   }
 
-  //------------------------------
+  void reSortWebs() async {
+    try {
+      List<WebsiteInfo> rWeb = new List<WebsiteInfo>.from(readedWebs);
+      setState(() {
+        actLoadedPages = 0;
+        _webList = checkLoadingPagesAssert();
+        readedWebs.clear();
+        Global_refreshPage = true;
+      });
+
+      rWeb.sort((a, b) {
+        DateTime dataA = DateTime.parse(a.DATE);
+        DateTime dataB = DateTime.parse(b.DATE);
+        return dataB.compareTo(dataA);
+      });
+      readedWebs = rWeb;
+
+      Global_refreshPage = true;
+    } catch (ex) {
+      saveLogs.error(ex.toString());
+    }
+  }
+
+  //----------------------------------------------------
   Widget refresh() {
     return (RotationTransition(
         turns: Tween(begin: 0.0, end: 1.0).animate(rotationController),
         child: GestureDetector(
-            onTap: () async {
+            behavior: HitTestBehavior.translucent,
+            onTapCancel: () {
               setState(() {
                 loadFromWebs(true);
               });
             },
-            onLongPressEnd: (time) async {
-              setState(() {
-                loadFromWebs(false);
-              });
+            onLongPress: () async {
+              _refreshLongPress();
+            },
+            onDoubleTap: () async {
+              _refreshDoubleTap();
             },
             child: IconButton(
-              iconSize: 30,
+              iconSize: _refreshIconSizeAnimation.value,
               padding: const EdgeInsets.all(0),
               icon: Icon(Icons.refresh),
               color: GlobalTheme.textColor,
               onPressed: () {},
             ))));
+  }
+
+  void _refreshLongPress() {
+    Toast.show("Refresh content", context,
+        duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+    setState(() {
+      loadFromWebs(false);
+    });
+  }
+
+  void _refreshDoubleTap() {
+    setState(() async {
+      await refreshController.forward();
+      reSortWebs();
+      refreshController.reset();
+    });
   }
 
   showPicker(BuildContext context) {
@@ -496,7 +546,6 @@ class _MyHomePageState extends State<MyHomePage>
                 } else {
                   Global_actPageToRefresh = ACT_PAGE.SAVED_PAGES;
                 }
-
                 Global_refreshPage = true;
               },
             ),
@@ -512,12 +561,20 @@ class _MyHomePageState extends State<MyHomePage>
         )));
   }
 
-  //*******************************APPPPP****************************************
+  void _onRefresh() async {
+    await Future.delayed(Duration(milliseconds: 1000));
+    setState(() {
+      loadFromWebs(true);
+    });
+    _refreshController.refreshCompleted();
+  }
+
+  //*******************************APP****************************************
   @override
   Widget build(BuildContext context) {
     try {
       if (!appStarted) {
-        WebsideInfo_loadedWeb_load();
+        webInfoLoadedWebLoad();
         Global_width = MediaQuery.of(context).size.width;
         Global_height = MediaQuery.of(context).size.height;
         loadFromWebs(true);
@@ -530,10 +587,16 @@ class _MyHomePageState extends State<MyHomePage>
       backgroundColor: GlobalTheme.background,
       appBar: renderAppBar(),
       body: Center(
-          child: ListView(
-            padding: const EdgeInsets.all(8),
-            children: _webList,
-          )),
+          child: SmartRefresher(
+              enablePullDown: true,
+              enablePullUp: false,
+              header: WaterDropHeader(),
+              controller: _refreshController,
+              onRefresh: _onRefresh,
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: _webList,
+              ))),
     );
   }
 }
