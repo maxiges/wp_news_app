@@ -26,7 +26,7 @@ Future<bool> yesNoDialogShowDialog(
                         child: Container(
                           decoration: new BoxDecoration(
                             borderRadius:
-                            new BorderRadius.all(Radius.circular(10)),
+                                new BorderRadius.all(Radius.circular(10)),
                             color: Color.fromARGB(255, 50, 50, 50),
                           ),
                           padding: new EdgeInsets.all(5),
