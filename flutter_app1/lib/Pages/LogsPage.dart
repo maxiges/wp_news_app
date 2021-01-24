@@ -69,10 +69,11 @@ class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
             ),
           ],
         ),
-        body: Text(
+        body: SingleChildScrollView(
+            child: Text(
           _actReadedLog,
           style: TextStyle(color: GlobalTheme.textColor),
-        ));
+            )));
   }
 
   void dispose() {

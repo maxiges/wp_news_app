@@ -1,4 +1,5 @@
 import 'package:WP_news_APP/Globals.dart';
+import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,6 +8,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Class/PageComments.dart';
 import '../Dialogs/DialogsPage.dart';
+import '../Utils/WebPageAPI.dart';
 
 class ShowMoreInfo extends StatefulWidget {
   ShowMoreInfo({Key key}) : super(key: key);
@@ -27,65 +29,48 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   String _saveText = "Save";
   IconData _saveRemoveIcon = Icons.save;
 
+  bool _readMore = false;
+  Text _PageText = new Text("Error");
+
   @override
   void initState() {
     super.initState();
   }
 
-  _getMoreInfo(WebsiteInfo web) async {
+  _getInfoAboutComments(WebsiteInfo web) async {
     try {
-      String url =
-          "https://" + web.DOMAIN + "/wp-json/wp/v2/comments?post=" + web.ID;
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        List<dynamic> retJson = json.decode(response.body);
-        setState(() {
-          commentsCounter = retJson.length.toString();
-        });
-        _commentList = new List<PageComments>();
-        for (dynamic items in retJson) {
-          String author, avatar, content, id, parent;
-          try {
-            author = items["author_name"].toString();
-          } catch (ex) {
-            author = "N/A";
-            assert(ex);
-          }
-          try {
-            id = items["id"].toString();
-          } catch (ex) {
-            id = "";
-            assert(ex);
-          }
-          try {
-            parent = items["parent"].toString();
-          } catch (ex) {
-            parent = "";
-            assert(ex);
-          }
-          try {
-            avatar = items["author_avatar_urls"]["96"].toString();
-          } catch (ex) {
-            avatar = "N/A";
-            assert(ex);
-          }
-          try {
-            content = items["content"]["rendered"].toString();
-          } catch (ex) {
-            content = "N/A";
-            assert(ex);
-          }
-          _commentList.add(PageComments(
-              AUTHOR: author,
-              AVATARIMG: avatar,
-              POST: content,
-              ID: id,
-              PARENT: parent));
-        }
-      }
+      _commentList = await webPageFetchAPI.getPageComments(web);
+      setState(() {
+        commentsCounter = _commentList.length.toString();
+      });
     } catch (ex) {
       setState(() {
         commentsCounter = "N/A";
+      });
+    }
+  }
+
+  _getMoreInfoAboutWebPage(WebsiteInfo web) async {
+    try {
+      WebsiteInfo ret = await webPageFetchAPI.websiteInfoGetAllWebInfo(web);
+      setState(() {
+        WebInfo = ret;
+      });
+
+      if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE.length >
+          WebInfo.DESCRIPTION.length) {
+        setState(() {
+          _readMore = true;
+        });
+      } else {
+        setState(() {
+          _readMore = false;
+        });
+      }
+    } catch (ex) {
+      saveLogs.error(ex);
+      setState(() {
+        _readMore = false;
       });
     }
   }
@@ -274,6 +259,43 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     return renderedList;
   }
 
+  Widget showMoreInfoChild() {
+    if (_readMore) {
+      return Text("Read More ...");
+    }
+    if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE == "N/A") {
+      return Text("No internet connection");
+    }
+    if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE == "") {
+      return Text("Loading ...");
+    }
+    return Text("Hide ...");
+  }
+
+  void _onTapReadMoreFunc() {
+    if (_readMore == true) {
+      setState(() {
+        _PageText = Text(
+          WebInfo.WEB_DETAILS.WEB_ALL_PAGE,
+          style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
+        );
+      });
+
+      _readMore = false;
+    } else {
+      setState(() {
+        _PageText = Text(
+          WebInfo.DESCRIPTION + " ...",
+          style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
+        );
+      });
+
+      if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE != "") {
+        _readMore = true;
+      }
+    }
+  }
+
   Widget showMoreInfoTable(WebsiteInfo webInfo, BuildContext context) {
     String _tabComments = "";
     if (_commentList.length > 0) {
@@ -286,11 +308,29 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           _Top(webInfo, context),
           Container(
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
-            child: Text(
-              webInfo.DESCRIPTION + " ...",
-              style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
-            ),
+            child: _PageText,
           ),
+          Container(
+              margin:
+              new EdgeInsets.only(bottom: 10, top: 5, left: 70, right: 0),
+              alignment: Alignment.centerRight,
+              child: new GestureDetector(
+                  onTap: () {
+                    _onTapReadMoreFunc();
+                  },
+                  child: new Container(
+                      width: 140.0,
+                      height: 25.0,
+                      padding: EdgeInsets.only(
+                        top: 5.0,
+                        right: 30,
+                      ),
+                      color: webInfo.getColor(),
+                      child: new Column(
+                        children: [
+                          showMoreInfoChild(),
+                        ],
+                      )))),
           Align(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -342,9 +382,15 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   Widget build(BuildContext context) {
     _width = MediaQuery.of(context).size.width;
     _height = MediaQuery.of(context).size.height;
-    WebInfo = ModalRoute.of(context).settings.arguments;
+
     if (_init) {
-      _getMoreInfo(WebInfo);
+      WebInfo = ModalRoute
+          .of(context)
+          .settings
+          .arguments;
+      _onTapReadMoreFunc(); //loadWebInfoPage
+      _getInfoAboutComments(WebInfo);
+      _getMoreInfoAboutWebPage(WebInfo);
       _init = false;
     }
 

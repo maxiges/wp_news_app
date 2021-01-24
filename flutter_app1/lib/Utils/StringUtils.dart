@@ -1,4 +1,4 @@
-String StringUtils_RemoveAllHTMLVal(String str) {
+String StringUtils_RemoveAllHTMLVal(String str, bool addNewLine) {
   str = str.replaceAll("\u0105", "ą");
   str = str.replaceAll("\u0107", "ć");
   str = str.replaceAll("\u0119", "ę");
@@ -18,9 +18,31 @@ String StringUtils_RemoveAllHTMLVal(String str) {
   str = str.replaceAll("&#8220;", "“");
   str = str.replaceAll("[&hellip;]", " ");
 
-  RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
+  str = str.replaceAll("&lt;", "<");
+  str = str.replaceAll("&gt;", ">");
+  str = str.replaceAll("&le;", "<=");
+  str = str.replaceAll("&ge;", ">=");
+  str = str.replaceAll("&nbsp;", " ");
 
-  str = str.replaceAll(exp, '');
+  str = str.replaceAll("{rendered:", "");
+  str = str.replaceAll(", protected: false}", "");
+
+  if (addNewLine) {
+    str = str.replaceAll("<li>", "  • ");
+    str = str.replaceAll("<h1>", "\r\n");
+    str = str.replaceAll("<h2>", "\r\n");
+    str = str.replaceAll("<h3>", "\r\n");
+  }
+
+  RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
+  if (addNewLine) {
+    str = str.replaceAll(exp, '\r\n');
+    while (str.indexOf("\r\n\r\n\r\n") > 0) {
+      str = str.replaceAll("\r\n\r\n\r\n", '\r\n\r\n');
+    }
+  } else {
+    str = str.replaceAll(exp, '');
+  }
 
   return str;
 }

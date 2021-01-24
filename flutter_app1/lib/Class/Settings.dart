@@ -4,7 +4,7 @@ import 'package:flutter/painting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/WebFilter.dart';
-
+import '../Utils/SaveLogs.dart';
 
 class Settings {
   bool _isDarkTheme = true;
@@ -28,7 +28,9 @@ class Settings {
         GlobalTheme = GlobalThemeLight;
         _isDarkTheme = false;
       }
-    } catch (ex) {}
+    } catch (ex) {
+      saveLogs.error(ex);
+    }
 
     try {
       if (prefs.getBool("AdsOn")) {
@@ -36,7 +38,9 @@ class Settings {
       } else {
         _adsOn = false;
       }
-    } catch (ex) {}
+    } catch (ex) {
+      saveLogs.error(ex);
+    }
   }
 
   setTheme(bool darkTheme) async {

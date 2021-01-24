@@ -2,6 +2,7 @@ import 'package:WP_news_APP/Globals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Utils/SaveLogs.dart';
 
 Map<String, Color> colorPalet = {
   "black": Colors.black,
@@ -104,7 +105,9 @@ ColorsTheme GlobalThemeLight = new ColorsTheme(
 Color Color_GetColor(String color) {
   try {
     return colorPalet[color];
-  } catch (ex) {}
+  } catch (ex) {
+    saveLogs.error(ex);
+  }
   return Colors.black;
 }
 

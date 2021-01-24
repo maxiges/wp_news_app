@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/ColorsFunc.dart';
+import '../Utils/SaveLogs.dart';
 
 class WebPortal {
   String url;
@@ -49,7 +50,7 @@ void _saveDataToFirebase(String data) async {
       'description': data
     });
   } catch (ex) {
-    assert(ex);
+    saveLogs.error(ex);
   }
 }
 
@@ -63,7 +64,7 @@ Future<List<String>> _loadDataFromFirebase() async {
     List<String> valll = retval.data["description"].toString().split(";");
     return valll;
   } catch (ex) {
-    assert(ex);
+    saveLogs.error(ex);
   }
 }
 
@@ -79,7 +80,7 @@ Future<bool> WebPortal_saveWebs(List<WebPortal> list) async {
       _saveDataToFirebase(
           objSave.reduce((value, element) => value + ';' + element));
     } catch (ex) {
-      assert(ex);
+      saveLogs.error(ex);
     }
   }
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -95,13 +96,13 @@ Future<List<WebPortal>> WebPortal_loadWebs() async {
     try {
       loadedWebs = await _loadDataFromFirebase();
     } catch (ex) {
-      assert(ex);
+      saveLogs.error(ex);
     }
   } else {
     try {
       loadedWebs = prefs.getStringList("SavedWebs");
     } catch (ex) {
-      assert(ex);
+      saveLogs.error(ex);
     }
   }
 
@@ -115,7 +116,7 @@ Future<List<WebPortal>> WebPortal_loadWebs() async {
       }
     }
   } catch (ex) {
-    print(ex.toString());
+    saveLogs.error(ex);
   }
 
   return readWebs;

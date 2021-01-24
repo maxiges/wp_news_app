@@ -14,30 +14,46 @@ import '../Utils/SaveLogs.dart';
 
 List<WebsiteInfo> readedWebs = new List<WebsiteInfo>();
 
+class WebsiteInfoDetails {
+  String WEB_ALL_PAGE = "";
+
+  WebsiteInfoDetails({
+    this.WEB_ALL_PAGE = "N/A",
+  }) {
+    this.WEB_ALL_PAGE = StringUtils_RemoveAllHTMLVal(this.WEB_ALL_PAGE, true);
+  }
+}
+
 class WebsiteInfo {
   String URL = "",
       TITTLE = "",
       IMAGEHREF = Global_NoImagePost,
       DATE = "",
       DESCRIPTION = "";
+  WebsiteInfoDetails WEB_DETAILS = WebsiteInfoDetails();
   String LinkColor = "";
   String DOMAIN = "";
   String ID = "";
 
-  WebsiteInfo(
-      {this.URL = "",
-      this.TITTLE = "",
-      this.IMAGEHREF = "",
-      this.DATE = "",
-      this.LinkColor = "",
-      this.DESCRIPTION = "",
-      this.ID = "",
-      this.DOMAIN = ""}) {
-    this.TITTLE = StringUtils_RemoveAllHTMLVal(this.TITTLE);
-    this.DESCRIPTION = StringUtils_RemoveAllHTMLVal(this.DESCRIPTION);
-
+  WebsiteInfo({
+    this.URL = "",
+    this.TITTLE = "",
+    this.IMAGEHREF = "",
+    this.DATE = "",
+    this.LinkColor = "",
+    this.DESCRIPTION = "",
+    this.ID = "",
+    this.DOMAIN = "",
+    this.WEB_DETAILS = null,
+  }) {
+    this.TITTLE = StringUtils_RemoveAllHTMLVal(this.TITTLE, false);
+    this.DESCRIPTION = StringUtils_RemoveAllHTMLVal(this.DESCRIPTION, false);
     if (this.IMAGEHREF.length < 5) {
       this.IMAGEHREF = Global_NoImagePost;
+    }
+
+    if (this.WEB_DETAILS == null) {
+      this.WEB_DETAILS = new WebsiteInfoDetails();
     }
   }
 
@@ -138,66 +154,6 @@ class WebsiteInfo {
   }
 } //class
 
-Future<List<WebsiteInfo>> websiteInfoGetWebInfos(WebPortal web) async {
-  List<WebsiteInfo> websCheckList = new List<WebsiteInfo>();
-  try {
-    try {
-      final response =
-          await http.get("https://" + web.url + "/wp-json/wp/v2/posts?_embed");
-      if (response.statusCode == 200) {
-        List<dynamic> retJson = json.decode(response.body);
-        for (dynamic items in retJson) {
-          try {
-            dynamic imaSrc = "";
-            String _articleTittle = "N/A";
-            String _articleDesc = "N/A";
-            String _postComments = "N/A";
-            String _id = "";
-
-            try {
-              imaSrc = items['_embedded']['wp:featuredmedia'][0]
-                  ['media_details']['sizes']['medium']['source_url'];
-            } catch (ex) {}
-            try {
-              _articleTittle = items['title']['rendered'];
-            } catch (ex) {}
-            try {
-              _articleDesc = items['excerpt']['rendered'];
-            } catch (ex) {}
-            try {
-              _postComments = items['_links']['replies'][0]['href'].toString();
-            } catch (ex) {}
-            try {
-              _id = _postComments.substring(_postComments.lastIndexOf("=") + 1);
-            } catch (ex) {}
-
-            websCheckList.add(new WebsiteInfo(
-                URL: items['link'],
-                TITTLE: _articleTittle,
-                IMAGEHREF: imaSrc,
-                DATE: items['date'],
-                LinkColor: Color_GetColorInString(web.getColor()),
-                DESCRIPTION: _articleDesc,
-                ID: _id,
-                DOMAIN: web.url));
-          } catch (ex) {}
-        }
-      }
-    } catch (ex) {
-      print("Load Page error :" + ex);
-    }
-    websCheckList.sort((a, b) {
-      if (DateTime.parse(a.DATE).isBefore(DateTime.parse(b.DATE)) == true)
-        return 1;
-      else
-        return 0;
-    });
-  } catch (ex) {
-    print(ex);
-  }
-  return websCheckList;
-}
-
 void _saveDataToFirebase(String data) async {
   try {
     final databaseReference = Firestore.instance;
@@ -209,7 +165,7 @@ void _saveDataToFirebase(String data) async {
       'description': data
     });
   } catch (ex) {
-    assert(ex);
+    saveLogs.error(ex);
   }
 }
 
@@ -244,7 +200,7 @@ Future<bool> webInfoSaveToFirebase(List<WebsiteInfo> webObj) async {
     try {
       _saveDataToFirebase(jsonEncode(objSave));
     } catch (ex) {
-      assert(ex);
+      saveLogs.error(ex);
     }
   }
 
@@ -273,7 +229,7 @@ Future<List<WebsiteInfo>> webInfoLoadFromFirebase() async {
       }
     }
   } catch (ex) {
-    saveLogs.error(ex.toString());
+    saveLogs.error(ex);
   }
 
   return readWebs;
@@ -324,7 +280,7 @@ Future<bool> webInfoLoadedWebLoad() async {
 
     readedWebs = readWebs;
   } catch (ex) {
-    saveLogs.error(ex.toString());
+    saveLogs.error(ex);
   }
   return true;
 }

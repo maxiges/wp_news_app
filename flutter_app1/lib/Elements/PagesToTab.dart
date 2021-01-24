@@ -34,7 +34,7 @@ class _PagesToTab extends State<PagesToTab>
         duration: const Duration(milliseconds: 100), vsync: this);
   }
 
-  Widget getPageDescWidget() {
+  Widget getPageDescWidget(bool showAllDescription) {
     if (_rowWidth < 500) {
       return (Align(
         alignment: Alignment.center,
@@ -45,13 +45,16 @@ class _PagesToTab extends State<PagesToTab>
       ));
     } else {
       String description = widget.p_webInfo.DESCRIPTION;
-      if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 >
-          (_rowWidth / 2) * 90) {
-        description = description.substring(
-            0, (((_rowWidth / 2) * 90 / 12) / 12).toInt());
-        description = description.substring(0, description.lastIndexOf(" "));
-        description += " ... ";
+      if (!showAllDescription) {
+        if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 >
+            (_rowWidth / 2) * 90) {
+          description = description.substring(
+              0, (((_rowWidth / 2) * 90 / 12) / 12).toInt());
+          description = description.substring(0, description.lastIndexOf(" "));
+          description += " ... ";
+        }
       }
+
       return (Align(
           alignment: Alignment.center,
           child: Row(
@@ -250,7 +253,7 @@ class _PagesToTab extends State<PagesToTab>
                                     Container(
                                         width: _rowWidth,
                                         height: _rowheight,
-                                        child: getPageDescWidget()),
+                                        child: getPageDescWidget(false)),
                                   ],
                                 ),
                               ),

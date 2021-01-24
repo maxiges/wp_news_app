@@ -54,7 +54,7 @@ class Ads {
           ..show();
       });
     } catch (ex) {
-      saveLogs.error(ex.toString());
+      saveLogs.error(ex);
     }
   }
 
@@ -65,7 +65,7 @@ class Ads {
         size: AdSize.banner,
       ));
     } catch (ex) {
-      saveLogs.error(ex.toString());
+      saveLogs.error(ex);
     }
   }
 

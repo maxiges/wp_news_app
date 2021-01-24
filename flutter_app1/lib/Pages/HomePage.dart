@@ -16,6 +16,7 @@ import 'package:firebase_admob/firebase_admob.dart';
 import 'package:admob_flutter/admob_flutter.dart';
 import 'package:toast/toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../Utils/WebPageAPI.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -345,7 +346,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   Future<List<WebsiteInfo>> getPageAsync(WebPortal web) async {
-    List<WebsiteInfo> _ret = await websiteInfoGetWebInfos(web);
+    List<WebsiteInfo> _ret = await webPageFetchAPI.websiteInfoGetWebPages(web);
     for (WebsiteInfo webs in _ret) {
       bool add = true;
       for (WebsiteInfo loaded in readedWebs) {
@@ -396,7 +397,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       rotationController.reset();
     } catch (ex) {
-      saveLogs.error(ex.toString());
+      saveLogs.error(ex);
     }
   }
 
@@ -419,7 +420,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       Global_refreshPage = true;
     } catch (ex) {
-      saveLogs.error(ex.toString());
+      saveLogs.error(ex);
     }
   }
 
