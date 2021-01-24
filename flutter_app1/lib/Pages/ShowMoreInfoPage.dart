@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../Class/WebsiteInfo.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../Class/PageComments.dart';
 import '../Dialogs/DialogsPage.dart';
 import '../Utils/WebPageAPI.dart';
@@ -413,24 +411,26 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     return Scaffold(
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: GlobalTheme.navAccent,
+          selectedLabelStyle: TextStyle(
+            color: GlobalTheme.textColor,
+          ),
+          unselectedLabelStyle: TextStyle(
+            color: GlobalTheme.textColor,
+          ),
+          unselectedItemColor: GlobalTheme.textColor,
+          selectedItemColor: GlobalTheme.textColor,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.arrow_left, color: Colors.green),
-              title: new Text(
-                'Back',
-                style: TextStyle(color: GlobalTheme.textColor),
-              ),
-            ),
+                icon: Icon(Icons.arrow_left, color: Colors.green),
+                label: 'Back'),
             BottomNavigationBarItem(
               icon: Icon(_saveRemoveIcon, color: Colors.deepPurple),
-              title: new Text(_saveText,
-                  style: TextStyle(color: GlobalTheme.textColor)),
+              label: _saveText,
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.pages, color: Colors.blueAccent),
-              title: new Text('See more',
-                  style: TextStyle(color: GlobalTheme.textColor)),
-            ),
+              label: "See more",
+            )
           ],
           onTap: (press) => pressButton(press),
         ),

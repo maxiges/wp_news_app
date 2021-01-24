@@ -1,4 +1,3 @@
-import 'package:WP_news_APP/Utils/ColorsFunc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 

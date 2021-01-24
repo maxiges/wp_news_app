@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: false);
 
   AnimationController rotationController;
   AnimationController refreshController;
@@ -63,12 +63,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     refreshController.repeat(period: Duration(milliseconds: 300));
     checkLoadingPagesAssert();
     _refreshIconSizeAnimation =
-    Tween<double>(begin: 30, end: 20).animate(refreshController)
-      ..addListener(() {
-        setState(() {
-          // The state that has changed here is the animation object’s value.
-        });
-      });
+        Tween<double>(begin: 30, end: 20).animate(refreshController)
+          ..addListener(() {
+            setState(() {
+              // The state that has changed here is the animation object’s value.
+            });
+          });
     refreshController.reset();
 
     Global_timer = new Timer.periodic(
@@ -118,16 +118,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     } else {
       retVal.add(new Center(
           child: Container(
-            margin: EdgeInsets.only(top: 20, bottom: 10),
-            child: Text(
-              "LOADING " +
-                  actLoadedPages.toString() +
-                  "/" +
-                  Global_webList.length.toString() +
-                  " pages ... ",
-              style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
-            ),
-          )));
+        margin: EdgeInsets.only(top: 20, bottom: 10),
+        child: Text(
+          "LOADING " +
+              actLoadedPages.toString() +
+              "/" +
+              Global_webList.length.toString() +
+              " pages ... ",
+          style: TextStyle(fontSize: 18, color: GlobalTheme.textColor2),
+        ),
+      )));
       retVal.add(Container(
         height: 30,
         decoration: BoxDecoration(
@@ -153,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               // Provide an optional curve to make the animation feel smoother.
               curve: Curves.fastOutSlowIn,
               width: ((Global_width - 20) *
-                  (actLoadedPages / Global_webList.length) +
+                      (actLoadedPages / Global_webList.length) +
                   1),
             ),
           ],
@@ -192,8 +192,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     ));
   }
 
-  void handleEvent(AdmobAdEvent event, Map<String, dynamic> args,
-      String adType) {
+  void handleEvent(
+      AdmobAdEvent event, Map<String, dynamic> args, String adType) {
     switch (event) {
       case AdmobAdEvent.loaded:
         showSnackBar('New Admob $adType Ad loaded!');
@@ -381,13 +381,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
       await Future.wait(tasks);
       for (var i = 0; i < 10; i++) {
-        int l1 = readedWebs
-            .toSet()
-            .length;
+        int l1 = readedWebs.toSet().length;
         sleep(const Duration(milliseconds: 250));
-        int l2 = readedWebs
-            .toSet()
-            .length;
+        int l2 = readedWebs.toSet().length;
         if (l1 == l2) {
           break;
         }
@@ -509,13 +505,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
             Container(
               margin:
-              const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
+                  const EdgeInsets.only(left: 5, right: 2, top: 5, bottom: 5),
               color: GlobalTheme.tabs,
               width: 1,
             ),
             FlatButton(
               padding:
-              const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
+                  const EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
               color: Colors.transparent,
               child: Row(children: <Widget>[
                 Text(
