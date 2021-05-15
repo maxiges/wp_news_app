@@ -12,7 +12,7 @@ class LogPage extends StatefulWidget {
 }
 
 class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
-  String _actReadedLog = "";
+  String _currLog = "";
 
   @override
   void initState() {
@@ -21,9 +21,9 @@ class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
   }
 
   logData() async {
-    _actReadedLog = await saveLogs.read();
+    _currLog = await saveLogs.read();
     setState(() {
-      _actReadedLog += "\r\n";
+      _currLog += "\r\n";
     });
   }
 
@@ -70,9 +70,9 @@ class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
         ),
         body: SingleChildScrollView(
             child: Text(
-          _actReadedLog,
+          _currLog,
           style: TextStyle(color: GlobalTheme.textColor),
-            )));
+        )));
   }
 
   void dispose() {

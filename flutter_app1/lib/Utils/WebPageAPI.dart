@@ -16,7 +16,7 @@ WebPageFetchAPI webPageFetchAPI = WebPageFetchAPI();
 
 class WebPageFetchAPI {
   Future<List<PageComments>> getPageComments(WebsiteInfo web) async {
-    List<PageComments> pageCommentList = new List<PageComments>();
+    List<PageComments> pageCommentList = [];
 
     try {
       String url =
@@ -74,7 +74,7 @@ class WebPageFetchAPI {
   }
 
   Future<List<WebsiteInfo>> websiteInfoGetWebPages(WebPortal web) async {
-    List<WebsiteInfo> websCheckList = new List<WebsiteInfo>();
+    List<WebsiteInfo> websCheckList = [];
     try {
       try {
         final response = await http

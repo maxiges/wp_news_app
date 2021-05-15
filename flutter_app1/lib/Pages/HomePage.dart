@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -9,10 +7,8 @@ import '../Globals.dart';
 import '../Elements/PagesToTab.dart';
 import '../Class/WebPortal.dart';
 import 'dart:math';
-import '../Utils/Ads.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import '../Utils/WebFilter.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:admob_flutter/admob_flutter.dart';
 import 'package:toast/toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -30,8 +26,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   var isPortrait = true;
-  List<Widget> _webList = new List<Widget>();
-  bool isOpendeSavedList = false;
+  List<Widget> _webList = [];
+  bool isOpenSavedList = false;
   bool appStarted = false;
 
   int actLoadedPages = 0;
@@ -45,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   AnimationController rotationController;
   AnimationController refreshController;
   Animation<double> _refreshIconSizeAnimation;
+
   void dispose() {
     super.dispose();
     Global_timer.cancel();
@@ -104,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> checkLoadingPagesAssert({String loadPageError}) {
-    List<Widget> retVal = List<Widget>();
+    List<Widget> retVal = [];
     if (Global_webList.length < 1) {
       retVal.add(new Center(
         child: Text("No pages to load.\r\n Go to settings ",
@@ -163,28 +160,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return retVal;
   }
 
-  Widget pagesToTabAdds() {
-    Ads newAds = Ads();
-    BannerAd _baner = newAds.getBaner();
-
-    Widget banerWidget = Container(
-      margin: EdgeInsets.only(bottom: 20.0),
-      child: AdmobBanner(
-        adUnitId: _baner.adUnitId,
-        adSize: AdmobBannerSize.BANNER,
-        listener: (AdmobAdEvent event, Map<String, dynamic> args) {
-          handleEvent(event, args, 'baner');
-        },
-      ),
-    );
-
-    return (Container(
-      margin: EdgeInsets.only(top: 0, bottom: 10),
-      color: GlobalTheme.tabsColorPrimary,
-      child: banerWidget,
-    ));
-  }
-
   void showSnackBar(String content) {
     scaffoldState.currentState.showSnackBar(SnackBar(
       content: Text(content),
@@ -235,8 +210,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   buildTableWithPages(bool tryLoadSavedLinks) {
-    isOpendeSavedList = tryLoadSavedLinks;
-    List<WebsiteInfo> websiteInfoLoaded = new List<WebsiteInfo>();
+    isOpenSavedList = tryLoadSavedLinks;
+    List<WebsiteInfo> websiteInfoLoaded = [];
     if (tryLoadSavedLinks) {
       _actIcon = new Icon(Icons.storage);
       websiteInfoLoaded = Global_savedWebsList;
@@ -245,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       websiteInfoLoaded = readedWebs;
     }
 
-    List<Widget> wid = new List<Widget>();
+    List<Widget> wid = [];
     for (WebsiteInfo iWeb in websiteInfoLoaded) {
       if (webFilter.actSetFilter != "All") {
         if (!iWeb.DOMAIN.contains(webFilter.actSetFilter)) {
@@ -256,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       if (Global_Settings.isAdsOn()) {
         var ran = new Random();
         if (ran.nextInt(20) == 0) {
-          wid.add(pagesToTabAdds());
+          //todo add AD
         }
       }
       wid.add(PagesToTab(iWeb, this.context));
@@ -282,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> setAddedPages() {
-    List<Widget> _ret = new List<Widget>();
+    List<Widget> _ret = [];
     _ret.add(Container(
       height: Global_height * 0.3,
     ));
@@ -303,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> setErrorLoadPage() {
-    List<Widget> _ret = new List<Widget>();
+    List<Widget> _ret = [];
     _ret.add(Container(
       height: Global_height * 0.3,
     ));
@@ -325,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> setNoSavedLinksDesign() {
-    List<Widget> _ret = new List<Widget>();
+    List<Widget> _ret = [];
     _ret.add(Container(
       height: Global_height * 0.3,
     ));
@@ -350,7 +325,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     for (WebsiteInfo webs in _ret) {
       bool add = true;
       for (WebsiteInfo loaded in readedWebs) {
-        if (loaded.URL == webs.URL) add = false;
+        if (loaded.URL == webs.URL) {
+          add = false;
+          break;
+        }
       }
       if (add) {
         readedWebs.add(webs);
@@ -374,21 +352,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
       Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
       rotationController.repeat(period: Duration(milliseconds: 1000));
-      List<Future> tasks = new List<Future>();
+      List<Future> tasks = [];
       for (WebPortal WEB in Global_webList) {
         tasks.add(getPageAsync(WEB));
       }
-
       await Future.wait(tasks);
-      for (var i = 0; i < 10; i++) {
-        int l1 = readedWebs.toSet().length;
-        sleep(const Duration(milliseconds: 250));
-        int l2 = readedWebs.toSet().length;
-        if (l1 == l2) {
-          break;
-        }
-      }
-
       reSortWebs();
 
       rotationController.reset();
@@ -401,10 +369,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     try {
       List<WebsiteInfo> rWeb = new List<WebsiteInfo>.from(readedWebs);
       setState(() {
-        actLoadedPages = 0;
         _webList = checkLoadingPagesAssert();
         readedWebs.clear();
-        Global_refreshPage = true;
       });
 
       rWeb.sort((a, b) {
@@ -414,9 +380,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       });
       readedWebs = rWeb;
 
-      Global_refreshPage = true;
+      setState(() {
+        Global_refreshPage = true;
+      });
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.errorMessage(ex, this.context);
     }
   }
 

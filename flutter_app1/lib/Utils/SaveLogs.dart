@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:developer';
 import 'dart:core';
 import 'package:path_provider/path_provider.dart';
+import 'package:toast/toast.dart';
 
 SaveLogs saveLogs = new SaveLogs();
 
@@ -31,6 +32,12 @@ class SaveLogs {
     List<String> stackList = stackString.split('\n');
     log("[Error ⚠ ]" + "\r\n" + data + "\r\n" + stackString);
     this._write("[Error ⚠ ]" + "\r\n" + data + "\r\n" + stackList[1] + "\r\n");
+  }
+
+  errorMessage(String data, dynamic context) async {
+    Toast.show("Error:⚠", context,
+        duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+    this.error(data);
   }
 
   _write(String data) async {

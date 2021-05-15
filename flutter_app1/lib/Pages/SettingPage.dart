@@ -31,8 +31,6 @@ class _SettingPage extends State<SettingPage>
     super.initState();
     animController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
-
-    settingAds.showBaner();
   }
 
   Future<bool> deletePage(WebPortal web) async {
@@ -64,7 +62,7 @@ class _SettingPage extends State<SettingPage>
   }
 
   Widget websList() {
-    List<Widget> webList = new List<Widget>();
+    List<Widget> webList = [];
     for (WebPortal WEB in Global_webList) {
       webList.add(Container(
           margin: EdgeInsets.only(
@@ -96,10 +94,7 @@ class _SettingPage extends State<SettingPage>
                                 icon: Icons.delete,
                                 onTap: () => deletePage(WEB))),
                         Container(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width - 150,
+                          width: MediaQuery.of(context).size.width - 150,
                           child: Center(
                             child: Text(
                               WEB.url,
@@ -115,7 +110,7 @@ class _SettingPage extends State<SettingPage>
                           decoration: new BoxDecoration(
                             color: WEB.getColor(),
                             borderRadius:
-                            new BorderRadius.all(Radius.circular(40)),
+                                new BorderRadius.all(Radius.circular(40)),
                           ),
                         ),
                       ]))))));
@@ -130,94 +125,86 @@ class _SettingPage extends State<SettingPage>
     if (Global_GoogleSign.googleUserIsSignIn() == true) {
       return Center(
           child: Container(
-            width: 300,
-            margin: EdgeInsets.only(
-                top: 30,
-                bottom: 10,
-                left: marginRightLeft,
-                right: marginRightLeft),
-            decoration: new BoxDecoration(
-              color: Colors.redAccent,
-              borderRadius: new BorderRadius.all(Radius.circular(30)),
-            ),
-            child: FlatButton(
-              onPressed: () {
-                Global_GoogleSign.signOutGoogle(context);
-              },
-              child: Row(
-                // Repl
-                mainAxisAlignment: MainAxisAlignment.center,
-                // ace with a Row for horizontal icon + text
-                children: <Widget>[
-                  Icon(FontAwesomeIcons.google,
-                      color: Color_getColorText(Colors.redAccent)),
-                  Container(
-                    width: 5,
-                  ),
-                  Flexible(
-                      child: Text(
-                        "Sign out " + Global_GoogleSign.getGoogleUser(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Color_getColorText(Colors.redAccent)),
-                      )),
-                ],
+        width: 300,
+        margin: EdgeInsets.only(
+            top: 30, bottom: 10, left: marginRightLeft, right: marginRightLeft),
+        decoration: new BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: new BorderRadius.all(Radius.circular(30)),
+        ),
+        child: FlatButton(
+          onPressed: () {
+            Global_GoogleSign.signOutGoogle(context);
+          },
+          child: Row(
+            // Repl
+            mainAxisAlignment: MainAxisAlignment.center,
+            // ace with a Row for horizontal icon + text
+            children: <Widget>[
+              Icon(FontAwesomeIcons.google,
+                  color: Color_getColorText(Colors.redAccent)),
+              Container(
+                width: 5,
               ),
-            ),
-          ));
+              Flexible(
+                  child: Text(
+                "Sign out " + Global_GoogleSign.getGoogleUser(),
+                style: TextStyle(
+                    fontSize: 18, color: Color_getColorText(Colors.redAccent)),
+              )),
+            ],
+          ),
+        ),
+      ));
     } else {
       return Center(
           child: Container(
-            margin: EdgeInsets.only(top: 10, bottom: 10),
-          ));
+        margin: EdgeInsets.only(top: 10, bottom: 10),
+      ));
     }
   }
 
   Widget seeLogs() {
     return Center(
         child: Container(
-          width: 300,
-          margin: EdgeInsets.only(
-              top: 30,
-              bottom: 10,
-              left: marginRightLeft,
-              right: marginRightLeft),
-          decoration: new BoxDecoration(
-            color: Colors.blueAccent,
-            borderRadius: new BorderRadius.all(Radius.circular(30)),
-          ),
-          child: FlatButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed("/logScreen");
-            },
-            child: Row(
-              // Repl
-              mainAxisAlignment: MainAxisAlignment.center,
-              // ace with a Row for horizontal icon + text
-              children: <Widget>[
-                Icon(FontAwesomeIcons.phoneAlt,
-                    color: Color_getColorText(Colors.redAccent)),
-                Container(
-                  width: 5,
-                ),
-                Flexible(
-                    child: Text(
-                      "Show Logs",
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Color_getColorText(Colors.redAccent)),
-                    )),
-              ],
+      width: 300,
+      margin: EdgeInsets.only(
+          top: 30, bottom: 10, left: marginRightLeft, right: marginRightLeft),
+      decoration: new BoxDecoration(
+        color: Colors.blueAccent,
+        borderRadius: new BorderRadius.all(Radius.circular(30)),
+      ),
+      child: FlatButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed("/logScreen");
+        },
+        child: Row(
+          // Repl
+          mainAxisAlignment: MainAxisAlignment.center,
+          // ace with a Row for horizontal icon + text
+          children: <Widget>[
+            Icon(FontAwesomeIcons.phoneAlt,
+                color: Color_getColorText(Colors.redAccent)),
+            Container(
+              width: 5,
             ),
-          ),
-        ));
+            Flexible(
+                child: Text(
+              "Show Logs",
+              style: TextStyle(
+                  fontSize: 18, color: Color_getColorText(Colors.redAccent)),
+            )),
+          ],
+        ),
+      ),
+    ));
   }
 
   Widget labelAddButtonPage() {
     return (new GestureDetector(
       onTapDown: (e) async {
         bool _isTrue =
-        await settingAddPageShowDialog(new WebPortal("", ""), this.context);
+            await settingAddPageShowDialog(new WebPortal("", ""), this.context);
         if (_isTrue) {
           setState(() {});
         }
@@ -249,10 +236,7 @@ class _SettingPage extends State<SettingPage>
       margin: EdgeInsets.only(
           top: 10, bottom: 10, right: marginRightLeft, left: marginRightLeft),
       padding: EdgeInsets.only(top: 10, bottom: 10),
-      width: MediaQuery
-          .of(context)
-          .size
-          .width - 10,
+      width: MediaQuery.of(context).size.width - 10,
       decoration: BoxDecoration(
         color: GlobalTheme.tabs,
         borderRadius: BorderRadius.circular(5),
@@ -390,6 +374,5 @@ class _SettingPage extends State<SettingPage>
 
   void dispose() {
     super.dispose();
-    settingAds.dispose();
   }
 }

@@ -21,7 +21,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   bool _init = true;
 
   double _width = 100.0, _height = 100.0;
-  List<PageComments> _commentList = new List<PageComments>();
+  List<PageComments> _commentList = [];
   String commentsCounter = "...";
   bool _isSaved = false;
   String _saveText = "Save";
@@ -218,7 +218,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   }
 
   List<Widget> getNextComment(String parent, double margin) {
-    List<Widget> renderedList = new List<Widget>();
+    List<Widget> renderedList = [];
     if (parent == null || parent == "0") {
       renderedList.add(Container(
         height: 10,
@@ -242,7 +242,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   }
 
   List<Widget> renderCommentsUi() {
-    List<Widget> renderedList = new List<Widget>();
+    List<Widget> renderedList = [];
     _commentList.forEach((act) {
       if (act.PARENT == "" || act.PARENT == "0") {
         renderedList.add(renderCommentPage(act, 0.0));
@@ -310,7 +310,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           ),
           Container(
               margin:
-              new EdgeInsets.only(bottom: 10, top: 5, left: 70, right: 0),
+                  new EdgeInsets.only(bottom: 10, top: 5, left: 70, right: 0),
               alignment: Alignment.centerRight,
               child: new GestureDetector(
                   onTap: () {
@@ -382,10 +382,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     _height = MediaQuery.of(context).size.height;
 
     if (_init) {
-      WebInfo = ModalRoute
-          .of(context)
-          .settings
-          .arguments;
+      WebInfo = ModalRoute.of(context).settings.arguments;
       _onTapReadMoreFunc(); //loadWebInfoPage
       _getInfoAboutComments(WebInfo);
       _getMoreInfoAboutWebPage(WebInfo);
@@ -397,7 +394,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         Navigator.pop(context, true);
       } else if (press == 1) {
         bool ret =
-        await dialogsPageSaveRemoveWebsite(_isSaved, context, WebInfo);
+            await dialogsPageSaveRemoveWebsite(_isSaved, context, WebInfo);
         if (ret) {
           checkThisPageIsSaved();
         }
