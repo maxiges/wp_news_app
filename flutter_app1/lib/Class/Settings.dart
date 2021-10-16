@@ -1,6 +1,4 @@
 import 'package:WP_news_APP/Globals.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/WebFilter.dart';

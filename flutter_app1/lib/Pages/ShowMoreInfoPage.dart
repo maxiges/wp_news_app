@@ -17,7 +17,7 @@ class ShowMoreInfo extends StatefulWidget {
 
 class _ShowMoreInfo extends State<ShowMoreInfo>
     with SingleTickerProviderStateMixin {
-  WebsiteInfo WebInfo;
+  WebsiteInfo articleInfo;
   bool _init = true;
 
   double _width = 100.0, _height = 100.0;
@@ -28,7 +28,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   IconData _saveRemoveIcon = Icons.save;
 
   bool _readMore = false;
-  Text _PageText = new Text("Error");
+  Text _pageText = new Text("Error");
 
   @override
   void initState() {
@@ -52,11 +52,11 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     try {
       WebsiteInfo ret = await webPageFetchAPI.websiteInfoGetAllWebInfo(web);
       setState(() {
-        WebInfo = ret;
+        articleInfo = ret;
       });
 
-      if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE.length >
-          WebInfo.DESCRIPTION.length) {
+      if (articleInfo.articleDetails.fullArticle.length >
+          articleInfo.descriptionBrief.length) {
         setState(() {
           _readMore = true;
         });
@@ -73,19 +73,19 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     }
   }
 
-  Widget renderInfoTab(String Tab) {
-    if (Tab == "" || Tab == null) {
+  Widget renderInfoTab(String tab) {
+    if (tab == "" || tab == null) {
       return (Container());
     } else {
       return (Container(
         padding: EdgeInsets.all(10),
         margin: EdgeInsets.only(bottom: 10),
-        color: WebInfo.getColor(),
+        color: articleInfo.getColor(),
         width: _width,
         child: Text(
-          Tab,
+          tab,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: WebInfo.getColorText()),
+          style: TextStyle(fontSize: 18, color: articleInfo.getColorText()),
         ),
       ));
     }
@@ -123,7 +123,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               Center(
                 child: Container(
                   child: Image.network(
-                    comment.AVATARIMG,
+                    comment.avatarImg,
                     fit: BoxFit.cover,
                     width: _widthAvatar * 0.4,
                     height: _widthAvatar * 0.4,
@@ -132,7 +132,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               ),
               Container(
                 child: SelectableText(
-                  comment.AUTHOR,
+                  comment.author,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: GlobalTheme.textColor),
                 ),
@@ -142,7 +142,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           Container(
             child: Flexible(
               child: SelectableText(
-                comment.POST,
+                comment.postData,
                 style: TextStyle(color: GlobalTheme.textColor),
               ),
             ),
@@ -152,7 +152,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     ));
   }
 
-  Widget _Top(WebsiteInfo webInfo, BuildContext context) {
+  Widget _top(WebsiteInfo webInfo, BuildContext context) {
     if (_width < 600) {
       return (Column(
         children: <Widget>[
@@ -161,9 +161,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               child: new ClipRRect(
                 borderRadius: new BorderRadius.circular(8.0),
                 child: Hero(
-                  tag: webInfo.URL,
+                  tag: webInfo.url,
                   child: Image.network(
-                    webInfo.IMAGEHREF,
+                    webInfo.thumbnailUrlLink,
                     fit: BoxFit.cover,
                     width: 200,
                     height: 200,
@@ -175,7 +175,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           Container(
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
-              webInfo.TITTLE,
+              webInfo.tittle,
               style: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
             ),
           ),
@@ -188,7 +188,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
             width: _width - 250,
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
-              webInfo.TITTLE,
+              webInfo.tittle,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 22, color: GlobalTheme.textColor),
             ),
@@ -201,9 +201,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               child: new ClipRRect(
                 borderRadius: new BorderRadius.circular(8.0),
                 child: Hero(
-                  tag: webInfo.URL,
+                  tag: webInfo.url,
                   child: Image.network(
-                    webInfo.IMAGEHREF,
+                    webInfo.thumbnailUrlLink,
                     fit: BoxFit.cover,
                     width: 200,
                     height: 200,
@@ -227,9 +227,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     }
 
     _commentList.forEach((act) {
-      if (act.PARENT == parent) {
+      if (act.parent == parent) {
         renderedList.add(renderCommentPage(act, margin));
-        renderedList += getNextComment(act.ID, margin + 20);
+        renderedList += getNextComment(act.id, margin + 20);
       }
     });
 
@@ -244,9 +244,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   List<Widget> renderCommentsUi() {
     List<Widget> renderedList = [];
     _commentList.forEach((act) {
-      if (act.PARENT == "" || act.PARENT == "0") {
+      if (act.parent == "" || act.parent == "0") {
         renderedList.add(renderCommentPage(act, 0.0));
-        renderedList += getNextComment(act.ID, 20);
+        renderedList += getNextComment(act.id, 20);
       }
     });
 
@@ -261,10 +261,10 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     if (_readMore) {
       return Text("Read More ...");
     }
-    if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE == "N/A") {
+    if (articleInfo.articleDetails.fullArticle == "N/A") {
       return Text("No internet connection");
     }
-    if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE == "") {
+    if (articleInfo.articleDetails.fullArticle == "") {
       return Text("Loading ...");
     }
     return Text("Hide ...");
@@ -273,8 +273,8 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   void _onTapReadMoreFunc() {
     if (_readMore == true) {
       setState(() {
-        _PageText = Text(
-          WebInfo.WEB_DETAILS.WEB_ALL_PAGE,
+        _pageText = Text(
+          articleInfo.articleDetails.fullArticle,
           style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
         );
       });
@@ -282,13 +282,13 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
       _readMore = false;
     } else {
       setState(() {
-        _PageText = Text(
-          WebInfo.DESCRIPTION + " ...",
+        _pageText = Text(
+          articleInfo.descriptionBrief + " ...",
           style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
         );
       });
 
-      if (WebInfo.WEB_DETAILS.WEB_ALL_PAGE != "") {
+      if (articleInfo.articleDetails.fullArticle != "") {
         _readMore = true;
       }
     }
@@ -303,27 +303,31 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         width: _width,
         margin: new EdgeInsets.all(0),
         child: ListView(children: <Widget>[
-          _Top(webInfo, context),
+          _top(webInfo, context),
           Container(
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
-            child: _PageText,
+            child: _pageText,
           ),
           Container(
               margin:
-                  new EdgeInsets.only(bottom: 10, top: 5, left: 70, right: 0),
+                  new EdgeInsets.only(bottom: 10, top: 5, left: 70, right: 10),
               alignment: Alignment.centerRight,
+
               child: new GestureDetector(
                   onTap: () {
                     _onTapReadMoreFunc();
                   },
                   child: new Container(
                       width: 140.0,
-                      height: 25.0,
-                      padding: EdgeInsets.only(
-                        top: 5.0,
-                        right: 30,
+                      height: 35.0,
+                      decoration: new BoxDecoration(
+                        color: webInfo.getColor(),
+                          borderRadius: new BorderRadius.all(Radius.circular(10.0)),
                       ),
-                      color: webInfo.getColor(),
+                      padding: EdgeInsets.only(
+                        top: 10.0,
+                        right: 0
+                      ),
                       child: new Column(
                         children: [
                           showMoreInfoChild(),
@@ -361,7 +365,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   }
 
   checkThisPageIsSaved() {
-    if (savedFileContainsThisWeb(WebInfo) >= 0) {
+    if (savedFileContainsThisWeb(articleInfo) >= 0) {
       setState(() {
         _isSaved = true;
         _saveText = "Remove";
@@ -382,10 +386,10 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     _height = MediaQuery.of(context).size.height;
 
     if (_init) {
-      WebInfo = ModalRoute.of(context).settings.arguments;
+      articleInfo = ModalRoute.of(context).settings.arguments;
       _onTapReadMoreFunc(); //loadWebInfoPage
-      _getInfoAboutComments(WebInfo);
-      _getMoreInfoAboutWebPage(WebInfo);
+      _getInfoAboutComments(articleInfo);
+      _getMoreInfoAboutWebPage(articleInfo);
       _init = false;
     }
 
@@ -394,12 +398,12 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         Navigator.pop(context, true);
       } else if (press == 1) {
         bool ret =
-            await dialogsPageSaveRemoveWebsite(_isSaved, context, WebInfo);
+            await dialogsPageSaveRemoveWebsite(_isSaved, context, articleInfo);
         if (ret) {
           checkThisPageIsSaved();
         }
       } else {
-        WebInfo.launchURL();
+        articleInfo.launchURL();
       }
     }
 
@@ -432,6 +436,6 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           onTap: (press) => pressButton(press),
         ),
         backgroundColor: GlobalTheme.background,
-        body: showMoreInfoTable(WebInfo, context));
+        body: showMoreInfoTable(articleInfo, context));
   }
 }

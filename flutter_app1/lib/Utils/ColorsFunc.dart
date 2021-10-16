@@ -1,10 +1,9 @@
-import 'package:WP_news_APP/Globals.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/SaveLogs.dart';
 
-Map<String, Color> colorPalet = {
+Map<String, Color> colorPalette = {
   "black": Colors.black,
   "black26": Colors.black26,
   "grey": Colors.grey,
@@ -41,14 +40,15 @@ class ColorsTheme {
     this.navAccent = Colors.black,
     this.textColor = Colors.white,
     this.textstyle = const TextStyle(color: Colors.white),
-    this.mainTheme = null,
+    this.mainTheme ,
     this.tabsColorPrimary = Colors.black54,
     this.tabsDayBackground = Colors.black54,
     this.textColor2 = Colors.black54,
     this.tabs = Colors.black38,
     this.iconTheme = const IconThemeData(color: Colors.white),
     this.textTheme = const TextTheme(
-        title: TextStyle(color: Colors.white),
+
+        headline1: TextStyle(color: Colors.white),
         button: TextStyle(color: Colors.white)),
     this.backgroundDialog = Colors.black54,
   });
@@ -65,7 +65,7 @@ ColorsTheme GlobalThemeDart = new ColorsTheme(
     tabs: Color.fromARGB(255, 0, 100, 100),
     iconTheme: const IconThemeData(color: Colors.white),
     textTheme: const TextTheme(
-        title: TextStyle(color: Colors.white),
+        headline1: TextStyle(color: Colors.white),
         button: TextStyle(color: Colors.white)),
     backgroundDialog: Color.fromARGB(255, 60, 60, 60),
     mainTheme: ThemeData(
@@ -74,7 +74,7 @@ ColorsTheme GlobalThemeDart = new ColorsTheme(
       secondaryHeaderColor: Colors.white,
       splashColor: Colors.black,
       brightness: Brightness.light,
-      textTheme: TextTheme(title: TextStyle(color: Colors.white)),
+      textTheme: TextTheme(headline1: TextStyle(color: Colors.white)),
       backgroundColor: Colors.black,
     ));
 
@@ -90,7 +90,7 @@ ColorsTheme GlobalThemeLight = new ColorsTheme(
     tabs: Color.fromARGB(255, 150, 255, 255),
     iconTheme: const IconThemeData(color: Colors.black),
     textTheme: const TextTheme(
-        title: TextStyle(color: Colors.black),
+        headline1: TextStyle(color: Colors.black),
         button: TextStyle(color: Colors.black)),
     mainTheme: ThemeData(
       primarySwatch: Colors.cyan,
@@ -98,13 +98,13 @@ ColorsTheme GlobalThemeLight = new ColorsTheme(
       secondaryHeaderColor: Colors.white,
       splashColor: Colors.white,
       brightness: Brightness.light,
-      textTheme: TextTheme(title: TextStyle(color: Colors.white)),
+      textTheme: TextTheme(headline1: TextStyle(color: Colors.white)),
       backgroundColor: Colors.white,
     ));
 
 Color Color_GetColor(String color) {
   try {
-    return colorPalet[color];
+    return colorPalette[color];
   } catch (ex) {
     saveLogs.error(ex);
   }
@@ -123,7 +123,7 @@ String Color_GetColorInString(Color color) {
   String findname = "black";
   int listnb = 0;
   int number = -1;
-  for (Color colorval in colorPalet.values.toList()) {
+  for (Color colorval in colorPalette.values.toList()) {
     if (colorval.value == color.value) {
       number = listnb;
       break;
@@ -131,7 +131,7 @@ String Color_GetColorInString(Color color) {
     listnb++;
   }
   if (number > 0) {
-    return colorPalet.keys.toList()[number];
+    return colorPalette.keys.toList()[number];
   }
   return findname;
 }

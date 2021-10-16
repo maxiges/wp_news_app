@@ -14,6 +14,7 @@ String actUrl = "";
 
 Function _changeColor(Color newColor) {
   currentColor = newColor;
+  return null;
 }
 
 BoxDecoration buttonDecor(Color back) {
@@ -90,10 +91,10 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
                     Container(
                       margin: const EdgeInsets.only(bottom: 30, top: 15),
                       child: ColorsPicker.ColorPicker(
-                        colorPalet.values.toList(),
+                        colorPalette.values.toList(),
                         _changeColor,
                         initColor: currentColor,
-                        maxRow: (Global_width / 80).toInt(),
+                        maxRow: Global_width ~/ 80,
                       ),
                     ),
                     Align(
@@ -156,14 +157,14 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
       for (WebPortal readWeb in Global_webList) {
         if (readWeb.url == actUrl && actUrl.length > 2) {
           readWeb.decColor = Color_GetColorInString(currentColor);
-          WebPortal_saveWebs(Global_webList);
+          webPortalSaveWebs(Global_webList);
           return true;
         }
       }
       web.decColor = Color_GetColorInString(currentColor);
       web.url = actUrl;
       Global_webList.add(web);
-      WebPortal_saveWebs(Global_webList);
+      webPortalSaveWebs(Global_webList);
       return true;
     }
     if (shouldUpdate == null) {

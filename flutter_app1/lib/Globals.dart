@@ -4,14 +4,13 @@ import 'Class/WebPortal.dart';
 import 'package:package_info/package_info.dart';
 import 'Elements/GoogleSignIn.dart';
 import 'Pages/HomePage.dart';
-import 'package:flutter/material.dart';
 import 'Utils/ColorsFunc.dart';
 import "Class/Settings.dart";
 
 enum ACT_PAGE { none, LOADED_PAGES, SAVED_PAGES, SETTINGS }
 
-List<WebPortal> Global_webList = new List<WebPortal>();
-List<WebsiteInfo> Global_savedWebsList = new List<WebsiteInfo>();
+List<WebPortal> Global_webList = [];
+List<WebsiteInfo> Global_savedWebsList = [];
 double Global_width = 0;
 double Global_height = 0;
 Timer Global_timer;
@@ -33,6 +32,6 @@ ColorsTheme GlobalTheme = GlobalThemeDart;
 Settings Global_Settings = new Settings();
 
 loadFromStorage() async {
-  Global_webList = await WebPortal_loadWebs();
+  Global_webList = await webPortalLoadWebs();
   Global_savedWebsList = await webInfoLoadFromFirebase();
 }

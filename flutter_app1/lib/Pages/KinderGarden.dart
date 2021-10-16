@@ -7,7 +7,6 @@ import '../Globals.dart';
 
 import 'package:flutter/services.dart';
 
-import 'package:flutter_local_notifications_extended/flutter_local_notifications_extended.dart';
 import '../Class/WebsiteInfo.dart';
 
 import '../Pages/ShowMoreInfoPage.dart';
@@ -38,35 +37,14 @@ class _KinderGarden extends State<KinderGarden>
     }
   }
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      new FlutterLocalNotificationsPlugin();
 
   displayNotification() async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'wpChannel', 'wpChannel', 'wpChannel for notification',
-        importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(0, 'WP notification ',
-        'Welcome this is my notification ', platformChannelSpecifics,
-        payload: new WebsiteInfo(TITTLE: "Test from notification").toJson());
+
   }
 
   @override
   void initState() {
     super.initState();
-
-// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
-    var initializationSettingsAndroid =
-        new AndroidInitializationSettings('ic_launcher');
-    var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
-
-    displayNotification();
   }
 
   Future<void> _getBatteryLevel() async {

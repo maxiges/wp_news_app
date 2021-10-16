@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'dart:async';
-import '../Class/WebsiteInfo.dart';
 import '../Globals.dart';
-import '../Elements/PagesToTab.dart';
 import '../Class/WebPortal.dart';
-import 'dart:math';
-import '../Utils/Ads.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 
 WebFilter webFilter = new WebFilter();
 
 class WebFilter {
-  List<String> filterPages = new List<String>();
+  List<String> filterPages = [];
   String actSetFilter = "All";
-  List<PickerItem> filterDataList = new List<PickerItem>();
+  List<PickerItem> filterDataList = [];
 
   void setPageFilter() {
     filterPages.clear();

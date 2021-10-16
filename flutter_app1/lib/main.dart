@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'Pages/SplashPage.dart';
 import 'Pages/SettingPage.dart';
 import 'Globals.dart';
-import 'Utils/ColorsFunc.dart';
 import 'Pages/KinderGarden.dart';
 import "Pages/LogsPage.dart";
 import "Utils/SaveLogs.dart";
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     try {
       Global_Settings.loadData();
-      SystemChrome.setEnabledSystemUIOverlays([]); //disable
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge); //disable
       //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);//enable
       return MaterialApp(
         title: 'WP news Collector',

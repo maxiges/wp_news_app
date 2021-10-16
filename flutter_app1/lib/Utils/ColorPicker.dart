@@ -30,7 +30,7 @@ class ColorPicker extends StatefulWidget {
 class _ColorPicker extends State<ColorPicker> {
   @override
   Widget build(BuildContext context) {
-    List<Widget> _colorsWidgetList = new List<Widget>();
+    List<Widget> _colorsWidgetList = [];
 
     for (Color acCol in widget._colorList) {
       Color _thisColorIsPicked = Colors.transparent;
@@ -76,12 +76,12 @@ class _ColorPicker extends State<ColorPicker> {
           )));
     }
 
-    List<Widget> _colorsWidgetRowsList = new List<Widget>();
+    List<Widget> _colorsWidgetRowsList = [];
 
     for (int i = 0; i < _colorsWidgetList.length; i += widget._maxinRow) {
-      int avalable = widget._maxinRow;
+      int _avail = widget._maxinRow;
       if (_colorsWidgetList.length - i < widget._maxinRow) {
-        avalable = _colorsWidgetList.length - i;
+        _avail = _colorsWidgetList.length - i;
       }
 
       _colorsWidgetRowsList.add(Padding(
@@ -89,7 +89,7 @@ class _ColorPicker extends State<ColorPicker> {
         child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.min,
-            children: _colorsWidgetList.sublist(i, i + avalable)),
+            children: _colorsWidgetList.sublist(i, i + _avail)),
       ));
     }
 

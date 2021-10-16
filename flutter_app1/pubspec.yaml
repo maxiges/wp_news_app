@@ -36,13 +36,10 @@ dependencies:
   firebase_database: ^3.1.6
   cloud_firestore: ^0.13.7
   font_awesome_flutter: ^8.8.1
-  flutter_local_notifications_extended: ^0.9.1
-  flutter_picker: ^1.1.5
+  flutter_picker: ^2.0.2
   path_provider: ^1.6.24
-  pull_to_refresh: ^1.6.3
+  pull_to_refresh: ^2.0.0
 
-
-  admob_flutter: ^0.3.4
 
 
 

@@ -1,12 +1,7 @@
-import 'package:WP_news_APP/Globals.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../Class/WebsiteInfo.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Class/PageComments.dart';
-import '../Dialogs/DialogsPage.dart';
 import '../Utils/SaveLogs.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Class/WebPortal.dart';
@@ -20,7 +15,7 @@ class WebPageFetchAPI {
 
     try {
       String url =
-          "https://" + web.DOMAIN + "/wp-json/wp/v2/comments?post=" + web.ID;
+          "https://" + web.domain + "/wp-json/wp/v2/comments?post=" + web.articleID;
       final response = await http.get(url);
       if (response.statusCode == 200) {
         List<dynamic> retJson = json.decode(response.body);
@@ -58,11 +53,11 @@ class WebPageFetchAPI {
             assert(ex);
           }
           pageCommentList.add(PageComments(
-              AUTHOR: author,
-              AVATARIMG: avatar,
-              POST: content,
-              ID: id,
-              PARENT: parent));
+              author: author,
+              avatarImg: avatar,
+              postData: content,
+              id: id,
+              parent: parent));
         }
       }
       return pageCommentList;
@@ -108,14 +103,14 @@ class WebPageFetchAPI {
               } catch (ex) {}
 
               websCheckList.add(new WebsiteInfo(
-                  URL: items['link'],
-                  TITTLE: _articleTittle,
-                  IMAGEHREF: imaSrc,
-                  DATE: items['date'],
-                  LinkColor: Color_GetColorInString(web.getColor()),
-                  DESCRIPTION: _articleDesc,
-                  ID: _id,
-                  DOMAIN: web.url));
+                  url: items['link'],
+                  tittle: _articleTittle,
+                  thumbnailUrlLink: imaSrc,
+                  articleDate: items['date'],
+                  providerColorAccent: Color_GetColorInString(web.getColor()),
+                  descriptionBrief: _articleDesc,
+                  articleID: _id,
+                  domain: web.url));
             } catch (ex) {}
           }
         }
@@ -123,7 +118,7 @@ class WebPageFetchAPI {
         saveLogs.error(ex);
       }
       websCheckList.sort((a, b) {
-        if (DateTime.parse(a.DATE).isBefore(DateTime.parse(b.DATE)) == true)
+        if (DateTime.parse(a.articleDate).isBefore(DateTime.parse(b.articleDate)) == true)
           return 1;
         else
           return 0;
@@ -139,9 +134,9 @@ class WebPageFetchAPI {
     try {
       try {
         final response = await http.get("https://" +
-            web.DOMAIN +
+            web.domain +
             "/wp-json/wp/v2/posts/" +
-            web.ID +
+            web.articleID +
             "?_embed");
         if (response.statusCode == 200) {
           dynamic retJson = json.decode(response.body);
@@ -175,18 +170,18 @@ class WebPageFetchAPI {
             } catch (ex) {}
 
             WebsiteInfoDetails webDetails =
-                new WebsiteInfoDetails(WEB_ALL_PAGE: _webFullDes);
+                new WebsiteInfoDetails(fullArticle: _webFullDes);
 
             websCheckList = new WebsiteInfo(
-                URL: retJson['link'],
-                TITTLE: _articleTittle,
-                IMAGEHREF: imaSrc,
-                DATE: retJson['date'],
-                LinkColor: Color_GetColorInString(web.getColor()),
-                DESCRIPTION: _articleDesc,
-                ID: _id,
-                DOMAIN: web.DOMAIN,
-                WEB_DETAILS: webDetails);
+                url: retJson['link'],
+                tittle: _articleTittle,
+                thumbnailUrlLink: imaSrc,
+                articleDate: retJson['date'],
+                providerColorAccent: Color_GetColorInString(web.getColor()),
+                descriptionBrief: _articleDesc,
+                articleID: _id,
+                domain: web.domain,
+                articleDetails: webDetails);
 
             return websCheckList;
           } catch (ex) {}

@@ -9,7 +9,6 @@ import '../Class/WebPortal.dart';
 import 'dart:math';
 import 'package:flutter_picker/flutter_picker.dart';
 import '../Utils/WebFilter.dart';
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:toast/toast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../Utils/WebPageAPI.dart';
@@ -167,48 +166,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     ));
   }
 
-  void handleEvent(
-      AdmobAdEvent event, Map<String, dynamic> args, String adType) {
-    switch (event) {
-      case AdmobAdEvent.loaded:
-        showSnackBar('New Admob $adType Ad loaded!');
-        break;
-      case AdmobAdEvent.opened:
-        showSnackBar('Admob $adType Ad opened!');
-        break;
-      case AdmobAdEvent.closed:
-        showSnackBar('Admob $adType Ad closed!');
-        break;
-      case AdmobAdEvent.failedToLoad:
-        showSnackBar('Admob $adType failed to load. :(');
-        break;
-      case AdmobAdEvent.rewarded:
-        showDialog(
-          context: scaffoldState.currentContext,
-          builder: (BuildContext context) {
-            return WillPopScope(
-              child: AlertDialog(
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text('Reward callback fired. Thanks Andrew!'),
-                    Text('Type: ${args['type']}'),
-                    Text('Amount: ${args['amount']}'),
-                  ],
-                ),
-              ),
-              onWillPop: () async {
-                scaffoldState.currentState.hideCurrentSnackBar();
-                return true;
-              },
-            );
-          },
-        );
-        break;
-      default:
-    }
-  }
-
   buildTableWithPages(bool tryLoadSavedLinks) {
     isOpenSavedList = tryLoadSavedLinks;
     List<WebsiteInfo> websiteInfoLoaded = [];
@@ -217,13 +174,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       websiteInfoLoaded = Global_savedWebsList;
     } else {
       _actIcon = new Icon(Icons.sd_storage);
-      websiteInfoLoaded = readedWebs;
+      websiteInfoLoaded = readWebsData;
     }
 
     List<Widget> wid = [];
     for (WebsiteInfo iWeb in websiteInfoLoaded) {
       if (webFilter.actSetFilter != "All") {
-        if (!iWeb.DOMAIN.contains(webFilter.actSetFilter)) {
+        if (!iWeb.domain.contains(webFilter.actSetFilter)) {
           continue;
         }
       }
@@ -324,14 +281,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     List<WebsiteInfo> _ret = await webPageFetchAPI.websiteInfoGetWebPages(web);
     for (WebsiteInfo webs in _ret) {
       bool add = true;
-      for (WebsiteInfo loaded in readedWebs) {
-        if (loaded.URL == webs.URL) {
+      for (WebsiteInfo loaded in readWebsData) {
+        if (loaded.url == webs.url) {
           add = false;
           break;
         }
       }
       if (add) {
-        readedWebs.add(webs);
+        readWebsData.add(webs);
       }
     }
     setState(() {
@@ -347,14 +304,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         actLoadedPages = 0;
         _webList = checkLoadingPagesAssert();
         if (append == false) {
-          readedWebs.clear();
+          readWebsData.clear();
         }
       });
       Global_actPageToRefresh = ACT_PAGE.LOADED_PAGES;
       rotationController.repeat(period: Duration(milliseconds: 1000));
       List<Future> tasks = [];
-      for (WebPortal WEB in Global_webList) {
-        tasks.add(getPageAsync(WEB));
+      for (WebPortal _website in Global_webList) {
+        tasks.add(getPageAsync(_website));
       }
       await Future.wait(tasks);
       reSortWebs();
@@ -367,18 +324,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   void reSortWebs() async {
     try {
-      List<WebsiteInfo> rWeb = new List<WebsiteInfo>.from(readedWebs);
+      List<WebsiteInfo> rWeb = new List<WebsiteInfo>.from(readWebsData);
       setState(() {
         _webList = checkLoadingPagesAssert();
-        readedWebs.clear();
+        readWebsData.clear();
       });
 
       rWeb.sort((a, b) {
-        DateTime dataA = DateTime.parse(a.DATE);
-        DateTime dataB = DateTime.parse(b.DATE);
+        DateTime dataA = DateTime.parse(a.articleDate);
+        DateTime dataB = DateTime.parse(b.articleDate);
         return dataB.compareTo(dataA);
       });
-      readedWebs = rWeb;
+      readWebsData = rWeb;
 
       setState(() {
         Global_refreshPage = true;
@@ -422,12 +379,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     });
   }
 
-  void _refreshDoubleTap() {
-    setState(() async {
+  void _refreshDoubleTap() async {
+
       await refreshController.forward();
-      reSortWebs();
-      refreshController.reset();
-    });
+       reSortWebs();
+    refreshController.reset();
   }
 
   showPicker(BuildContext context) {
@@ -440,7 +396,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         columnPadding: const EdgeInsets.all(8.0),
         backgroundColor: GlobalTheme.background,
         cancelText: "Cancel",
-        headercolor: GlobalTheme.background,
+        headerColor: GlobalTheme.background,
         containerColor: GlobalTheme.background,
         cancelTextStyle: TextStyle(color: GlobalTheme.textColor),
         confirmTextStyle: TextStyle(color: GlobalTheme.tabs),
@@ -462,7 +418,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         preferredSize: Size.fromHeight(35.0),
         child: new AppBar(
           backgroundColor: GlobalTheme.navAccent,
-          textTheme: GlobalTheme.textTheme,
           iconTheme: GlobalTheme.iconTheme,
           leading: refresh(),
           title: Row(children: <Widget>[

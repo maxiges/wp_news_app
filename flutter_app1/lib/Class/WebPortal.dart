@@ -18,9 +18,9 @@ class WebPortal {
     return Color_GetColor(this.decColor);
   }
 
-  void tryRead(String JsonString) {
+  void tryRead(String jsonString) {
     try {
-      Map<String, dynamic> user = jsonDecode(JsonString);
+      Map<String, dynamic> user = jsonDecode(jsonString);
       this.url = user["URL"];
       this.decColor = user["Color"];
     } catch (ex) {
@@ -66,10 +66,11 @@ Future<List<String>> _loadDataFromFirebase() async {
   } catch (ex) {
     saveLogs.error(ex);
   }
+  return  [];
 }
 
-Future<bool> WebPortal_saveWebs(List<WebPortal> list) async {
-  List<String> objSave = new List<String>();
+Future<bool> webPortalSaveWebs(List<WebPortal> list) async {
+  List<String> objSave = [];
 
   for (WebPortal objectVal in list) {
     objSave.add(objectVal.toJson());
@@ -88,8 +89,8 @@ Future<bool> WebPortal_saveWebs(List<WebPortal> list) async {
   return prefs.setStringList("SavedWebs", objSave);
 }
 
-Future<List<WebPortal>> WebPortal_loadWebs() async {
-  List<String> loadedWebs = new List<String>();
+Future<List<WebPortal>> webPortalLoadWebs() async {
+  List<String> loadedWebs = [];
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
@@ -106,11 +107,11 @@ Future<List<WebPortal>> WebPortal_loadWebs() async {
     }
   }
 
-  List<WebPortal> readWebs = new List<WebPortal>();
+  List<WebPortal> readWebs = [];
   try {
-    for (String JsonString in loadedWebs) {
+    for (String _jsonString in loadedWebs) {
       WebPortal newSavedPage = new WebPortal("", "");
-      newSavedPage.tryRead(JsonString);
+      newSavedPage.tryRead(_jsonString);
       if (newSavedPage.url.length > 0) {
         readWebs.add(newSavedPage);
       }

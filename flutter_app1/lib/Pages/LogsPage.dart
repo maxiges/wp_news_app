@@ -33,11 +33,10 @@ class _LogPage extends State<LogPage> with SingleTickerProviderStateMixin {
         backgroundColor: GlobalTheme.background,
         appBar: AppBar(
           backgroundColor: GlobalTheme.navAccent,
-          textTheme: GlobalTheme.textTheme,
           iconTheme: GlobalTheme.iconTheme,
+          titleTextStyle: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
           title: const Text(
             'Logs',
-            style: TextStyle(fontSize: 20),
           ),
           leading: IconButton(
             iconSize: 30,

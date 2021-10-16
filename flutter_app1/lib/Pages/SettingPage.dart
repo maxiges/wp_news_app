@@ -9,7 +9,6 @@ import '../Dialogs/SettingAddPage.dart';
 import '../Class/WebPortal.dart';
 import '../Dialogs/AbautInfo.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import "../Utils/Ads.dart";
 
 class SettingPage extends StatefulWidget {
   SettingPage({Key key}) : super(key: key);
@@ -22,7 +21,6 @@ class _SettingPage extends State<SettingPage>
     with SingleTickerProviderStateMixin {
   AnimationController animController;
 
-  Ads settingAds = new Ads();
 
   double marginRightLeft = 5;
 
@@ -63,7 +61,7 @@ class _SettingPage extends State<SettingPage>
 
   Widget websList() {
     List<Widget> webList = [];
-    for (WebPortal WEB in Global_webList) {
+    for (WebPortal _web in Global_webList) {
       webList.add(Container(
           margin: EdgeInsets.only(
               top: 5, bottom: 5, left: marginRightLeft, right: marginRightLeft),
@@ -84,7 +82,7 @@ class _SettingPage extends State<SettingPage>
                               caption: 'Edit',
                               color: Colors.greenAccent,
                               icon: Icons.edit,
-                              onTap: () => editPage(WEB)),
+                              onTap: () => editPage(_web)),
                         ),
                         Container(
                             width: 50,
@@ -92,12 +90,12 @@ class _SettingPage extends State<SettingPage>
                                 caption: 'Detete',
                                 color: Colors.redAccent,
                                 icon: Icons.delete,
-                                onTap: () => deletePage(WEB))),
+                                onTap: () => deletePage(_web))),
                         Container(
                           width: MediaQuery.of(context).size.width - 150,
                           child: Center(
                             child: Text(
-                              WEB.url,
+                              _web.url,
                               style: TextStyle(
                                   color: GlobalTheme.textColor, fontSize: 18),
                               textAlign: TextAlign.center,
@@ -108,7 +106,7 @@ class _SettingPage extends State<SettingPage>
                           width: 30,
                           height: 30,
                           decoration: new BoxDecoration(
-                            color: WEB.getColor(),
+                            color: _web.getColor(),
                             borderRadius:
                                 new BorderRadius.all(Radius.circular(40)),
                           ),
@@ -261,7 +259,7 @@ class _SettingPage extends State<SettingPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text("   Change to darkmode:",
+          Text("   Change to dark mode:",
               style: TextStyle(
                   color: Color_getColorText(GlobalTheme.tabs), fontSize: 20)),
           Switch(
@@ -323,11 +321,10 @@ class _SettingPage extends State<SettingPage>
       backgroundColor: GlobalTheme.background,
       appBar: AppBar(
         backgroundColor: GlobalTheme.navAccent,
-        textTheme: GlobalTheme.textTheme,
         iconTheme: GlobalTheme.iconTheme,
+        titleTextStyle: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
         title: const Text(
-          'Setting',
-          style: TextStyle(fontSize: 20),
+          'Setting'
         ),
         leading: IconButton(
           iconSize: 30,

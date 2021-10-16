@@ -2,18 +2,18 @@ import '../Globals.dart';
 import '../Utils/StringUtils.dart';
 
 class PageComments {
-  String AUTHOR, POST, AVATARIMG, ID, PARENT;
+  String author, postData, avatarImg, id, parent;
 
   PageComments(
-      {this.AUTHOR = "",
-      this.POST = "",
-      this.AVATARIMG = Global_NoImageAvater,
-      this.ID = "",
-      this.PARENT = ""}) {
-    this.POST = StringUtils_RemoveAllHTMLVal(this.POST, false);
+      {this.author = "",
+      this.postData = "",
+      this.avatarImg = Global_NoImageAvater,
+      this.id = "",
+      this.parent = ""}) {
+    this.postData = StringUtils_RemoveAllHTMLVal(this.postData, false);
 
-    if (this.AVATARIMG.length < 5) {
-      this.AVATARIMG = Global_NoImageAvater;
+    if (this.avatarImg.length < 5) {
+      this.avatarImg = Global_NoImageAvater;
     }
   }
 }

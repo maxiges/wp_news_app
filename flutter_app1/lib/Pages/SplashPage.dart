@@ -12,7 +12,6 @@ import '../Utils/SaveLogs.dart';
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key}) : super(key: key);
 
-  @override
   _SplashScreen createState() => _SplashScreen();
 }
 
@@ -34,7 +33,16 @@ class _SplashScreen extends State<SplashScreen>
     animController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
     _timerStart();
-    setVrtsionApp();
+    setVersionApp();
+  }
+
+  @override
+  dispose() {
+    _timerStop();
+    if (animController != null){
+      animController.dispose(); // you need this
+    }
+    super.dispose();
   }
 
   _timerStart() {
@@ -47,13 +55,19 @@ class _SplashScreen extends State<SplashScreen>
   }
 
   _timerStop() {
-    _timer.cancel();
-    animController.stop();
     counter = 0;
-    setState(() {
-      buttonList = retButtons(false);
-    });
     _tryLoadGoogleAcc = false;
+
+
+    if (_timer != null){
+      _timer.cancel();
+    }
+    if (animController != null){
+      animController.stop();
+    }
+
+
+
   }
 
   timerService() {
@@ -65,11 +79,11 @@ class _SplashScreen extends State<SplashScreen>
     }
   }
 
-  setVrtsionApp() async {
+  setVersionApp() async {
     Global_packageInfo = await PackageInfo.fromPlatform();
   }
 
-  tryLoginAutomaticly() async {
+  tryLoginAutomatically() async {
     bool isSignIn = await Global_GoogleSign.getActLoginStat();
     if (isSignIn == true) {
       _tryLoadGoogleAcc = true;
@@ -270,7 +284,7 @@ class _SplashScreen extends State<SplashScreen>
     if (runApp) {
       _timerStart();
       runApp = false;
-      tryLoginAutomaticly();
+      tryLoginAutomatically();
     }
     double _imageSize = 200;
     double _imageTopMargin = 100;

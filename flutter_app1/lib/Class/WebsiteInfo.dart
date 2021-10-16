@@ -2,69 +2,67 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
-import 'WebPortal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/StringUtils.dart';
 import '../Utils/SaveLogs.dart';
 
-List<WebsiteInfo> readedWebs = new List<WebsiteInfo>();
+List<WebsiteInfo> readWebsData = [];
 
 class WebsiteInfoDetails {
-  String WEB_ALL_PAGE = "";
+  String fullArticle = "";
 
   WebsiteInfoDetails({
-    this.WEB_ALL_PAGE = "N/A",
+    this.fullArticle = "N/A",
   }) {
-    this.WEB_ALL_PAGE = StringUtils_RemoveAllHTMLVal(this.WEB_ALL_PAGE, true);
+    this.fullArticle = StringUtils_RemoveAllHTMLVal(this.fullArticle, true);
   }
 }
 
 class WebsiteInfo {
-  String URL = "",
-      TITTLE = "",
-      IMAGEHREF = Global_NoImagePost,
-      DATE = "",
-      DESCRIPTION = "";
-  WebsiteInfoDetails WEB_DETAILS = WebsiteInfoDetails();
-  String LinkColor = "";
-  String DOMAIN = "";
-  String ID = "";
+  String url = "",
+      tittle = "",
+      thumbnailUrlLink = Global_NoImagePost,
+      articleDate = "",
+      descriptionBrief = "";
+  WebsiteInfoDetails articleDetails = WebsiteInfoDetails();
+  String providerColorAccent = "";
+  String domain = "";
+  String articleID = "";
 
   WebsiteInfo({
-    this.URL = "",
-    this.TITTLE = "",
-    this.IMAGEHREF = "",
-    this.DATE = "",
-    this.LinkColor = "",
-    this.DESCRIPTION = "",
-    this.ID = "",
-    this.DOMAIN = "",
-    this.WEB_DETAILS = null,
+    this.url = "",
+    this.tittle = "",
+    this.thumbnailUrlLink = "",
+    this.articleDate = "",
+    this.providerColorAccent = "",
+    this.descriptionBrief = "",
+    this.articleID = "",
+    this.domain = "",
+    this.articleDetails,
   }) {
-    this.TITTLE = StringUtils_RemoveAllHTMLVal(this.TITTLE, false);
-    this.DESCRIPTION = StringUtils_RemoveAllHTMLVal(this.DESCRIPTION, false);
-    if (this.IMAGEHREF.length < 5) {
-      this.IMAGEHREF = Global_NoImagePost;
+    this.tittle = StringUtils_RemoveAllHTMLVal(this.tittle, false);
+    this.descriptionBrief = StringUtils_RemoveAllHTMLVal(this.descriptionBrief, false);
+    if (this.thumbnailUrlLink.length < 5) {
+      this.thumbnailUrlLink = Global_NoImagePost;
     }
 
-    if (this.WEB_DETAILS == null) {
-      this.WEB_DETAILS = new WebsiteInfoDetails();
+    if (this.articleDetails == null) {
+      this.articleDetails = new WebsiteInfoDetails();
     }
   }
 
   Color getColor() {
-    return Color_GetColor(this.LinkColor);
+    return Color_GetColor(this.providerColorAccent);
   }
 
   getColorText() {
     Color actColor;
     try {
-      actColor = colorPalet[this.LinkColor];
+      actColor = colorPalette[this.providerColorAccent];
     } catch (ex) {
       actColor = Colors.black;
     }
@@ -75,81 +73,81 @@ class WebsiteInfo {
     Map<String, dynamic> user = jsonDecode(jsonString);
 
     try {
-      this.DATE = user["DATE"];
+      this.articleDate = user["DATE"];
     } catch (ex) {
-      this.DATE = "";
+      this.articleDate = "";
     }
 
     try {
-      this.URL = user["URL"];
+      this.url = user["URL"];
     } catch (ex) {
-      this.URL = "";
+      this.url = "";
     }
 
     try {
-      this.TITTLE = user["TITTLE"];
+      this.tittle = user["TITTLE"];
     } catch (ex) {
-      this.TITTLE = "";
+      this.tittle = "";
     }
 
     try {
-      this.IMAGEHREF = user["HREF"];
+      this.thumbnailUrlLink = user["HREF"];
     } catch (ex) {
-      this.IMAGEHREF = "";
+      this.thumbnailUrlLink = "";
     }
 
     try {
-      this.DESCRIPTION = user["DESCRIPTION"];
+      this.descriptionBrief = user["DESCRIPTION"];
     } catch (ex) {
-      this.DESCRIPTION = "";
+      this.descriptionBrief = "";
     }
 
     try {
-      this.LinkColor = user["LinkColor"];
+      this.providerColorAccent = user["LinkColor"];
     } catch (ex) {
-      this.LinkColor = "";
+      this.providerColorAccent = "";
     }
 
     try {
-      this.DOMAIN = user["DOMAIN"];
+      this.domain = user["DOMAIN"];
     } catch (ex) {
-      this.DOMAIN = "";
+      this.domain = "";
     }
 
     try {
-      this.ID = user["ID"];
+      this.articleID = user["ID"];
     } catch (ex) {
-      this.ID = "";
+      this.articleID = "";
     }
   }
 
   String toJson() {
     String jsonStr = '{ "DATE" : "' +
-        this.DATE.replaceAll("\n", "") +
+        this.articleDate.replaceAll("\n", "") +
         '", "URL" :"' +
-        this.URL.replaceAll("\n", "") +
+        this.url.replaceAll("\n", "") +
         '", "DESCRIPTION" :"' +
-        this.DESCRIPTION.replaceAll("\n", "") +
+        this.descriptionBrief.replaceAll("\n", "") +
         '", "TITTLE" :"' +
-        this.TITTLE.replaceAll("\n", "") +
+        this.tittle.replaceAll("\n", "") +
         '", "HREF" :"' +
-        this.IMAGEHREF.replaceAll("\n", "") +
+        this.thumbnailUrlLink.replaceAll("\n", "") +
         '", "DOMAIN" :"' +
-        this.DOMAIN.replaceAll("\n", "") +
+        this.domain.replaceAll("\n", "") +
         '", "ID" :"' +
-        this.ID.replaceAll("\n", "") +
+        this.articleID.replaceAll("\n", "") +
         '", "LinkColor" :"' +
-        this.LinkColor.replaceAll("\n", "") +
+        this.providerColorAccent.replaceAll("\n", "") +
         '"}';
 
     return jsonStr;
   }
 
   void launchURL() async {
-    if (await canLaunch(URL)) {
-      await launch(URL);
+    if (await canLaunch(url)) {
+      await launch(url);
     } else {
-      throw 'Could not launch $URL';
+      throw 'Could not launch $url';
     }
   }
 } //class
@@ -172,13 +170,13 @@ void _saveDataToFirebase(String data) async {
 Future<List<String>> _loadDataFromFirebase() async {
   try {
     final databaseReference = Firestore.instance;
-    DocumentSnapshot retval = await databaseReference
+    DocumentSnapshot retVal = await databaseReference
         .collection("dataFromBaseWebs")
         .document(Global_GoogleSign.getGoogleUserEmail())
         .get();
-    List val = jsonDecode(retval.data["description"].toString());
+    List val = jsonDecode(retVal.data["description"].toString());
 
-    List<String> list = new List<String>();
+    List<String> list = [];
 
     for (int i = 0; i < val.length; i++) {
       list.add(val[i]);
@@ -188,10 +186,11 @@ Future<List<String>> _loadDataFromFirebase() async {
   } catch (ex) {
     saveLogs.error(ex);
   }
+  return  [];
 }
 
 Future<bool> webInfoSaveToFirebase(List<WebsiteInfo> webObj) async {
-  List<String> objSave = new List<String>();
+  List<String> objSave = [];
   for (WebsiteInfo objectVal in webObj) {
     objSave.add(objectVal.toJson());
   }
@@ -210,8 +209,8 @@ Future<bool> webInfoSaveToFirebase(List<WebsiteInfo> webObj) async {
 }
 
 Future<List<WebsiteInfo>> webInfoLoadFromFirebase() async {
-  List<WebsiteInfo> readWebs = new List<WebsiteInfo>();
-  List<String> loadedWebs = new List<String>();
+  List<WebsiteInfo> readWebs = [];
+  List<String> loadedWebs = [];
 
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
     loadedWebs = await _loadDataFromFirebase();
@@ -221,10 +220,10 @@ Future<List<WebsiteInfo>> webInfoLoadFromFirebase() async {
   }
 
   try {
-    for (String JsonString in loadedWebs) {
+    for (String _jsonString in loadedWebs) {
       WebsiteInfo newSavedPage = new WebsiteInfo();
-      newSavedPage.tryParseJson(JsonString);
-      if (newSavedPage.TITTLE.length > 0) {
+      newSavedPage.tryParseJson(_jsonString);
+      if (newSavedPage.tittle.length > 0) {
         readWebs.add(newSavedPage);
       }
     }
@@ -238,7 +237,7 @@ Future<List<WebsiteInfo>> webInfoLoadFromFirebase() async {
 int savedFileContainsThisWeb(WebsiteInfo act) {
   int i = 0;
   for (WebsiteInfo iWeb in Global_savedWebsList) {
-    if (iWeb.TITTLE == act.TITTLE && iWeb.URL == act.URL) {
+    if (iWeb.tittle == act.tittle && iWeb.url == act.url) {
       return i;
     }
     i++;
@@ -247,8 +246,8 @@ int savedFileContainsThisWeb(WebsiteInfo act) {
 }
 
 Future<bool> webInfoLoadedWebSave() async {
-  List<String> objSave = new List<String>();
-  for (WebsiteInfo objectVal in readedWebs) {
+  List<String> objSave = [];
+  for (WebsiteInfo objectVal in readWebsData) {
     objSave.add(objectVal.toJson());
   }
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -257,28 +256,28 @@ Future<bool> webInfoLoadedWebSave() async {
 }
 
 Future<bool> webInfoLoadedWebLoad() async {
-  List<WebsiteInfo> readWebs = new List<WebsiteInfo>();
-  List<String> loadedWebs = new List<String>();
+  List<WebsiteInfo> readWebs = [];
+  List<String> loadedWebs = [];
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   loadedWebs = prefs.getStringList("SavePages");
   try {
-    for (String JsonString in loadedWebs) {
+    for (String _jsonString in loadedWebs) {
       WebsiteInfo newSavedPage = new WebsiteInfo();
-      newSavedPage.tryParseJson(JsonString);
-      bool tooOld = DateTime.parse(newSavedPage.DATE)
+      newSavedPage.tryParseJson(_jsonString);
+      bool tooOld = DateTime.parse(newSavedPage.articleDate)
           .isBefore(DateTime.now().subtract(Duration(days: 2)));
-      if (newSavedPage.TITTLE.length > 0 && tooOld == false) {
+      if (newSavedPage.tittle.length > 0 && tooOld == false) {
         readWebs.add(newSavedPage);
       }
     }
 
     readWebs.sort((a, b) {
-      DateTime dataA = DateTime.parse(a.DATE);
-      DateTime dataB = DateTime.parse(b.DATE);
+      DateTime dataA = DateTime.parse(a.articleDate);
+      DateTime dataB = DateTime.parse(b.articleDate);
       return dataB.compareTo(dataA);
     });
 
-    readedWebs = readWebs;
+    readWebsData = readWebs;
   } catch (ex) {
     saveLogs.error(ex);
   }

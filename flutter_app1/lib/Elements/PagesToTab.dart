@@ -7,11 +7,11 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import '../Dialogs/DialogsPage.dart';
 
 class PagesToTab extends StatefulWidget {
-  WebsiteInfo p_webInfo;
+  WebsiteInfo pageInfo;
   BuildContext context;
 
   PagesToTab(WebsiteInfo webInfo, BuildContext context) {
-    this.p_webInfo = webInfo;
+    this.pageInfo = webInfo;
     this.context = context;
   }
 
@@ -39,17 +39,17 @@ class _PagesToTab extends State<PagesToTab>
       return (Align(
         alignment: Alignment.center,
         child: Text(
-          widget.p_webInfo.TITTLE,
+          widget.pageInfo.tittle,
           style: TextStyle(color: GlobalTheme.textColor, fontSize: 16),
         ),
       ));
     } else {
-      String description = widget.p_webInfo.DESCRIPTION;
+      String description = widget.pageInfo.descriptionBrief;
       if (!showAllDescription) {
-        if (widget.p_webInfo.DESCRIPTION.length * 12 * 12 >
+        if (widget.pageInfo.descriptionBrief.length * 12 * 12 >
             (_rowWidth / 2) * 90) {
           description = description.substring(
-              0, (((_rowWidth / 2) * 90 / 12) / 12).toInt());
+              0, ((_rowWidth / 2) * 90 / 12) ~/ 12);
           description = description.substring(0, description.lastIndexOf(" "));
           description += " ... ";
         }
@@ -62,7 +62,7 @@ class _PagesToTab extends State<PagesToTab>
               Container(
                 width: _rowWidth / 2 - 6,
                 child: Text(
-                  widget.p_webInfo.TITTLE,
+                  widget.pageInfo.tittle,
                   style: TextStyle(color: GlobalTheme.textColor, fontSize: 16),
                 ),
               ),
@@ -73,7 +73,7 @@ class _PagesToTab extends State<PagesToTab>
                   alignment: Alignment.center,
                   child: Container(
                     height: _rowheight * 0.8,
-                    color: widget.p_webInfo.getColor(),
+                    color: widget.pageInfo.getColor(),
                   ),
                 ),
               ),
@@ -89,7 +89,6 @@ class _PagesToTab extends State<PagesToTab>
     }
   }
 
-  @override
   Widget buildSavedContainer(isSaved) {
     Widget retVal = Center();
     if (isSaved) {
@@ -130,7 +129,7 @@ class _PagesToTab extends State<PagesToTab>
   }
 
   void openMoreDetails() {
-    Navigator.of(context).pushNamed('/moreInfo', arguments: widget.p_webInfo);
+    Navigator.of(context).pushNamed('/moreInfo', arguments: widget.pageInfo);
   }
 
   Widget build(BuildContext context) {
@@ -138,14 +137,14 @@ class _PagesToTab extends State<PagesToTab>
     _rowWidth = _width - 100 - 20;
     animationControl.forward();
     bool isSaved = false;
-    if (savedFileContainsThisWeb(widget.p_webInfo) >= 0) {
+    if (savedFileContainsThisWeb(widget.pageInfo) >= 0) {
       isSaved = true;
     }
     var now = new DateTime.now();
     var postData =
-        DateTime.parse(widget.p_webInfo.DATE.substring(0, 10).toString());
+        DateTime.parse(widget.pageInfo.articleDate.substring(0, 10).toString());
 
-    var timeVal = widget.p_webInfo.DATE.substring(0, 10);
+    var timeVal = widget.pageInfo.articleDate.substring(0, 10);
     if (now.year == postData.year &&
         now.month == postData.month &&
         now.day == postData.day) {
@@ -163,7 +162,7 @@ class _PagesToTab extends State<PagesToTab>
                   margin: new EdgeInsets.only(bottom: 10),
                   child: new GestureDetector(
                     onDoubleTap: () {
-                      widget.p_webInfo.launchURL();
+                      widget.pageInfo.launchURL();
                     },
                     onTap: () {
                       openMoreDetails();
@@ -172,7 +171,7 @@ class _PagesToTab extends State<PagesToTab>
                     onLongPressEnd: (pressDetails) {},
                     onLongPress: () async {
                       await dialogsPageSaveRemoveWebsite(
-                          isSaved, context, widget.p_webInfo);
+                          isSaved, context, widget.pageInfo);
                     },
                     child: Container(
                       decoration: new BoxDecoration(
@@ -201,9 +200,9 @@ class _PagesToTab extends State<PagesToTab>
                                                   new BorderRadius.circular(
                                                       8.0),
                                               child: Hero(
-                                                tag: widget.p_webInfo.URL,
+                                                tag: widget.pageInfo.url,
                                                 child: Image.network(
-                                                  widget.p_webInfo.IMAGEHREF,
+                                                  widget.pageInfo.thumbnailUrlLink,
                                                   fit: BoxFit.cover,
                                                   width: 75,
                                                   height: 75,
@@ -218,7 +217,7 @@ class _PagesToTab extends State<PagesToTab>
                                                   new BorderRadius.all(
                                                       Radius.circular(10)),
                                               color:
-                                                  widget.p_webInfo.getColor(),
+                                                  widget.pageInfo.getColor(),
                                             ),
                                             padding: new EdgeInsets.all(1),
                                             width: 60,
@@ -264,7 +263,7 @@ class _PagesToTab extends State<PagesToTab>
           actions: <Widget>[
             IconSlideAction(
                 caption: 'Read more',
-                color: widget.p_webInfo.getColor(),
+                color: widget.pageInfo.getColor(),
                 icon: Icons.more_horiz,
                 onTap: () => openMoreDetails()),
           ]),
