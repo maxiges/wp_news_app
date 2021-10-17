@@ -14,8 +14,12 @@ class WebPageFetchAPI {
     List<PageComments> pageCommentList = [];
 
     try {
-      String url =
-          "https://" + web.domain + "/wp-json/wp/v2/comments?post=" + web.articleID;
+      String urlString = "https://" +
+          web.domain +
+          "/wp-json/wp/v2/comments?post=" +
+          web.articleID;
+
+      var url = Uri.parse(urlString);
       final response = await http.get(url);
       if (response.statusCode == 200) {
         List<dynamic> retJson = json.decode(response.body);
@@ -72,8 +76,8 @@ class WebPageFetchAPI {
     List<WebsiteInfo> websCheckList = [];
     try {
       try {
-        final response = await http
-            .get("https://" + web.url + "/wp-json/wp/v2/posts?_embed");
+        final response = await http.get(
+            Uri.parse("https://" + web.url + "/wp-json/wp/v2/posts?_embed"));
         if (response.statusCode == 200) {
           List<dynamic> retJson = json.decode(response.body);
           for (dynamic items in retJson) {
@@ -118,7 +122,9 @@ class WebPageFetchAPI {
         saveLogs.error(ex);
       }
       websCheckList.sort((a, b) {
-        if (DateTime.parse(a.articleDate).isBefore(DateTime.parse(b.articleDate)) == true)
+        if (DateTime.parse(a.articleDate)
+                .isBefore(DateTime.parse(b.articleDate)) ==
+            true)
           return 1;
         else
           return 0;
@@ -133,11 +139,11 @@ class WebPageFetchAPI {
     WebsiteInfo websCheckList = WebsiteInfo();
     try {
       try {
-        final response = await http.get("https://" +
+        final response = await http.get(Uri.parse("https://" +
             web.domain +
             "/wp-json/wp/v2/posts/" +
             web.articleID +
-            "?_embed");
+            "?_embed"));
         if (response.statusCode == 200) {
           dynamic retJson = json.decode(response.body);
           try {

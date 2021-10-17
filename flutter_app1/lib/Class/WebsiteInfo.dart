@@ -5,10 +5,10 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/StringUtils.dart';
 import '../Utils/SaveLogs.dart';
+import 'Firebase.dart';
 
 List<WebsiteInfo> readWebsData = [];
 
@@ -45,7 +45,8 @@ class WebsiteInfo {
     this.articleDetails,
   }) {
     this.tittle = StringUtils_RemoveAllHTMLVal(this.tittle, false);
-    this.descriptionBrief = StringUtils_RemoveAllHTMLVal(this.descriptionBrief, false);
+    this.descriptionBrief =
+        StringUtils_RemoveAllHTMLVal(this.descriptionBrief, false);
     if (this.thumbnailUrlLink.length < 5) {
       this.thumbnailUrlLink = Global_NoImagePost;
     }
@@ -154,14 +155,9 @@ class WebsiteInfo {
 
 void _saveDataToFirebase(String data) async {
   try {
-    final databaseReference = Firestore.instance;
-    await databaseReference
-        .collection("dataFromBaseWebs")
-        .document(Global_GoogleSign.getGoogleUserEmail())
-        .setData({
-      'id': Global_GoogleSign.getGoogleUserEmail(),
-      'description': data
-    });
+    DataFromWebsDb d =
+        DataFromWebsDb(Global_GoogleSign.getGoogleUserEmail(), data);
+    fbDataFromBaseWebsRef.doc(d.id).update(d.toJson());
   } catch (ex) {
     saveLogs.error(ex);
   }
@@ -169,15 +165,11 @@ void _saveDataToFirebase(String data) async {
 
 Future<List<String>> _loadDataFromFirebase() async {
   try {
-    final databaseReference = Firestore.instance;
-    DocumentSnapshot retVal = await databaseReference
-        .collection("dataFromBaseWebs")
-        .document(Global_GoogleSign.getGoogleUserEmail())
+    final retDoc = await fbDataFromBaseWebsRef
+        .doc(Global_GoogleSign.getGoogleUserEmail())
         .get();
-    List val = jsonDecode(retVal.data["description"].toString());
-
+    List val = jsonDecode(retDoc.data().description);
     List<String> list = [];
-
     for (int i = 0; i < val.length; i++) {
       list.add(val[i]);
     }
@@ -186,7 +178,7 @@ Future<List<String>> _loadDataFromFirebase() async {
   } catch (ex) {
     saveLogs.error(ex);
   }
-  return  [];
+  return [];
 }
 
 Future<bool> webInfoSaveToFirebase(List<WebsiteInfo> webObj) async {

@@ -6,12 +6,65 @@ import 'dart:async';
 import '../Globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Utils/SaveLogs.dart';
+import 'dart:convert' show json;
+
+import "package:http/http.dart" as http;
+GoogleSignIn _googleSignIn = GoogleSignIn();
+
+
 
 class GoogleSign {
-  FirebaseUser _googleUser;
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  GoogleSignIn _googleSignIn = GoogleSignIn();
+  GoogleSignInAccount _currentUser;
+  User _googleUser;
   bool _userSignIn = false;
+  FirebaseAuth _auth;
+
+
+  GoogleSign() {
+    _auth = FirebaseAuth.instance;
+  }
+
+  Future<void> _handleGetContact(GoogleSignInAccount user) async {
+    final http.Response response = await http.get(
+      Uri.parse('https://people.googleapis.com/v1/people/me/connections'
+          '?requestMask.includeField=person.names'),
+      headers: await user.authHeaders,
+    );
+    if (response.statusCode != 200) {
+      print('People API ${response.statusCode} response: ${response.body}');
+      return;
+    }
+    final Map<String, dynamic> data = json.decode(response.body);
+    final String namedContact = _pickFirstNamedContact(data);
+  }
+
+  String _pickFirstNamedContact(Map<String, dynamic> data) {
+    final List<dynamic> connections = data['connections'];
+    final Map<String, dynamic> contact = connections?.firstWhere(
+      (dynamic contact) => contact['names'] != null,
+      orElse: () => null,
+    );
+    if (contact != null) {
+      final Map<String, dynamic> name = contact['names'].firstWhere(
+        (dynamic name) => name['displayName'] != null,
+        orElse: () => null,
+      );
+      if (name != null) {
+        return name['displayName'];
+      }
+    }
+    return null;
+  }
+
+  Future<void> _handleSignIn() async {
+    try {
+      await _googleSignIn.signIn();
+    } catch (error) {
+      print(error);
+    }
+  }
+
+  Future<void> _handleSignOut() => _googleSignIn.disconnect();
 
   Future<bool> getActLoginStat() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -25,22 +78,22 @@ class GoogleSign {
     prefs.setBool("GoogleSign", stat);
   }
 
-  Future<FirebaseUser> signInWithGoogle() async {
+  Future<User> signInWithGoogle() async {
     try {
       final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
       if (_googleUser != null) {
-        final FirebaseUser user = await _auth.currentUser();
-        return user;
+        return _googleUser;
       } else {
-        AuthCredential authCredential = GoogleAuthProvider.getCredential(
+        AuthCredential authCredential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        AuthResult fire = (await _auth.signInWithCredential(authCredential));
-        final FirebaseUser user = fire.user;
+        final User user =
+            (await _auth.signInWithCredential(authCredential)).user;
+
         return user;
       }
     } catch (ex) {

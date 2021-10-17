@@ -7,9 +7,17 @@ import 'Globals.dart';
 import 'Pages/KinderGarden.dart';
 import "Pages/LogsPage.dart";
 import "Utils/SaveLogs.dart";
+import 'package:firebase_core/firebase_core.dart';
 
 MyApp app = MyApp();
-void main() => runApp(app);
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await  Firebase.initializeApp();
+
+  runApp(app);
+}
+
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

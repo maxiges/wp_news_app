@@ -4,9 +4,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Utils/ColorsFunc.dart';
 import '../Utils/SaveLogs.dart';
+import 'Firebase.dart';
 
 class WebPortal {
   String url;
@@ -41,32 +41,25 @@ class WebPortal {
 
 void _saveDataToFirebase(String data) async {
   try {
-    final databaseReference = Firestore.instance;
-    await databaseReference
-        .collection("dataFromBase")
-        .document(Global_GoogleSign.getGoogleUserEmail())
-        .setData({
-      'id': Global_GoogleSign.getGoogleUserEmail(),
-      'description': data
-    });
+    DataFromDb d = DataFromDb(Global_GoogleSign.getGoogleUserEmail(), data);
+    fbDataFromBaseRef.doc(d.id).update(d.toJson());
   } catch (ex) {
     saveLogs.error(ex);
   }
 }
 
-Future<List<String>> _loadDataFromFirebase() async {
+Future<List<DataFromDb>> _loadDataFromFirebase() async {
   try {
-    final databaseReference = Firestore.instance;
-    DocumentSnapshot retval = await databaseReference
-        .collection("dataFromBase")
-        .document(Global_GoogleSign.getGoogleUserEmail())
+    List<DataFromDb> retList = [];
+    final users = await fbDataFromBaseRef
+        .doc(Global_GoogleSign.getGoogleUserEmail())
         .get();
-    List<String> valll = retval.data["description"].toString().split(";");
-    return valll;
+    retList.add(users.data());
+    return retList;
   } catch (ex) {
     saveLogs.error(ex);
   }
-  return  [];
+  return [];
 }
 
 Future<bool> webPortalSaveWebs(List<WebPortal> list) async {
@@ -95,7 +88,12 @@ Future<List<WebPortal>> webPortalLoadWebs() async {
 
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
-      loadedWebs = await _loadDataFromFirebase();
+      List<DataFromDb> ret = await _loadDataFromFirebase();
+      for (DataFromDb objectVal in ret) {
+        for (String savedWebpages in objectVal.description.split(";")) {
+          loadedWebs.add(savedWebpages);
+        }
+      }
     } catch (ex) {
       saveLogs.error(ex);
     }

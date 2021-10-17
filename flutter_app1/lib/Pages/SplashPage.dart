@@ -80,7 +80,11 @@ class _SplashScreen extends State<SplashScreen>
   }
 
   setVersionApp() async {
-    Global_packageInfo = await PackageInfo.fromPlatform();
+    final PackageInfo info = await PackageInfo.fromPlatform();
+    setState(() {
+      Global_packageInfo = info;
+    });
+
   }
 
   tryLoginAutomatically() async {
@@ -342,7 +346,7 @@ class _SplashScreen extends State<SplashScreen>
             Align(
                 child: Container(
               child: Text(
-                "var:" + Global_packageInfo.version,
+                "Ver:" + Global_packageInfo.version,
                 style: TextStyle(color: Colors.orange),
               ),
             )),
