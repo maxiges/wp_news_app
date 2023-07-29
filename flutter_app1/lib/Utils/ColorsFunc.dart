@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import '../Utils/SaveLogs.dart';
@@ -8,21 +7,22 @@ Map<String, Color> colorPalette = {
   "black26": Colors.black26,
   "grey": Colors.grey,
   "white": Colors.white,
-  "red": Colors.red,
   "redAccent": Colors.redAccent,
-  "orangeDip": Colors.deepOrange,
+  "red": Colors.red,
   "orange": Colors.orange,
+  "orangeDip": Colors.deepOrange,
   "yellow": Colors.yellow,
   "yellowAccent": Colors.yellowAccent,
   "green": Colors.green,
   "greenAccent": Colors.greenAccent,
   "blue": Colors.blue,
   "blueAccent": Colors.blueAccent,
-  "purple": Colors.deepPurple,
+  "purple": Colors.purple,
+  "deepPurple": Colors.deepPurple,
 };
 
 class ColorsTheme {
-  final ThemeData mainTheme;
+  final ThemeData? mainTheme;
   final Color background,
       backgroundDialog,
       navAccent,
@@ -30,8 +30,9 @@ class ColorsTheme {
       tabsColorPrimary,
       tabsDayBackground,
       textColor2,
-      tabs;
-  final TextStyle textstyle;
+      tabs,
+      basicButtonBackground;
+  final TextStyle textStyle;
   final TextTheme textTheme;
   final IconThemeData iconTheme;
 
@@ -39,76 +40,80 @@ class ColorsTheme {
     this.background = Colors.black,
     this.navAccent = Colors.black,
     this.textColor = Colors.white,
-    this.textstyle = const TextStyle(color: Colors.white),
-    this.mainTheme ,
+    this.textStyle = const TextStyle(color: Colors.white),
+    this.mainTheme = null,
     this.tabsColorPrimary = Colors.black54,
-    this.tabsDayBackground = Colors.black54,
+    this.tabsDayBackground = Colors.black26,
     this.textColor2 = Colors.black54,
     this.tabs = Colors.black38,
+    this.basicButtonBackground = Colors.black26,
     this.iconTheme = const IconThemeData(color: Colors.white),
     this.textTheme = const TextTheme(
-
         headline1: TextStyle(color: Colors.white),
         button: TextStyle(color: Colors.white)),
     this.backgroundDialog = Colors.black54,
   });
 }
 
-ColorsTheme GlobalThemeDart = new ColorsTheme(
+ColorsTheme GlobalThemeDark = new ColorsTheme(
     background: Colors.black,
     navAccent: Color.fromARGB(255, 40, 40, 40),
     textColor: Colors.white,
-    textstyle: const TextStyle(color: Colors.white),
-    tabsColorPrimary: Color.fromARGB(100, 40, 40, 40),
-    tabsDayBackground: Colors.black,
+    textStyle: const TextStyle(color: Colors.white),
+    tabsColorPrimary: Color.fromARGB(100, 68, 68, 68),
+    tabsDayBackground: Color.fromARGB(255, 59, 59, 59),
     textColor2: Color.fromARGB(255, 200, 200, 200),
-    tabs: Color.fromARGB(255, 0, 100, 100),
+    tabs: Color(0xFF2191EA),
+    basicButtonBackground: Color.fromARGB(140, 28, 28, 28),
     iconTheme: const IconThemeData(color: Colors.white),
-    textTheme: const TextTheme(
-        headline1: TextStyle(color: Colors.white),
-        button: TextStyle(color: Colors.white)),
+    textTheme: TextTheme(
+      bodyLarge: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.white),
+      bodySmall: TextStyle(color: Colors.white),
+    ),
     backgroundDialog: Color.fromARGB(255, 60, 60, 60),
     mainTheme: ThemeData(
+      useMaterial3: true,
       primarySwatch: Colors.cyan,
-      accentColor: Colors.white,
       secondaryHeaderColor: Colors.white,
       splashColor: Colors.black,
       brightness: Brightness.light,
       textTheme: TextTheme(headline1: TextStyle(color: Colors.white)),
-      backgroundColor: Colors.black,
+      switchTheme: SwitchThemeData(),
     ));
 
 ColorsTheme GlobalThemeLight = new ColorsTheme(
-    background: Color.fromARGB(255, 170, 170, 170),
+    background: Color.fromARGB(255, 217, 217, 217),
     navAccent: Color.fromARGB(255, 200, 200, 200),
     textColor: Colors.black,
-    backgroundDialog: Color.fromARGB(255, 150, 150, 150),
-    textstyle: const TextStyle(color: Colors.black),
-    tabsColorPrimary: Color.fromARGB(255, 220, 220, 220),
-    tabsDayBackground: Color.fromARGB(255, 150, 150, 150),
+    backgroundDialog: Color.fromARGB(255, 185, 185, 185),
+    textStyle: const TextStyle(color: Colors.black),
+    tabsColorPrimary: Color.fromARGB(255, 245, 245, 245),
+    tabsDayBackground: Color.fromARGB(255, 227, 227, 227),
     textColor2: Color.fromARGB(255, 60, 60, 60),
-    tabs: Color.fromARGB(255, 150, 255, 255),
-    iconTheme: const IconThemeData(color: Colors.black),
-    textTheme: const TextTheme(
-        headline1: TextStyle(color: Colors.black),
-        button: TextStyle(color: Colors.black)),
+    tabs: Color(0xFF90CAF9),
+    iconTheme: const IconThemeData(color: Colors.white),
+    basicButtonBackground: Color.fromARGB(168, 227, 227, 227),
+    textTheme: TextTheme(
+      bodyLarge: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.white),
+      bodySmall: TextStyle(color: Colors.white),
+    ),
     mainTheme: ThemeData(
       primarySwatch: Colors.cyan,
-      accentColor: Colors.cyan,
       secondaryHeaderColor: Colors.white,
       splashColor: Colors.white,
       brightness: Brightness.light,
       textTheme: TextTheme(headline1: TextStyle(color: Colors.white)),
-      backgroundColor: Colors.white,
+      useMaterial3: true,
     ));
 
 Color Color_GetColor(String color) {
-  try {
-    return colorPalette[color];
-  } catch (ex) {
-    saveLogs.error(ex);
+  Color? c = colorPalette[color];
+  if (c == null) {
+    return Colors.black;
   }
-  return Colors.black;
+  return c;
 }
 
 Color Color_getColorText(Color act) {

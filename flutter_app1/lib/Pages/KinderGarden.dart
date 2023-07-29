@@ -1,3 +1,4 @@
+import 'package:WP_news_APP/Class/WebPortal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -12,7 +13,7 @@ import '../Class/WebsiteInfo.dart';
 import '../Pages/ShowMoreInfoPage.dart';
 
 class KinderGarden extends StatefulWidget {
-  KinderGarden({Key key}) : super(key: key);
+  KinderGarden({Key? key}) : super(key: key);
 
   @override
   _KinderGarden createState() => _KinderGarden();
@@ -24,8 +25,8 @@ class _KinderGarden extends State<KinderGarden>
   String _batteryLevel = 'Unknown battery level.';
 
   Future onSelectNotification(String payload) async {
-    WebsiteInfo webFromNot = new WebsiteInfo();
-    webFromNot.tryParseJson(payload);
+    WebsiteInfo webFromNot = new WebsiteInfo(portalType: PortalType.Other);
+    webFromNot = webFromNot.tryParseJson(payload);
     if (payload != null) {
       //press notification
       await Navigator.push(
@@ -37,10 +38,7 @@ class _KinderGarden extends State<KinderGarden>
     }
   }
 
-
-  displayNotification() async {
-
-  }
+  displayNotification() async {}
 
   @override
   void initState() {

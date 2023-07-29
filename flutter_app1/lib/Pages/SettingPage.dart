@@ -1,4 +1,8 @@
+import 'dart:ffi';
+
+import 'package:WP_news_APP/Decors/decors.dart';
 import 'package:WP_news_APP/Utils/ColorsFunc.dart';
+import 'package:WP_news_APP/Utils/WebFilter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
@@ -11,7 +15,7 @@ import '../Dialogs/AbautInfo.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SettingPage extends StatefulWidget {
-  SettingPage({Key key}) : super(key: key);
+  SettingPage({Key? key}) : super(key: key);
 
   @override
   _SettingPage createState() => _SettingPage();
@@ -19,8 +23,18 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPage extends State<SettingPage>
     with SingleTickerProviderStateMixin {
-  AnimationController animController;
+  late AnimationController animController;
 
+  final MaterialStateProperty<Icon?> thumbIcon =
+      MaterialStateProperty.resolveWith<Icon?>(
+    (Set<MaterialState> states) {
+      // Thumb icon when the switch is selected.
+      if (states.contains(MaterialState.selected)) {
+        return const Icon(Icons.check);
+      }
+      return const Icon(Icons.close);
+    },
+  );
 
   double marginRightLeft = 5;
 
@@ -31,7 +45,7 @@ class _SettingPage extends State<SettingPage>
         duration: const Duration(milliseconds: 500), vsync: this);
   }
 
-  Future<bool> deletePage(WebPortal web) async {
+  deletePage(WebPortal web) async {
     bool shouldUpdate = await yesNoDialogShowDialog(
         "Delete website: \r\n" + web.url,
         Colors.red,
@@ -42,14 +56,14 @@ class _SettingPage extends State<SettingPage>
           size: 36.0,
         ));
 
-    if (shouldUpdate == true) {
-      Global_webList.remove(web);
-    }
-
     setState(() {
       websList();
     });
-    return shouldUpdate;
+
+    if (shouldUpdate == true) {
+      Global_webList.remove(web);
+      webPortalSaveWebs(Global_webList);
+    }
   }
 
   void editPage(WebPortal web) async {
@@ -60,39 +74,85 @@ class _SettingPage extends State<SettingPage>
   }
 
   Widget websList() {
+    double _tabHeight = 50.0;
+
     List<Widget> webList = [];
     for (WebPortal _web in Global_webList) {
+      Widget isInvalid = Icon(
+        Icons.check_circle_outline,
+        color: Colors.greenAccent,
+        size: 20.0,
+        semanticLabel: 'Valid website',
+      );
+      if (_web.isInvalid) {
+        isInvalid = Icon(
+          Icons.cancel_outlined,
+          color: Colors.redAccent,
+          weight: 30,
+          size: 20.0,
+          semanticLabel: 'Invalid website',
+        );
+      }
+
       webList.add(Container(
+          key: Key(_web.url),
           margin: EdgeInsets.only(
               top: 5, bottom: 5, left: marginRightLeft, right: marginRightLeft),
-          height: 50,
-          decoration: new BoxDecoration(
-            color: GlobalTheme.tabsDayBackground,
-          ),
+          height: _tabHeight,
+          decoration: Decors.tab2BoxDecor,
           child: Align(
               alignment: Alignment.center,
               child: Center(
-                  child: Container(
-                      color: GlobalTheme.tabsColorPrimary,
+                  child: Slidable(
+                      key: const ValueKey(0),
+                      startActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
+                          SlidableAction(
+                            label: 'Edit',
+                            foregroundColor: Colors.greenAccent,
+                            backgroundColor: GlobalTheme.tabsColorPrimary,
+                            icon: Icons.edit,
+                            onPressed: (value) {
+                              editPage(_web);
+                            },
+                          ),
+                          SlidableAction(
+                            label: "Delete",
+                            backgroundColor: GlobalTheme.tabsColorPrimary,
+                            foregroundColor: Colors.redAccent,
+                            icon: Icons.delete,
+                            onPressed: (value) {
+                              deletePage(_web);
+                            },
+                          ),
+                        ],
+                      ),
+
                       //WEBSITES
                       child: Row(children: <Widget>[
                         Container(
-                          width: 50,
-                          child: IconSlideAction(
-                              caption: 'Edit',
-                              color: Colors.greenAccent,
-                              icon: Icons.edit,
-                              onTap: () => editPage(_web)),
-                        ),
+                            width: 40,
+                            alignment: Alignment.center,
+                            height: _tabHeight ,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  isInvalid,
+                                  Text(
+                                    _web.requestTime,
+                                    style: TextStyle(
+                                        color: GlobalTheme.textColor,
+                                        fontSize: 9),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )),
                         Container(
-                            width: 50,
-                            child: IconSlideAction(
-                                caption: 'Detete',
-                                color: Colors.redAccent,
-                                icon: Icons.delete,
-                                onTap: () => deletePage(_web))),
-                        Container(
-                          width: MediaQuery.of(context).size.width - 150,
+                          width: MediaQuery.of(context).size.width - 90,
                           child: Center(
                             child: Text(
                               _web.url,
@@ -114,9 +174,22 @@ class _SettingPage extends State<SettingPage>
                       ]))))));
     }
 
-    return (new Column(
+    return (new Container(
+        child: ReorderableListView(
+      onReorder: (int oldIndex, int newIndex) {
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        setState(() {
+          final WebPortal item = Global_webList.removeAt(oldIndex);
+          Global_webList.insert(newIndex, item);
+          webFilter.setPageFilter();
+          webPortalSaveWebs(Global_webList);
+        });
+      },
       children: webList,
-    ));
+      shrinkWrap: true,
+    )));
   }
 
   Widget signOutGoogle() {
@@ -130,7 +203,7 @@ class _SettingPage extends State<SettingPage>
           color: Colors.redAccent,
           borderRadius: new BorderRadius.all(Radius.circular(30)),
         ),
-        child: FlatButton(
+        child: TextButton(
           onPressed: () {
             Global_GoogleSign.signOutGoogle(context);
           },
@@ -168,11 +241,8 @@ class _SettingPage extends State<SettingPage>
       width: 300,
       margin: EdgeInsets.only(
           top: 30, bottom: 10, left: marginRightLeft, right: marginRightLeft),
-      decoration: new BoxDecoration(
-        color: Colors.blueAccent,
-        borderRadius: new BorderRadius.all(Radius.circular(30)),
-      ),
-      child: FlatButton(
+      child: TextButton(
+        style: Decors.primaryButtonStyle,
         onPressed: () {
           Navigator.of(context).pushNamed("/logScreen");
         },
@@ -181,16 +251,16 @@ class _SettingPage extends State<SettingPage>
           mainAxisAlignment: MainAxisAlignment.center,
           // ace with a Row for horizontal icon + text
           children: <Widget>[
-            Icon(FontAwesomeIcons.phoneAlt,
-                color: Color_getColorText(Colors.redAccent)),
+            Icon(FontAwesomeIcons.bookSkull,
+                color: Decors.primaryButtonStyleTextColour),
             Container(
-              width: 5,
+              width: 20,
             ),
             Flexible(
                 child: Text(
-              "Show Logs",
+              "Show error logs",
               style: TextStyle(
-                  fontSize: 18, color: Color_getColorText(Colors.redAccent)),
+                  fontSize: 18, color: Decors.primaryButtonStyleTextColour),
             )),
           ],
         ),
@@ -199,34 +269,23 @@ class _SettingPage extends State<SettingPage>
   }
 
   Widget labelAddButtonPage() {
-    return (new GestureDetector(
-      onTapDown: (e) async {
-        bool _isTrue =
-            await settingAddPageShowDialog(new WebPortal("", ""), this.context);
-        if (_isTrue) {
-          setState(() {});
-        }
-      },
-      child: Align(
-        alignment: Alignment.center,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: new BoxDecoration(
-            color: Colors.greenAccent,
-            borderRadius: new BorderRadius.all(Radius.circular(50)),
-          ),
-          margin: EdgeInsets.all(0),
-          child: IconButton(
-            iconSize: 25,
-            focusColor: Colors.red,
-            hoverColor: Colors.orange,
-            icon: Icon(Icons.add),
-            onPressed: () {},
-          ),
-        ),
-      ),
-    ));
+    bool isTrue;
+    return (Align(
+        alignment: Alignment.topRight,
+        child: MaterialButton(
+          onPressed: () async {
+            isTrue = await settingAddPageShowDialog(
+                new WebPortal("", "", null), this.context);
+            if (isTrue) {
+              setState(() {});
+            }
+          },
+          color: Colors.greenAccent,
+          textColor: Colors.black,
+          padding: EdgeInsets.all(16),
+          child: Icon(Icons.add, size: 24),
+          shape: CircleBorder(),
+        )));
   }
 
   Widget label(String textString) {
@@ -234,11 +293,8 @@ class _SettingPage extends State<SettingPage>
       margin: EdgeInsets.only(
           top: 10, bottom: 10, right: marginRightLeft, left: marginRightLeft),
       padding: EdgeInsets.only(top: 10, bottom: 10),
-      width: MediaQuery.of(context).size.width - 10,
-      decoration: BoxDecoration(
-        color: GlobalTheme.tabs,
-        borderRadius: BorderRadius.circular(5),
-      ),
+      width: MediaQuery.of(context).size.width - 40,
+      decoration: Decors.tabBoxDecor,
       child: Text(
         textString,
         style: TextStyle(
@@ -252,10 +308,7 @@ class _SettingPage extends State<SettingPage>
     return (Container(
       margin: EdgeInsets.only(
           top: 30, bottom: 10, left: marginRightLeft, right: marginRightLeft),
-      decoration: new BoxDecoration(
-        color: GlobalTheme.tabs,
-        borderRadius: new BorderRadius.all(Radius.circular(5)),
-      ),
+      decoration: Decors.tabBoxDecor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -264,20 +317,15 @@ class _SettingPage extends State<SettingPage>
                   color: Color_getColorText(GlobalTheme.tabs), fontSize: 20)),
           Switch(
             value: Global_Settings.isDarkTheme(),
-            activeTrackColor: Colors.lightGreen,
-            activeColor: Colors.green,
+            thumbIcon: thumbIcon,
+            activeTrackColor: Colors.greenAccent,
+            activeColor: Colors.white24,
             onChanged: (value) {
               setState(() {
                 Global_Settings.setTheme(value);
-                if (value) {
-                  setState(() {
-                    GlobalTheme = GlobalThemeDart;
-                  });
-                } else {
-                  setState(() {
-                    GlobalTheme = GlobalThemeLight;
-                  });
-                }
+                setState(() {
+                  GlobalTheme = value ? GlobalThemeDark : GlobalThemeLight;
+                });
               });
             },
           ),
@@ -290,10 +338,7 @@ class _SettingPage extends State<SettingPage>
     return (Container(
       margin: EdgeInsets.only(
           top: 30, bottom: 10, left: marginRightLeft, right: marginRightLeft),
-      decoration: new BoxDecoration(
-        color: GlobalTheme.tabs,
-        borderRadius: new BorderRadius.all(Radius.circular(5)),
-      ),
+      decoration: Decors.tabBoxDecor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -302,8 +347,9 @@ class _SettingPage extends State<SettingPage>
                   color: Color_getColorText(GlobalTheme.tabs), fontSize: 14)),
           Switch(
             value: Global_Settings.isAdsOn(),
-            activeTrackColor: Colors.lightGreen,
-            activeColor: Colors.green,
+            thumbIcon: thumbIcon,
+            activeTrackColor: Colors.greenAccent,
+            activeColor: Colors.white24,
             onChanged: (value) {
               setState(() {
                 Global_Settings.setAddsOn(value);
@@ -323,9 +369,7 @@ class _SettingPage extends State<SettingPage>
         backgroundColor: GlobalTheme.navAccent,
         iconTheme: GlobalTheme.iconTheme,
         titleTextStyle: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
-        title: const Text(
-          'Setting'
-        ),
+        title: const Text('Setting'),
         leading: IconButton(
           iconSize: 30,
           padding: const EdgeInsets.all(0),
@@ -333,6 +377,7 @@ class _SettingPage extends State<SettingPage>
             Navigator.of(context).pop();
           },
           icon: Icon(Icons.arrow_back),
+          color: GlobalTheme.textColor,
         ),
         actions: <Widget>[
           IconButton(
@@ -342,30 +387,34 @@ class _SettingPage extends State<SettingPage>
               aboutInfoDialog(this.context);
             },
             icon: Icon(Icons.info_outline),
+            color: GlobalTheme.textColor,
           ),
         ],
       ),
-      body: ListView(children: <Widget>[
-        Stack(children: [
-          label("Website"),
-          Positioned(
-            bottom: 0,
-            right: 10,
-            child: labelAddButtonPage(),
-          ),
-        ]),
-        Container(
-          height: 10,
-        ),
-        websList(),
-        darkLightModeUi(),
-        addsOnUi(),
-        seeLogs(),
-        signOutGoogle(),
-        Container(
-          height: 120,
-        ),
-      ]),
+      body: ListView(
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
+          children: <Widget>[
+            Stack(children: [
+              label("Website"),
+              Positioned(
+                bottom: 6,
+                right: -10,
+                child: labelAddButtonPage(),
+              ),
+            ]),
+            Container(
+              height: 10,
+            ),
+            websList(),
+            darkLightModeUi(),
+            addsOnUi(),
+            seeLogs(),
+            signOutGoogle(),
+            Container(
+              height: 120,
+            ),
+          ]),
     );
   }
 

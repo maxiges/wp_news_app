@@ -47,8 +47,11 @@ Future<bool> yesNoDialogShowDialog(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Expanded(
-                            child: FlatButton(
-                              color: yesColor,
+                            child: TextButton(
+                              style: ButtonStyle(
+                                iconColor:
+                                    MaterialStateProperty.all<Color>(yesColor),
+                              ),
                               child: new Text(
                                 "YES",
                               ),
@@ -59,7 +62,7 @@ Future<bool> yesNoDialogShowDialog(
                             child: Container(),
                           ),
                           Expanded(
-                            child: FlatButton(
+                            child: TextButton(
                               child: new Text(
                                 "NO ",
                                 style: TextStyle(color: GlobalTheme.textColor),

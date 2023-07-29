@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 final fbDataFromBaseRef = FirebaseFirestore.instance
     .collection('dataFromBase')
     .withConverter<DataFromDb>(
-  fromFirestore: (snapshots, _) => DataFromDb.fromJson(snapshots.data()),
-  toFirestore: (data, _) => data.toJson(),
-);
+      fromFirestore: (snapshots, _) => DataFromDb.fromJson(snapshots.data()!),
+      toFirestore: (data, _) => data.toJson(),
+    );
 
 class DataFromDb {
   final String description;
@@ -18,21 +17,19 @@ class DataFromDb {
       : id = json['id'],
         description = json['description'];
 
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'id': id,
         'description': description,
       };
 }
 
-
-
 final fbDataFromBaseWebsRef = FirebaseFirestore.instance
     .collection('dataFromBaseWebs')
     .withConverter<DataFromWebsDb>(
-  fromFirestore: (snapshots, _) => DataFromWebsDb.fromJson(snapshots.data()),
-  toFirestore: (data, _) => data.toJson(),
-);
+      fromFirestore: (snapshots, _) =>
+          DataFromWebsDb.fromJson(snapshots.data()!),
+      toFirestore: (data, _) => data.toJson(),
+    );
 
 class DataFromWebsDb {
   final String description;
@@ -44,8 +41,7 @@ class DataFromWebsDb {
       : id = json['id'],
         description = json['description'];
 
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'id': id,
         'description': description,
       };

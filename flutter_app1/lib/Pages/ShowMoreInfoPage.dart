@@ -1,3 +1,5 @@
+import 'package:WP_news_APP/Class/Time.dart';
+import 'package:WP_news_APP/Decors/decors.dart';
 import 'package:WP_news_APP/Globals.dart';
 import 'package:WP_news_APP/Utils/SaveLogs.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,7 @@ import '../Dialogs/DialogsPage.dart';
 import '../Utils/WebPageAPI.dart';
 
 class ShowMoreInfo extends StatefulWidget {
-  ShowMoreInfo({Key key}) : super(key: key);
+  ShowMoreInfo({Key? key}) : super(key: key);
 
   @override
   _ShowMoreInfo createState() => _ShowMoreInfo();
@@ -17,7 +19,7 @@ class ShowMoreInfo extends StatefulWidget {
 
 class _ShowMoreInfo extends State<ShowMoreInfo>
     with SingleTickerProviderStateMixin {
-  WebsiteInfo articleInfo;
+  late WebsiteInfo articleInfo;
   bool _init = true;
 
   double _width = 100.0, _height = 100.0;
@@ -55,8 +57,9 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         articleInfo = ret;
       });
 
-      if (articleInfo.articleDetails.fullArticle.length >
-          articleInfo.descriptionBrief.length) {
+      if (articleInfo.articleDetails != null &&
+          articleInfo.articleDetails!.fullArticle.length >
+              articleInfo.descriptionBrief.length) {
         setState(() {
           _readMore = true;
         });
@@ -66,7 +69,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         });
       }
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
       setState(() {
         _readMore = false;
       });
@@ -74,7 +77,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   }
 
   Widget renderInfoTab(String tab) {
-    if (tab == "" || tab == null) {
+    if (tab == "") {
       return (Container());
     } else {
       return (Container(
@@ -154,38 +157,68 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
 
   Widget _top(WebsiteInfo webInfo, BuildContext context) {
     if (_width < 600) {
-      return (Column(
-        children: <Widget>[
-          Center(
-            child: Container(
-              child: new ClipRRect(
-                borderRadius: new BorderRadius.circular(8.0),
-                child: Hero(
-                  tag: webInfo.url,
-                  child: Image.network(
-                    webInfo.thumbnailUrlLink,
-                    fit: BoxFit.cover,
-                    width: 200,
-                    height: 200,
-                  ),
+      return _topSmallScreen(webInfo, context);
+    } else {
+      return _topBigScreen(webInfo, context);
+    }
+  }
+
+  Widget _topSmallScreen(WebsiteInfo webInfo, BuildContext context) {
+    return (Column(
+      children: <Widget>[
+        Center(
+          child: Container(
+            child: new ClipRRect(
+              borderRadius: new BorderRadius.circular(8.0),
+              child: Hero(
+                tag: webInfo.url,
+                child: Image.network(
+                  webInfo.thumbnailUrlLink,
+                  fit: BoxFit.cover,
+                  width: MediaQuery.of(context).size.width,
+                  height: 200,
                 ),
               ),
             ),
           ),
-          Container(
-            margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
-            child: Text(
-              webInfo.tittle,
-              style: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
-            ),
+        ),
+        Container(
+            child: Align(
+                alignment: Alignment.bottomRight,
+                child: Transform.translate(
+                    offset: Offset(-0, -25),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      decoration: new BoxDecoration(
+                          borderRadius:
+                              new BorderRadius.all(Radius.circular(4)),
+                          border: Border.all(color: webInfo.getColor()),
+                          color: GlobalTheme.navAccent,
+                          boxShadow: Decors.boxShadow),
+                      child: Text(
+                        Time.timeStringToLocalTimeString(webInfo.articleDate),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 11, color: GlobalTheme.textColor),
+                      ),
+                    )))),
+        Container(
+          margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
+          child: Text(
+            webInfo.tittle,
+            style: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
           ),
-        ],
-      ));
-    } else {
-      return (Row(
+        ),
+      ],
+    ));
+  }
+
+  Widget _topBigScreen(WebsiteInfo webInfo, BuildContext context) {
+    return Column(children: [
+      Row(
         children: <Widget>[
           Container(
-            width: _width - 250,
+            width: _width - 240,
             margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
             child: Text(
               webInfo.tittle,
@@ -193,33 +226,48 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               style: TextStyle(fontSize: 22, color: GlobalTheme.textColor),
             ),
           ),
-          Center(
-            child: Container(
-              width: 220,
-              margin:
-                  new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
-              child: new ClipRRect(
-                borderRadius: new BorderRadius.circular(8.0),
-                child: Hero(
-                  tag: webInfo.url,
-                  child: Image.network(
-                    webInfo.thumbnailUrlLink,
-                    fit: BoxFit.cover,
-                    width: 200,
-                    height: 200,
-                  ),
+          Container(
+            width: 200,
+            margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
+            child: new ClipRRect(
+              borderRadius: new BorderRadius.circular(8.0),
+              child: Hero(
+                tag: webInfo.url,
+                child: Image.network(
+                  webInfo.thumbnailUrlLink,
+                  fit: BoxFit.cover,
+                  width: 200,
+                  height: 200,
                 ),
               ),
             ),
           ),
+          Align(
+              alignment: Alignment.bottomRight,
+              child: Transform.translate(
+                  offset: Offset(-120, 80),
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                    decoration: new BoxDecoration(
+                        borderRadius: new BorderRadius.all(Radius.circular(4)),
+                        border: Border.all(color: webInfo.getColor()),
+                        color: GlobalTheme.navAccent,
+                        boxShadow: Decors.boxShadow),
+                    child: Text(
+                      Time.timeStringToLocalTimeString(webInfo.articleDate),
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 11, color: GlobalTheme.textColor),
+                    ),
+                  ))),
         ],
-      ));
-    }
+      )
+    ]);
   }
 
   List<Widget> getNextComment(String parent, double margin) {
     List<Widget> renderedList = [];
-    if (parent == null || parent == "0") {
+    if (parent == "0") {
       renderedList.add(Container(
         height: 10,
       ));
@@ -261,10 +309,13 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     if (_readMore) {
       return Text("Read More ...");
     }
-    if (articleInfo.articleDetails.fullArticle == "N/A") {
-      return Text("No internet connection");
+    if (articleInfo.articleDetails!.fullArticle == "N/A") {
+      return Text(
+        "No internet connection",
+        style: TextStyle(fontSize: 11),
+      );
     }
-    if (articleInfo.articleDetails.fullArticle == "") {
+    if (articleInfo.articleDetails!.fullArticle == "") {
       return Text("Loading ...");
     }
     return Text("Hide ...");
@@ -274,7 +325,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     if (_readMore == true) {
       setState(() {
         _pageText = Text(
-          articleInfo.articleDetails.fullArticle,
+          articleInfo.articleDetails!.fullArticle,
           style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
         );
       });
@@ -288,7 +339,7 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
         );
       });
 
-      if (articleInfo.articleDetails.fullArticle != "") {
+      if (articleInfo.articleDetails!.fullArticle != "") {
         _readMore = true;
       }
     }
@@ -297,71 +348,73 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   Widget showMoreInfoTable(WebsiteInfo webInfo, BuildContext context) {
     String _tabComments = "";
     if (_commentList.length > 0) {
-      _tabComments = "Coments";
+      _tabComments = "Comments";
     }
     return Container(
         width: _width,
         margin: new EdgeInsets.all(0),
-        child: ListView(children: <Widget>[
-          _top(webInfo, context),
-          Container(
-            margin: new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
-            child: _pageText,
-          ),
-          Container(
-              margin:
-                  new EdgeInsets.only(bottom: 10, top: 5, left: 70, right: 10),
-              alignment: Alignment.centerRight,
-
-              child: new GestureDetector(
-                  onTap: () {
-                    _onTapReadMoreFunc();
-                  },
-                  child: new Container(
-                      width: 140.0,
-                      height: 35.0,
-                      decoration: new BoxDecoration(
-                        color: webInfo.getColor(),
-                          borderRadius: new BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                      padding: EdgeInsets.only(
-                        top: 10.0,
-                        right: 0
-                      ),
-                      child: new Column(
-                        children: [
-                          showMoreInfoChild(),
-                        ],
-                      )))),
-          Align(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  commentsCounter,
-                  style: TextStyle(fontSize: 20, color: GlobalTheme.textColor),
+        child: ListView(
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+            children: <Widget>[
+              _top(webInfo, context),
+              Container(
+                margin:
+                    new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
+                child: _pageText,
+              ),
+              Container(
+                  margin: new EdgeInsets.only(
+                      bottom: 10, top: 5, left: 70, right: 10),
+                  alignment: Alignment.centerRight,
+                  child: new GestureDetector(
+                      onTap: () {
+                        _onTapReadMoreFunc();
+                      },
+                      child: new Container(
+                          width: 140.0,
+                          height: 35.0,
+                          decoration: new BoxDecoration(
+                              color: webInfo.getColor(),
+                              borderRadius:
+                                  new BorderRadius.all(Radius.circular(5)),
+                              boxShadow: Decors.boxShadow),
+                          padding: EdgeInsets.only(top: 8.0, right: 0),
+                          child: new Column(
+                            children: [
+                              showMoreInfoChild(),
+                            ],
+                          )))),
+              Align(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      commentsCounter,
+                      style:
+                          TextStyle(fontSize: 20, color: GlobalTheme.textColor),
+                    ),
+                    Container(
+                      width: 10,
+                    ),
+                    Icon(
+                      Icons.forum,
+                      color: webInfo.getColor(),
+                      size: 30.0,
+                      semanticLabel: 'Comments in post',
+                    ),
+                    Container(
+                      width: 10,
+                    ),
+                  ],
                 ),
-                Container(
-                  width: 10,
-                ),
-                Icon(
-                  Icons.forum,
-                  color: webInfo.getColor(),
-                  size: 30.0,
-                  semanticLabel: 'Comments in post',
-                ),
-                Container(
-                  width: 10,
-                ),
-              ],
-            ),
-          ),
-          renderInfoTab(_tabComments),
-          Column(
-            children: renderCommentsUi(),
-            //   _CommentList.map((item) => RenderCommentPage(item)).toList(),
-          )
-        ]));
+              ),
+              renderInfoTab(_tabComments),
+              Column(
+                children: renderCommentsUi(),
+                //   _CommentList.map((item) => RenderCommentPage(item)).toList(),
+              )
+            ]));
   }
 
   checkThisPageIsSaved() {
@@ -386,7 +439,8 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
     _height = MediaQuery.of(context).size.height;
 
     if (_init) {
-      articleInfo = ModalRoute.of(context).settings.arguments;
+      articleInfo = ModalRoute.of(context)!.settings.arguments as WebsiteInfo;
+
       _onTapReadMoreFunc(); //loadWebInfoPage
       _getInfoAboutComments(articleInfo);
       _getMoreInfoAboutWebPage(articleInfo);

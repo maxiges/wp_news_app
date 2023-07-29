@@ -16,34 +16,35 @@ class Settings {
   }
 
   loadData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      if (prefs.getBool("DarkTheme")) {
-        GlobalTheme = GlobalThemeDart;
+      if (prefs.getBool("DarkTheme") == true) {
+        GlobalTheme = GlobalThemeDark;
         _isDarkTheme = true;
       } else {
         GlobalTheme = GlobalThemeLight;
         _isDarkTheme = false;
       }
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
 
     try {
-      if (prefs.getBool("AdsOn")) {
+      if (prefs.getBool("AdsOn") == true) {
         _adsOn = true;
       } else {
         _adsOn = false;
       }
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
   }
 
   setTheme(bool darkTheme) async {
     _isDarkTheme = darkTheme;
     saveData();
+    GlobalTheme = darkTheme? GlobalThemeDark : GlobalThemeLight;
   }
 
   setAddsOn(bool oN) async {

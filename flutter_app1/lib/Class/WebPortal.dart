@@ -11,8 +11,24 @@ import 'Firebase.dart';
 class WebPortal {
   String url;
   String decColor;
+  late PortalType portalType;
+  bool isInvalid = false;
+  String requestTime ="";
 
-  WebPortal(this.url, this.decColor);
+  WebPortal(this.url, this.decColor, PortalType? portalType) {
+    this.portalType = PortalType.Wordpress;
+    if (portalType != null) {
+      this.portalType = portalType;
+    }
+  }
+
+  setIsInvalid() {
+    this.isInvalid = true;
+  }
+
+  setQueryTime(String value) {
+    this.requestTime = value;
+  }
 
   Color getColor() {
     return Color_GetColor(this.decColor);
@@ -20,23 +36,48 @@ class WebPortal {
 
   void tryRead(String jsonString) {
     try {
-      Map<String, dynamic> user = jsonDecode(jsonString);
-      this.url = user["URL"];
-      this.decColor = user["Color"];
+      Map<String, dynamic> jsonObj = jsonDecode(jsonString);
+      try {
+        fromJson(jsonObj);
+      } catch (ex) {
+        this.portalType = PortalType.Wordpress;
+      }
     } catch (ex) {
       this.url = "";
       this.decColor = "red";
+      this.portalType = PortalType.Wordpress;
     }
   }
 
-  String toJson() {
-    String jsonStr = '{ "URL" : "' +
-        this.url.replaceAll("\n", "") +
-        '", "Color" :"' +
-        this.decColor.replaceAll("\n", "") +
-        '"}';
-    return jsonStr;
+  String toJsonString() {
+    Map<String, dynamic> jsonObj = this.toJson();
+    String jsonString = jsonEncode(jsonObj);
+    return jsonString;
   }
+
+  fromJson(Map<String, dynamic> json) {
+    try {
+      this.url = json['URL'];
+    } catch (ex) {
+      this.url = "";
+    }
+    try {
+      this.decColor = json['Color'];
+    } catch (ex) {
+      this.decColor = "";
+    }
+    try {
+      this.portalType = PortalType.values.byName(json['PortalType']);
+    } catch (ex) {
+      this.portalType = PortalType.Other;
+    }
+  }
+
+  Map<String, dynamic> toJson() => {
+        'URL': url,
+        'Color': decColor,
+        'PortalType': portalType.name,
+      };
 } //class  WebPortal
 
 void _saveDataToFirebase(String data) async {
@@ -44,7 +85,7 @@ void _saveDataToFirebase(String data) async {
     DataFromDb d = DataFromDb(Global_GoogleSign.getGoogleUserEmail(), data);
     fbDataFromBaseRef.doc(d.id).update(d.toJson());
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
 }
 
@@ -54,27 +95,25 @@ Future<List<DataFromDb>> _loadDataFromFirebase() async {
     final users = await fbDataFromBaseRef
         .doc(Global_GoogleSign.getGoogleUserEmail())
         .get();
-    retList.add(users.data());
+    retList.add(users.data()!);
     return retList;
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
   return [];
 }
 
 Future<bool> webPortalSaveWebs(List<WebPortal> list) async {
   List<String> objSave = [];
-
   for (WebPortal objectVal in list) {
-    objSave.add(objectVal.toJson());
+    objSave.add(objectVal.toJsonString());
   }
-
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
       _saveDataToFirebase(
           objSave.reduce((value, element) => value + ';' + element));
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
   }
   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -95,28 +134,74 @@ Future<List<WebPortal>> webPortalLoadWebs() async {
         }
       }
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
   } else {
     try {
-      loadedWebs = prefs.getStringList("SavedWebs");
+      loadedWebs = prefs.getStringList("SavedWebs")!;
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
   }
 
   List<WebPortal> readWebs = [];
   try {
     for (String _jsonString in loadedWebs) {
-      WebPortal newSavedPage = new WebPortal("", "");
+      WebPortal newSavedPage = new WebPortal("", "", null);
       newSavedPage.tryRead(_jsonString);
       if (newSavedPage.url.length > 0) {
         readWebs.add(newSavedPage);
       }
     }
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
 
   return readWebs;
+}
+
+enum PortalType {
+  Wordpress,
+  DywanikPL,
+  PrawoPL,
+  GolangNews,
+  Other,
+}
+
+Map<String, PortalType> mapPTStoEnum = {
+  "Wordpress": PortalType.Wordpress,
+  "DywanikPL": PortalType.DywanikPL,
+  "PrawoPL": PortalType.PrawoPL,
+  "GolangNews": PortalType.GolangNews,
+  "Other": PortalType.Other,
+};
+
+String getPortalTypeString(PortalType pt) {
+  var result = "Other";
+  mapPTStoEnum.forEach((k, v) {
+    if (v.toString() == pt.toString()) {
+      result = k;
+      return;
+    }
+  });
+  return result;
+}
+
+PortalType getPortalTypeFromString(String pt) {
+  var result = PortalType.Other;
+  mapPTStoEnum.forEach((k, v) {
+    if (k == pt) {
+      result = v;
+      return;
+    }
+  });
+  return result;
+}
+
+List<String> getPortalTypeStringList() {
+  List<String> result = [];
+  mapPTStoEnum.forEach((k, v) {
+    result.add(k);
+  });
+  return result;
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
+import '../Decors/decors.dart';
 import '../Globals.dart';
 import 'package:package_info/package_info.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,19 +11,19 @@ import 'package:flutter/foundation.dart';
 import '../Utils/SaveLogs.dart';
 
 class SplashScreen extends StatefulWidget {
-  SplashScreen({Key key}) : super(key: key);
+  SplashScreen({Key? key}) : super(key: key);
 
   _SplashScreen createState() => _SplashScreen();
 }
 
 class _SplashScreen extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  AnimationController animController;
-  Timer _timer;
+  late AnimationController animController;
+  Timer? _timer;
   bool runApp = true;
   bool _tryLoadGoogleAcc = true;
   int counter = 0;
-  List<Widget> buttonList;
+  late List<Widget> buttonList;
 
   var _width;
   var _height;
@@ -30,8 +31,8 @@ class _SplashScreen extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    animController = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
+    animController =
+        AnimationController(duration: const Duration(seconds: 1), vsync: this);
     _timerStart();
     setVersionApp();
   }
@@ -39,9 +40,7 @@ class _SplashScreen extends State<SplashScreen>
   @override
   dispose() {
     _timerStop();
-    if (animController != null){
-      animController.dispose(); // you need this
-    }
+    animController.dispose();
     super.dispose();
   }
 
@@ -49,25 +48,26 @@ class _SplashScreen extends State<SplashScreen>
     setState(() {
       buttonList = retButtons(true);
     });
+    try {
+      if (_timer != null) {
+        _timer?.cancel();
+        animController.stop();
+      }
+    } catch (ex) {
+      saveLogs.error(ex.toString());
+    }
     _timer = new Timer.periodic(
         Duration(seconds: 2), (Timer timer) => timerService());
-    animController.repeat(period: Duration(milliseconds: 1000));
+    animController.repeat(period: Duration(seconds: 1));
   }
 
   _timerStop() {
     counter = 0;
     _tryLoadGoogleAcc = false;
-
-
-    if (_timer != null){
-      _timer.cancel();
+    if (_timer != null) {
+      _timer?.cancel();
     }
-    if (animController != null){
-      animController.stop();
-    }
-
-
-
+    animController.stop();
   }
 
   timerService() {
@@ -84,7 +84,6 @@ class _SplashScreen extends State<SplashScreen>
     setState(() {
       Global_packageInfo = info;
     });
-
   }
 
   tryLoginAutomatically() async {
@@ -94,7 +93,7 @@ class _SplashScreen extends State<SplashScreen>
       try {
         Global_GoogleSign.tryLogInbyGoogle(context);
       } catch (ex) {
-        saveLogs.error(ex);
+        saveLogs.error(ex.toString());
         setState(() {
           _tryLoadGoogleAcc = false;
         });
@@ -112,7 +111,7 @@ class _SplashScreen extends State<SplashScreen>
         Container(
           child: RotationTransition(
             turns: Tween(begin: 0.0, end: 1.0).animate(animController),
-            child: CircularProgressIndicator(value: 0.4),
+            child: CircularProgressIndicator(value: 0.4 , color: Colors.greenAccent,)
           ),
         ),
       ];
@@ -122,14 +121,16 @@ class _SplashScreen extends State<SplashScreen>
   }
 
   List<Widget> buildLoginButtons() {
-    if (MediaQuery.of(context).size.width < 500) {
+    if (!isLargeWideScreen()) {
       return [
         Container(
           height: 50,
           width: MediaQuery.of(context).size.width,
           margin: EdgeInsets.all(0),
-          child: FlatButton(
-            padding: const EdgeInsets.all(0),
+          child: TextButton(
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0)),
+            ),
             onPressed: () {
               Global_GoogleSign.tryLogInbyGoogle(context);
               _timerStop();
@@ -172,8 +173,10 @@ class _SplashScreen extends State<SplashScreen>
         Container(
           height: 50,
           width: MediaQuery.of(context).size.width,
-          child: FlatButton(
-            padding: const EdgeInsets.all(0),
+          child: TextButton(
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0)),
+            ),
             onPressed: () async {
               _timerStart();
               _tryLoadGoogleAcc = true;
@@ -218,16 +221,19 @@ class _SplashScreen extends State<SplashScreen>
         ),
       ];
     } else {
-      //--------------ELSE --------------------
+      //--------------ELSE  largeScreen--------------------
       return [
         Container(
           width: 300,
-          child: FlatButton(
+          child: TextButton(
             onPressed: () {
               Global_GoogleSign.tryLogInbyGoogle(context);
               _timerStop();
             },
-            color: Colors.blueAccent,
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0)),
+              iconColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
+            ),
             child: Row(
               // Repl
               mainAxisAlignment: MainAxisAlignment.center,
@@ -248,7 +254,7 @@ class _SplashScreen extends State<SplashScreen>
         ),
         Container(
           width: 300,
-          child: FlatButton(
+          child: TextButton(
             onPressed: () async {
               _timerStart();
               _tryLoadGoogleAcc = true;
@@ -259,7 +265,10 @@ class _SplashScreen extends State<SplashScreen>
               _timerStop();
               await Navigator.of(context).pushReplacementNamed('/mainScreen');
             },
-            color: Colors.orange,
+            style: ButtonStyle(
+              padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.all(0)),
+              iconColor: MaterialStateProperty.all<Color>(Colors.orange),
+            ),
             child: Row(
               // Replace with a
               mainAxisAlignment: MainAxisAlignment.center,
@@ -300,8 +309,8 @@ class _SplashScreen extends State<SplashScreen>
     Widget _kinderGardenBut = Container();
     if (!kReleaseMode) {
       _kinderGardenBut = Container(
-        child: FlatButton(
-          color: Colors.lightGreen,
+        child: TextButton(
+          style: Decors.basicButtonStyle,
           onPressed: () {
             Navigator.of(context).pushNamed('/kinderGarden');
           },
@@ -317,6 +326,8 @@ class _SplashScreen extends State<SplashScreen>
           children: <Widget>[
             Expanded(
               child: ListView(
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
                 children: <Widget>[
                   Center(
                     child: Container(

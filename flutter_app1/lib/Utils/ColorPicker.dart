@@ -2,25 +2,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import '../Utils/ColorsFunc.dart';
-class ColorPicker extends StatefulWidget {
-  List<Color> _colorList;
-  Color _initColor;
-  double _width;
-  double _hight;
-  var _setColorFunction;
-  int _maxinRow;
 
-  ColorPicker(List<Color> colorList, Function setColor(Color color),
+class ColorPicker extends StatefulWidget {
+  List<Color> _colorList = [];
+  Color _initColor = Colors.black;
+  double _width = 0;
+  double _height = 0;
+  var _setColorFunction;
+  int _maxInRow = 1;
+
+  ColorPicker(List<Color> colorList, setColor(Color color),
       {Color initColor = Colors.black,
       double width = 50,
-      double hight = 50,
+      double height = 50,
       int maxRow = 5}) {
     this._colorList = colorList;
     this._initColor = initColor;
     this._width = width;
-    this._hight = hight;
+    this._height = height;
     this._setColorFunction = setColor;
-    this._maxinRow = maxRow;
+    this._maxInRow = maxRow;
   }
 
   @override
@@ -39,48 +40,45 @@ class _ColorPicker extends State<ColorPicker> {
       }
 
       Color _frameColor = Color_getColorText(acCol);
-      
-      _colorsWidgetList.add(
-           Container(
-               child:Container(
-          width: widget._width,
-          height: widget._hight,
-          margin: new EdgeInsets.all(5),
-          child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  widget._setColorFunction(acCol);
 
-                  widget._initColor = acCol;
-                });
-              },
-              child: Container(
-                padding: EdgeInsets.all(1),
-                  decoration: new BoxDecoration(
-                    color: _frameColor,
-                    borderRadius: new BorderRadius.all(Radius.circular(50)),
-                  ),
-              child: Container(
-                decoration: new BoxDecoration(
-                  color: acCol,
-                  borderRadius: new BorderRadius.all(Radius.circular(50)),
-                ),
-                child: Icon(
-                  Icons.check,
-                  color: _thisColorIsPicked,
-                  size: 20.0,
-                ),
-              ))
-          )
+      _colorsWidgetList.add(Container(
+          child: Container(
+              width: widget._width,
+              height: widget._height,
+              margin: new EdgeInsets.all(5),
+              child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      widget._setColorFunction(acCol);
 
-          )));
+                      widget._initColor = acCol;
+                    });
+                  },
+                  child: Container(
+                      padding: EdgeInsets.all(1),
+                      decoration: new BoxDecoration(
+                        color: _frameColor,
+                        borderRadius: new BorderRadius.all(Radius.circular(50)),
+                      ),
+                      child: Container(
+                        decoration: new BoxDecoration(
+                          color: acCol,
+                          borderRadius:
+                              new BorderRadius.all(Radius.circular(50)),
+                        ),
+                        child: Icon(
+                          Icons.check,
+                          color: _thisColorIsPicked,
+                          size: 20.0,
+                        ),
+                      ))))));
     }
 
     List<Widget> _colorsWidgetRowsList = [];
 
-    for (int i = 0; i < _colorsWidgetList.length; i += widget._maxinRow) {
-      int _avail = widget._maxinRow;
-      if (_colorsWidgetList.length - i < widget._maxinRow) {
+    for (int i = 0; i < _colorsWidgetList.length; i += widget._maxInRow) {
+      int _avail = widget._maxInRow;
+      if (_colorsWidgetList.length - i < widget._maxInRow) {
         _avail = _colorsWidgetList.length - i;
       }
 

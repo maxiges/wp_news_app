@@ -7,8 +7,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import '../Dialogs/DialogsPage.dart';
 
 class PagesToTab extends StatefulWidget {
-  WebsiteInfo pageInfo;
-  BuildContext context;
+  late WebsiteInfo pageInfo;
+  late BuildContext context;
 
   PagesToTab(WebsiteInfo webInfo, BuildContext context) {
     this.pageInfo = webInfo;
@@ -21,11 +21,11 @@ class PagesToTab extends StatefulWidget {
 
 class _PagesToTab extends State<PagesToTab>
     with SingleTickerProviderStateMixin {
-  AnimationController animationControl;
+  late AnimationController animationControl;
 
-  double _width;
-  double _rowWidth;
-  double _rowheight = 100;
+  late double _width;
+  late double _rowWidth;
+  double _rowheight = 90;
 
   @override
   void initState() {
@@ -33,9 +33,19 @@ class _PagesToTab extends State<PagesToTab>
     animationControl = AnimationController(
         duration: const Duration(milliseconds: 100), vsync: this);
   }
+  @override
+  void dispose() {
+    animationControl.stop();
+    animationControl.dispose();
+    super.dispose();
+  }
 
+
+  // main screen
   Widget getPageDescWidget(bool showAllDescription) {
-    if (_rowWidth < 500) {
+
+    // small screen - phone
+    if (!isLargeWideScreen()) {
       return (Align(
         alignment: Alignment.center,
         child: Text(
@@ -43,13 +53,16 @@ class _PagesToTab extends State<PagesToTab>
           style: TextStyle(color: GlobalTheme.textColor, fontSize: 16),
         ),
       ));
-    } else {
+    }
+
+
+    // large wide screen - tablet
       String description = widget.pageInfo.descriptionBrief;
       if (!showAllDescription) {
-        if (widget.pageInfo.descriptionBrief.length * 12 * 12 >
-            (_rowWidth / 2) * 90) {
-          description = description.substring(
-              0, ((_rowWidth / 2) * 90 / 12) ~/ 12);
+        if (widget.pageInfo.descriptionBrief.length * 14 * 14 >
+            (_rowWidth / 2) * _rowheight) {
+          description =
+              description.substring(0, ((_rowWidth / 2) * _rowheight / 14) ~/ 14);
           description = description.substring(0, description.lastIndexOf(" "));
           description += " ... ";
         }
@@ -60,15 +73,15 @@ class _PagesToTab extends State<PagesToTab>
           child: Row(
             children: <Widget>[
               Container(
-                width: _rowWidth / 2 - 6,
+                width: (_rowWidth / 2) - 50,
                 child: Text(
                   widget.pageInfo.tittle,
-                  style: TextStyle(color: GlobalTheme.textColor, fontSize: 16),
+                  style: TextStyle(color: GlobalTheme.textColor, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
               Container(
-                width: 1,
-                margin: EdgeInsets.only(right: 4, left: 4),
+                width: 2,
+                margin: EdgeInsets.only(right: 10, left: 4),
                 child: Align(
                   alignment: Alignment.center,
                   child: Container(
@@ -78,7 +91,7 @@ class _PagesToTab extends State<PagesToTab>
                 ),
               ),
               Container(
-                width: _rowWidth / 2 - 6,
+                width: (_rowWidth / 2) + 30,
                 child: Text(
                   description,
                   style: TextStyle(color: GlobalTheme.textColor2, fontSize: 14),
@@ -86,7 +99,7 @@ class _PagesToTab extends State<PagesToTab>
               )
             ],
           )));
-    }
+
   }
 
   Widget buildSavedContainer(isSaved) {
@@ -99,7 +112,7 @@ class _PagesToTab extends State<PagesToTab>
               child: Align(
                   alignment: Alignment.topCenter,
                   child: Transform.translate(
-                      offset: Offset(-33, -90),
+                      offset: Offset(30, -35),
                       child: Transform.scale(
                           scale: 18,
                           child: Container(
@@ -109,18 +122,18 @@ class _PagesToTab extends State<PagesToTab>
                                   end: Alignment(0.5, 0.5),
                                   // 10% of the width, so there are ten blinds.
                                   colors: [
-                                    const Color(0xFFAAAAFF),
-                                    const Color(0xFF7070FF)
+                                    const Color(0xFF69F0AE),
+                                    const Color(0xFF24AF6E)
                                   ],
                                   // whitish to gray
                                   tileMode: TileMode
                                       .clamp, // repeats the gradient over the canvas
                                 ),
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(20))),
+                                    BorderRadius.all(Radius.circular(0.2))),
                             child: Icon(
                               Icons.file_download,
-                              color: Colors.black,
+                              color: Colors.black54,
                               size: 1,
                             ),
                           ))))));
@@ -150,16 +163,66 @@ class _PagesToTab extends State<PagesToTab>
         now.day == postData.day) {
       timeVal = "TODAY";
     }
+
+    const radius = 5.0;
+
+    Widget _imageContainer = Container(
+      margin: new EdgeInsets.all(5),
+      child: new ClipRRect(
+          borderRadius: new BorderRadius.circular(radius),
+          child: Hero(
+            tag: widget.pageInfo.url,
+            child: Image.network(
+              widget.pageInfo.thumbnailUrlLink,
+              fit: BoxFit.cover,
+              width: 75,
+              height: 75,
+            ),
+          )),
+    );
+    Widget _timeContainer = Positioned(
+        top: 75,
+        right: 7,
+        child: Align(
+            alignment: Alignment.center,
+            child: Transform.translate(
+              offset: Offset(0, 0),
+              child: Container(
+                decoration: new BoxDecoration(
+                  borderRadius: new BorderRadius.all(Radius.circular(radius)),
+                  color: widget.pageInfo.getColor(),
+                ),
+                padding: new EdgeInsets.all(1),
+                width: 65,
+                child: Center(
+                    child: Container(
+                  decoration: new BoxDecoration(
+                    borderRadius: new BorderRadius.all(Radius.circular(radius)),
+                    color: GlobalTheme.tabsDayBackground,
+                  ),
+                  width: 65,
+                  child: Center(
+                    child: // Stroked text as border.
+                        Text(
+                      timeVal,
+                      style:
+                          TextStyle(fontSize: 11, color: GlobalTheme.textColor),
+                    ),
+                  ),
+                  // Solid text as fill.
+                )),
+              ),
+            )));
+
     return SlideTransition(
-      position: Tween<Offset>(begin: Offset(0, 50), end: Offset.zero).animate(
-          CurvedAnimation(parent: animationControl, curve: Curves.easeIn)),
-      child: Slidable(
-          actionPane: SlidableDrawerActionPane(),
-          actionExtentRatio: 0.25,
+        position: Tween<Offset>(begin: Offset(0, 50), end: Offset.zero).animate(
+            CurvedAnimation(parent: animationControl, curve: Curves.easeIn)),
+        child: Slidable(
+          key: const ValueKey(0),
           child:
 //PAGE
               Container(
-                  margin: new EdgeInsets.only(bottom: 10),
+                  margin: new EdgeInsets.only(bottom: 4),
                   child: new GestureDetector(
                     onDoubleTap: () {
                       widget.pageInfo.launchURL();
@@ -176,7 +239,7 @@ class _PagesToTab extends State<PagesToTab>
                     child: Container(
                       decoration: new BoxDecoration(
                           borderRadius:
-                              new BorderRadius.all(Radius.circular(10)),
+                              new BorderRadius.all(Radius.circular(radius)),
                           color: GlobalTheme.tabsColorPrimary),
                       child: Container(
                         margin: new EdgeInsets.all(5),
@@ -192,63 +255,18 @@ class _PagesToTab extends State<PagesToTab>
                                     //fires when was imf
                                     Container(
                                       width: 80,
-                                      child: Column(children: [
-                                        Container(
-                                          margin: new EdgeInsets.all(5),
-                                          child: new ClipRRect(
-                                              borderRadius:
-                                                  new BorderRadius.circular(
-                                                      8.0),
-                                              child: Hero(
-                                                tag: widget.pageInfo.url,
-                                                child: Image.network(
-                                                  widget.pageInfo.thumbnailUrlLink,
-                                                  fit: BoxFit.cover,
-                                                  width: 75,
-                                                  height: 75,
-                                                ),
-                                              )),
-                                        ),
-                                        Align(
-                                          alignment: Alignment.center,
-                                          child: Container(
-                                            decoration: new BoxDecoration(
-                                              borderRadius:
-                                                  new BorderRadius.all(
-                                                      Radius.circular(10)),
-                                              color:
-                                                  widget.pageInfo.getColor(),
-                                            ),
-                                            padding: new EdgeInsets.all(1),
-                                            width: 60,
-                                            child: Center(
-                                                child: Container(
-                                              decoration: new BoxDecoration(
-                                                borderRadius:
-                                                    new BorderRadius.all(
-                                                        Radius.circular(10)),
-                                                color: GlobalTheme
-                                                    .tabsDayBackground,
-                                              ),
-                                              width: 60,
-                                              child: Center(
-                                                child: // Stroked text as border.
-                                                    Text(
-                                                  timeVal,
-                                                  style: TextStyle(
-                                                      fontSize: 11,
-                                                      color: GlobalTheme
-                                                          .textColor),
-                                                ),
-                                              ),
-                                              // Solid text as fill.
-                                            )),
-                                          ),
-                                        ),
-                                        buildSavedContainer(isSaved),
-                                      ]),
+                                      height: _rowheight+5,
+                                      margin:
+                                          new EdgeInsets.fromLTRB(0, 2, 0, 2),
+                                      child: Stack(
+                                          alignment:
+                                              AlignmentDirectional.center,
+                                          children: [
+                                            _imageContainer,
+                                            _timeContainer,
+                                            buildSavedContainer(isSaved),
+                                          ]),
                                     ),
-                                    //sec when was text
                                     Container(
                                         width: _rowWidth,
                                         height: _rowheight,
@@ -260,13 +278,19 @@ class _PagesToTab extends State<PagesToTab>
                       ),
                     ),
                   )),
-          actions: <Widget>[
-            IconSlideAction(
-                caption: 'Read more',
-                color: widget.pageInfo.getColor(),
-                icon: Icons.more_horiz,
-                onTap: () => openMoreDetails()),
-          ]),
-    );
+          startActionPane: ActionPane(
+            // A motion is a widget used to control how the pane animates.
+            motion: const ScrollMotion(),
+            // A pane can dismiss the Slidable.
+            children: [
+              SlidableAction(
+                  label: 'Read more',
+                  foregroundColor: widget.pageInfo.getColor(),
+                  backgroundColor: Colors.transparent,
+                  icon: Icons.more_horiz,
+                  onPressed: (BuildContext context) => openMoreDetails()),
+            ],
+          ),
+        ));
   }
 }

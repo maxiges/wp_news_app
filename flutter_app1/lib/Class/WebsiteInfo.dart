@@ -1,3 +1,4 @@
+import 'package:WP_news_APP/Class/WebPortal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
@@ -20,6 +21,18 @@ class WebsiteInfoDetails {
   }) {
     this.fullArticle = StringUtils_RemoveAllHTMLVal(this.fullArticle, true);
   }
+
+  Map<String, dynamic> toJson() => {
+        'fullArticle': fullArticle,
+      };
+
+  fromJson(Map<String, dynamic> json) {
+    try {
+      this.fullArticle = json['fullArticle'];
+    } catch (ex) {
+      this.fullArticle = "NA";
+    }
+  }
 }
 
 class WebsiteInfo {
@@ -28,10 +41,11 @@ class WebsiteInfo {
       thumbnailUrlLink = Global_NoImagePost,
       articleDate = "",
       descriptionBrief = "";
-  WebsiteInfoDetails articleDetails = WebsiteInfoDetails();
+  WebsiteInfoDetails? articleDetails = WebsiteInfoDetails();
   String providerColorAccent = "";
   String domain = "";
   String articleID = "";
+  PortalType portalType = PortalType.Other;
 
   WebsiteInfo({
     this.url = "",
@@ -43,6 +57,7 @@ class WebsiteInfo {
     this.articleID = "",
     this.domain = "",
     this.articleDetails,
+    required this.portalType,
   }) {
     this.tittle = StringUtils_RemoveAllHTMLVal(this.tittle, false);
     this.descriptionBrief =
@@ -61,92 +76,66 @@ class WebsiteInfo {
   }
 
   getColorText() {
-    Color actColor;
+    Color? actColor;
     try {
       actColor = colorPalette[this.providerColorAccent];
     } catch (ex) {
       actColor = Colors.black;
     }
-    return Color_getColorText(actColor);
+    return Color_getColorText(actColor!);
   }
 
-  tryParseJson(String jsonString) {
-    Map<String, dynamic> user = jsonDecode(jsonString);
-
+  fromJson(Map<String, dynamic> json) {
     try {
-      this.articleDate = user["DATE"];
+      this.url = json['url'];
+      this.tittle = json['tittle'];
+      this.thumbnailUrlLink = json['thumbnailUrlLink'];
+      this.articleDate = json['articleDate'];
+      this.providerColorAccent = json['providerColorAccent'];
+      this.descriptionBrief = json['descriptionBrief'];
+      this.articleID = json['articleID'];
+      this.domain = json['domain'];
+      try {
+        this.articleDetails = WebsiteInfoDetails();
+        this.articleDetails?.fromJson(json['articleDetails']);
+      } catch (ex) {
+        saveLogs.error(ex.toString());
+      }
+      this.portalType = PortalType.values.byName(json['portalType']);
     } catch (ex) {
-      this.articleDate = "";
-    }
-
-    try {
-      this.url = user["URL"];
-    } catch (ex) {
-      this.url = "";
-    }
-
-    try {
-      this.tittle = user["TITTLE"];
-    } catch (ex) {
-      this.tittle = "";
-    }
-
-    try {
-      this.thumbnailUrlLink = user["HREF"];
-    } catch (ex) {
-      this.thumbnailUrlLink = "";
-    }
-
-    try {
-      this.descriptionBrief = user["DESCRIPTION"];
-    } catch (ex) {
-      this.descriptionBrief = "";
-    }
-
-    try {
-      this.providerColorAccent = user["LinkColor"];
-    } catch (ex) {
-      this.providerColorAccent = "";
-    }
-
-    try {
-      this.domain = user["DOMAIN"];
-    } catch (ex) {
-      this.domain = "";
-    }
-
-    try {
-      this.articleID = user["ID"];
-    } catch (ex) {
-      this.articleID = "";
+      saveLogs.error(ex.toString());
     }
   }
 
-  String toJson() {
-    String jsonStr = '{ "DATE" : "' +
-        this.articleDate.replaceAll("\n", "") +
-        '", "URL" :"' +
-        this.url.replaceAll("\n", "") +
-        '", "DESCRIPTION" :"' +
-        this.descriptionBrief.replaceAll("\n", "") +
-        '", "TITTLE" :"' +
-        this.tittle.replaceAll("\n", "") +
-        '", "HREF" :"' +
-        this.thumbnailUrlLink.replaceAll("\n", "") +
-        '", "DOMAIN" :"' +
-        this.domain.replaceAll("\n", "") +
-        '", "ID" :"' +
-        this.articleID.replaceAll("\n", "") +
-        '", "LinkColor" :"' +
-        this.providerColorAccent.replaceAll("\n", "") +
-        '"}';
+  Map<String, dynamic> toJson() => {
+        'url': url,
+        'tittle': tittle,
+        'thumbnailUrlLink': thumbnailUrlLink,
+        'articleDate': articleDate,
+        'providerColorAccent': providerColorAccent,
+        'descriptionBrief': descriptionBrief,
+        'articleID': articleID,
+        'domain': domain,
+        'articleDetails': articleDetails,
+        'portalType': portalType.name,
+      };
 
-    return jsonStr;
+  WebsiteInfo tryParseJson(String jsonString) {
+    Map<String, dynamic> _websiteData = jsonDecode(jsonString);
+    this.fromJson(_websiteData);
+    return this;
+  }
+
+  String toStringJson() {
+    Map<String, dynamic> jsonObj = this.toJson();
+    String jsonString = jsonEncode(jsonObj);
+    return jsonString;
   }
 
   void launchURL() async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    Uri findURl = Uri.parse(url);
+    if (await canLaunchUrl(findURl)) {
+      await launchUrl(findURl);
     } else {
       throw 'Could not launch $url';
     }
@@ -159,7 +148,7 @@ void _saveDataToFirebase(String data) async {
         DataFromWebsDb(Global_GoogleSign.getGoogleUserEmail(), data);
     fbDataFromBaseWebsRef.doc(d.id).update(d.toJson());
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
 }
 
@@ -168,7 +157,7 @@ Future<List<String>> _loadDataFromFirebase() async {
     final retDoc = await fbDataFromBaseWebsRef
         .doc(Global_GoogleSign.getGoogleUserEmail())
         .get();
-    List val = jsonDecode(retDoc.data().description);
+    List val = jsonDecode(retDoc.data()!.description);
     List<String> list = [];
     for (int i = 0; i < val.length; i++) {
       list.add(val[i]);
@@ -176,7 +165,7 @@ Future<List<String>> _loadDataFromFirebase() async {
 
     return list;
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
   return [];
 }
@@ -184,14 +173,14 @@ Future<List<String>> _loadDataFromFirebase() async {
 Future<bool> webInfoSaveToFirebase(List<WebsiteInfo> webObj) async {
   List<String> objSave = [];
   for (WebsiteInfo objectVal in webObj) {
-    objSave.add(objectVal.toJson());
+    objSave.add(objectVal.toStringJson());
   }
 
   if (Global_GoogleSign.googleUserIsSignIn() == true) {
     try {
       _saveDataToFirebase(jsonEncode(objSave));
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
   }
 
@@ -208,19 +197,22 @@ Future<List<WebsiteInfo>> webInfoLoadFromFirebase() async {
     loadedWebs = await _loadDataFromFirebase();
   } else {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    loadedWebs = prefs.getStringList("SaverURLS");
+    List<String>? resp = prefs.getStringList("SaverURLS");
+    if (resp != null) {
+      loadedWebs = resp;
+    }
   }
 
   try {
     for (String _jsonString in loadedWebs) {
-      WebsiteInfo newSavedPage = new WebsiteInfo();
-      newSavedPage.tryParseJson(_jsonString);
+      WebsiteInfo newSavedPage = new WebsiteInfo(portalType: PortalType.Other);
+      newSavedPage = newSavedPage.tryParseJson(_jsonString);
       if (newSavedPage.tittle.length > 0) {
         readWebs.add(newSavedPage);
       }
     }
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
 
   return readWebs;
@@ -240,7 +232,7 @@ int savedFileContainsThisWeb(WebsiteInfo act) {
 Future<bool> webInfoLoadedWebSave() async {
   List<String> objSave = [];
   for (WebsiteInfo objectVal in readWebsData) {
-    objSave.add(objectVal.toJson());
+    objSave.add(objectVal.toStringJson());
   }
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.remove("SavePages");
@@ -251,11 +243,15 @@ Future<bool> webInfoLoadedWebLoad() async {
   List<WebsiteInfo> readWebs = [];
   List<String> loadedWebs = [];
   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  loadedWebs = prefs.getStringList("SavePages");
+  List<String>? p = prefs.getStringList("SavePages");
+  if (p != null) {
+    loadedWebs = p;
+  }
+
   try {
     for (String _jsonString in loadedWebs) {
-      WebsiteInfo newSavedPage = new WebsiteInfo();
-      newSavedPage.tryParseJson(_jsonString);
+      WebsiteInfo newSavedPage = new WebsiteInfo(portalType: PortalType.Other);
+      newSavedPage = newSavedPage.tryParseJson(_jsonString);
       bool tooOld = DateTime.parse(newSavedPage.articleDate)
           .isBefore(DateTime.now().subtract(Duration(days: 2)));
       if (newSavedPage.tittle.length > 0 && tooOld == false) {
@@ -271,7 +267,7 @@ Future<bool> webInfoLoadedWebLoad() async {
 
     readWebsData = readWebs;
   } catch (ex) {
-    saveLogs.error(ex);
+    saveLogs.error(ex.toString());
   }
   return true;
 }

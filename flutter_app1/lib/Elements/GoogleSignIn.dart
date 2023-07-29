@@ -9,16 +9,14 @@ import '../Utils/SaveLogs.dart';
 import 'dart:convert' show json;
 
 import "package:http/http.dart" as http;
+
 GoogleSignIn _googleSignIn = GoogleSignIn();
 
-
-
 class GoogleSign {
-  GoogleSignInAccount _currentUser;
-  User _googleUser;
+  late GoogleSignInAccount _currentUser;
+  User? _googleUser;
   bool _userSignIn = false;
-  FirebaseAuth _auth;
-
+  late FirebaseAuth _auth;
 
   GoogleSign() {
     _auth = FirebaseAuth.instance;
@@ -40,7 +38,7 @@ class GoogleSign {
 
   String _pickFirstNamedContact(Map<String, dynamic> data) {
     final List<dynamic> connections = data['connections'];
-    final Map<String, dynamic> contact = connections?.firstWhere(
+    final Map<String, dynamic> contact = connections.firstWhere(
       (dynamic contact) => contact['names'] != null,
       orElse: () => null,
     );
@@ -53,7 +51,7 @@ class GoogleSign {
         return name['displayName'];
       }
     }
-    return null;
+    return "";
   }
 
   Future<void> _handleSignIn() async {
@@ -68,7 +66,12 @@ class GoogleSign {
 
   Future<bool> getActLoginStat() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _userSignIn = prefs.getBool("GoogleSign");
+    _userSignIn = false;
+    bool? isSignIn = prefs.getBool("GoogleSign");
+    if (isSignIn != null) {
+      _userSignIn = isSignIn;
+    }
+
     return _userSignIn;
   }
 
@@ -78,11 +81,11 @@ class GoogleSign {
     prefs.setBool("GoogleSign", stat);
   }
 
-  Future<User> signInWithGoogle() async {
+  Future<User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+          await googleUser!.authentication;
 
       if (_googleUser != null) {
         return _googleUser;
@@ -91,29 +94,29 @@ class GoogleSign {
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-        final User user =
+        final User? user =
             (await _auth.signInWithCredential(authCredential)).user;
 
         return user;
       }
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
     return null;
   }
 
   Future<void> tryLogInbyGoogle(context) async {
     try {
-      _googleUser = await signInWithGoogle();
+      _googleUser = (await signInWithGoogle())!;
       await loadFromStorage();
       await saveActLoginStat(true);
 
       await Navigator.of(context).pushReplacementNamed('/mainScreen');
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
       saveActLoginStat(false);
-      Toast.show("Please sign in or login like guest", context,
-          duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      Toast.show("Please sign in or login like guest",
+          duration: Toast.lengthLong, gravity: Toast.bottom);
     }
   }
 
@@ -122,13 +125,13 @@ class GoogleSign {
       await _googleSignIn.signOut();
       await _auth.signOut();
       await saveActLoginStat(false);
-      _googleUser = null;
+
       while (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
       Navigator.of(context).popAndPushNamed("/splashScreen");
     } catch (ex) {
-      saveLogs.error(ex);
+      saveLogs.error(ex.toString());
     }
   }
 
@@ -138,10 +141,19 @@ class GoogleSign {
   }
 
   String getGoogleUser() {
-    return _googleUser.email.substring(0, _googleUser.email.indexOf("@"));
+    String? email =
+        _googleUser?.email!.substring(0, _googleUser?.email!.indexOf("@"));
+    if (email == null) {
+      return "";
+    }
+    return email;
   }
 
   String getGoogleUserEmail() {
-    return _googleUser.email;
+    String? email = _googleUser?.email;
+    if (email == null) {
+      return "";
+    }
+    return email;
   }
 }
