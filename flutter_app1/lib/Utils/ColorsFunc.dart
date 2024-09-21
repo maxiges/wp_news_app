@@ -49,8 +49,7 @@ class ColorsTheme {
     this.basicButtonBackground = Colors.black26,
     this.iconTheme = const IconThemeData(color: Colors.white),
     this.textTheme = const TextTheme(
-        headline1: TextStyle(color: Colors.white),
-        button: TextStyle(color: Colors.white)),
+        headlineSmall: TextStyle(color: Colors.white),),
     this.backgroundDialog = Colors.black54,
   });
 }
@@ -78,7 +77,7 @@ ColorsTheme GlobalThemeDark = new ColorsTheme(
       secondaryHeaderColor: Colors.white,
       splashColor: Colors.black,
       brightness: Brightness.light,
-      textTheme: TextTheme(headline1: TextStyle(color: Colors.white)),
+      textTheme: TextTheme(headlineSmall: TextStyle(color: Colors.white)),
       switchTheme: SwitchThemeData(),
     ));
 
@@ -104,7 +103,7 @@ ColorsTheme GlobalThemeLight = new ColorsTheme(
       secondaryHeaderColor: Colors.white,
       splashColor: Colors.white,
       brightness: Brightness.light,
-      textTheme: TextTheme(headline1: TextStyle(color: Colors.white)),
+      textTheme: TextTheme(headlineSmall: TextStyle(color: Colors.white)),
       useMaterial3: true,
     ));
 

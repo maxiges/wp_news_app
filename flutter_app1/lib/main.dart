@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:WP_news_APP/Pages/ShowMoreInfoPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:toast/toast.dart';
 import 'Pages/SplashPage.dart';
 import 'Pages/SettingPage.dart';
 import 'Globals.dart';
@@ -35,13 +36,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ToastContext().init(context);
     Global_Settings.loadData();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge); //disable
     //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);//enable
+
     return MaterialApp(
       title: 'WP news Collector',
       theme: GlobalTheme.mainTheme,
       home: new SplashScreen(),
+
       routes: <String, WidgetBuilder>{
         '/mainScreen': (BuildContext context) => Global_MyHomePage,
         '/settingScreen': (BuildContext context) => new SettingPage(),

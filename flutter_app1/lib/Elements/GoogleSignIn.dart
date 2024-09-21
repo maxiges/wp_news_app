@@ -100,6 +100,8 @@ class GoogleSign {
         return user;
       }
     } catch (ex) {
+      print("------------");
+      print(ex.toString());
       saveLogs.error(ex.toString());
     }
     return null;

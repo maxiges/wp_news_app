@@ -275,7 +275,7 @@ class _SettingPage extends State<SettingPage>
         child: MaterialButton(
           onPressed: () async {
             isTrue = await settingAddPageShowDialog(
-                new WebPortal("", "", null), this.context);
+                new WebPortal("", "", null, 5), this.context);
             if (isTrue) {
               setState(() {});
             }

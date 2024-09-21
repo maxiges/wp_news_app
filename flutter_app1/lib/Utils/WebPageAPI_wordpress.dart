@@ -69,7 +69,7 @@ Future<List<WebsiteInfo>> websiteInfoGetWebPagesWordpress(WebPortal web) async {
       web.url = web.url.replaceAll("https://", "");
 
       final response = await http
-          .get(Uri.parse('https://${web.url}/wp-json/wp/v2/posts?_embed&per_page=5'));
+          .get(Uri.parse('https://${web.url}/wp-json/wp/v2/posts?_embed&per_page=${web.articlesRead}'));
       if (response.statusCode == 200) {
         List<dynamic> retJson = json.decode(response.body);
         for (dynamic items in retJson) {

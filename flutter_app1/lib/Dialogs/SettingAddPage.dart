@@ -42,8 +42,17 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
   currentColor = web.getColor();
   actUrl = web.url;
   String dropdownValue = getPortalTypeString(web.portalType);
+  int dropdownValueNumber = 5;
+
+
   // List of items in our dropdown menu
   var items = getPortalTypeStringList();
+  List<int> valuePicker = [5,10,15];
+
+  List<String> recomendedWebsides = ["","android.com.pl","niebezpiecznik.pl", "prawo.pl", "golangnews.com", "tabletowo.pl"  ];
+
+  String pickerChangeURL = recomendedWebsides[0];
+  var textController = new TextEditingController(text: "");
 
   StateSetter _setState;
   bool? shouldUpdate = await showDialog(
@@ -74,7 +83,7 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
                         margin: const EdgeInsets.only(
                             bottom: 5, left: 0, right: 0, top: 0),
                         child: TextFormField(
-                          initialValue: web.url,
+                          controller: textController,
                           style: TextStyle(color: GlobalTheme.textColor),
                           decoration: InputDecoration(
                             icon: Icon(Icons.bookmark_border),
@@ -109,6 +118,68 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
                         direction: Axis.horizontal,
                         spacing: 20,
                         children: [
+                          DropdownButton(
+                            style: TextStyle(color: GlobalTheme.textColor),
+                            dropdownColor: GlobalTheme.backgroundDialog,
+                            // Initial Value
+                            value: pickerChangeURL,
+                            // Down Arrow Icon
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            // Array list of valuePicker
+                            items: recomendedWebsides.map((String valuePicker) {
+                              return DropdownMenuItem(
+                                value: valuePicker,
+                                child: Text(
+                                    style:
+                                    TextStyle(color: GlobalTheme.textColor),
+                                    ""+valuePicker.toString()),
+                              );
+                            }).toList(),
+                            // After selecting the desired option,it will
+                            // change button value to selected value
+                            onChanged: (String? newValue) {
+                              if(newValue ==null){
+                                return;
+                              }
+                              _setState(() {
+                                actUrl = newValue;
+                                pickerChangeURL = newValue;
+                                final updatedText =  newValue;
+                                textController.value = textController.value.copyWith(
+                                  text: updatedText,
+                                  selection: TextSelection.collapsed(offset: updatedText.length),
+                                );
+                              });
+                            },
+                          ),
+                          DropdownButton(
+                            style: TextStyle(color: GlobalTheme.textColor),
+                            dropdownColor: GlobalTheme.backgroundDialog,
+                            // Initial Value
+                            value: dropdownValueNumber,
+                            // Down Arrow Icon
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            // Array list of valuePicker
+                            items: valuePicker.map((int valuePicker) {
+                              return DropdownMenuItem(
+                                value: valuePicker,
+                                child: Text(
+                                    style:
+                                    TextStyle(color: GlobalTheme.textColor),
+                                    ""+valuePicker.toString()),
+                              );
+                            }).toList(),
+                            // After selecting the desired option,it will
+                            // change button value to selected value
+                            onChanged: (int? newValue) {
+                              if(newValue ==null){
+                                return;
+                              }
+                              _setState(() {
+                                dropdownValueNumber = newValue;
+                              });
+                            },
+                          ),
                           DropdownButton(
                             style: TextStyle(color: GlobalTheme.textColor),
                             dropdownColor: GlobalTheme.backgroundDialog,
@@ -211,6 +282,7 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
         if (readWeb.url == actUrl && actUrl.length > 2) {
           readWeb.decColor = Color_GetColorInString(currentColor);
           web.portalType = getPortalTypeFromString(dropdownValue);
+          web.articlesRead = dropdownValueNumber;
           webPortalSaveWebs(Global_webList);
           return true;
         }
@@ -218,6 +290,7 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
       web.url = actUrl;
       web.decColor = Color_GetColorInString(currentColor);
       web.portalType = getPortalTypeFromString(dropdownValue);
+      web.articlesRead = dropdownValueNumber;
       Global_webList.add(web);
       webPortalSaveWebs(Global_webList);
       return true;

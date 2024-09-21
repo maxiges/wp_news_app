@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'dart:async';
@@ -14,8 +15,9 @@ class WebPortal {
   late PortalType portalType;
   bool isInvalid = false;
   String requestTime ="";
+  int articlesRead =5;
 
-  WebPortal(this.url, this.decColor, PortalType? portalType) {
+  WebPortal(this.url, this.decColor, PortalType? portalType,  this.articlesRead  ) {
     this.portalType = PortalType.Wordpress;
     if (portalType != null) {
       this.portalType = portalType;
@@ -147,7 +149,7 @@ Future<List<WebPortal>> webPortalLoadWebs() async {
   List<WebPortal> readWebs = [];
   try {
     for (String _jsonString in loadedWebs) {
-      WebPortal newSavedPage = new WebPortal("", "", null);
+      WebPortal newSavedPage = new WebPortal("", "", null, 5);
       newSavedPage.tryRead(_jsonString);
       if (newSavedPage.url.length > 0) {
         readWebs.add(newSavedPage);
