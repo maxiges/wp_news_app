@@ -43,6 +43,8 @@ String StringUtils_RemoveAllHTMLVal(String str, bool addNewLine) {
   } else {
     str = str.replaceAll(exp, '');
   }
+  str = str.replaceAll(RegExp(r"\s\s+"), "\r\n");
+  str = str.replaceAll("\r\n\r\n", '\r\n');
 
   return str;
 }

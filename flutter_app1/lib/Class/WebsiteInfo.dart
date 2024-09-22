@@ -15,7 +15,6 @@ List<WebsiteInfo> readWebsData = [];
 
 class WebsiteInfoDetails {
   String fullArticle = "";
-
   WebsiteInfoDetails({
     this.fullArticle = "N/A",
   }) {
@@ -46,6 +45,7 @@ class WebsiteInfo {
   String domain = "";
   String articleID = "";
   PortalType portalType = PortalType.Other;
+  List<String> imgsInArticle = [];
 
   WebsiteInfo({
     this.url = "",
@@ -57,6 +57,7 @@ class WebsiteInfo {
     this.articleID = "",
     this.domain = "",
     this.articleDetails,
+    this.imgsInArticle = const [],
     required this.portalType,
   }) {
     this.tittle = StringUtils_RemoveAllHTMLVal(this.tittle, false);
@@ -64,6 +65,9 @@ class WebsiteInfo {
         StringUtils_RemoveAllHTMLVal(this.descriptionBrief, false);
     if (this.thumbnailUrlLink.length < 5) {
       this.thumbnailUrlLink = Global_NoImagePost;
+    }
+    if (this.imgsInArticle == null) {
+      this.imgsInArticle = [];
     }
 
     if (this.articleDetails == null) {

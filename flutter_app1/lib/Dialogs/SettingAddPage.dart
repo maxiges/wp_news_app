@@ -52,7 +52,7 @@ Future<bool> settingAddPageShowDialog(WebPortal web, dynamic context) async {
   List<String> recomendedWebsides = ["","android.com.pl","niebezpiecznik.pl", "prawo.pl", "golangnews.com", "tabletowo.pl"  ];
 
   String pickerChangeURL = recomendedWebsides[0];
-  var textController = new TextEditingController(text: "");
+  var textController = new TextEditingController(text: actUrl);
 
   StateSetter _setState;
   bool? shouldUpdate = await showDialog(

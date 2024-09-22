@@ -32,6 +32,8 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
   bool _readMore = false;
   Text _pageText = new Text("Error");
 
+  Widget _pageComponentFullPage = new Text("No images");
+
   @override
   void initState() {
     super.initState();
@@ -323,11 +325,34 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
 
   void _onTapReadMoreFunc() {
     if (_readMore == true) {
+      _pageComponentFullPage = Text("");
+      if (articleInfo.imgsInArticle.length > 0) {
+        List<Widget> widgets = [];
+        articleInfo.imgsInArticle.forEach((imgURL) {
+          widgets.add(Container(
+            // To see the difference between the image's original size and the fram
+            child: Image.network(imgURL, fit: BoxFit.fitWidth),
+          ));
+        });
+        _pageComponentFullPage = Container(
+          height: MediaQuery.of(context).size.height * 0.5 ,
+            child: GridView.count(
+              primary: false,
+              padding: const EdgeInsets.all(20),
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              crossAxisCount: 2,
+              shrinkWrap: true,
+          children: widgets,
+        ));
+      }
+
       setState(() {
         _pageText = Text(
           articleInfo.articleDetails!.fullArticle,
           style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
         );
+        _pageComponentFullPage = _pageComponentFullPage;
       });
 
       _readMore = false;
@@ -337,6 +362,8 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
           articleInfo.descriptionBrief + " ...",
           style: TextStyle(fontSize: 14, color: GlobalTheme.textColor),
         );
+
+        _pageComponentFullPage = Text("No images");
       });
 
       if (articleInfo.articleDetails!.fullArticle != "") {
@@ -361,7 +388,20 @@ class _ShowMoreInfo extends State<ShowMoreInfo>
               Container(
                 margin:
                     new EdgeInsets.only(bottom: 10, top: 5, left: 5, right: 5),
-                child: _pageText,
+                child: ListBody(
+                  children: <Widget>[
+                    Container(
+                      child: _pageText,
+                    ),
+                    Container(
+                      child: _pageComponentFullPage,
+                    ),
+                    Container(
+                      margin: new EdgeInsets.only(
+                          bottom: 20, top: 5, left: 5, right: 5),
+                    ),
+                  ],
+                ),
               ),
               Container(
                   margin: new EdgeInsets.only(

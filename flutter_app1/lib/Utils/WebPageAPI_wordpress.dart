@@ -61,6 +61,25 @@ Future<List<PageComments>> getArticleCommentsWordpress(WebsiteInfo web) async {
   return pageCommentList;
 }
 
+List<String> ExtractImgsFromString( String contentString) {
+  RegExp regExp79 = new RegExp( r'<img[^>]+src="([^">]+)"',
+    caseSensitive: false,
+    multiLine: true,
+  );
+
+  Iterable<RegExpMatch> elements =  regExp79.allMatches(contentString);
+
+  if(!elements.isEmpty){
+    List<String> ret = [];
+    for (var m in regExp79.allMatches(contentString)) {
+      ret.add(m[1].toString());
+
+    }
+    return ret;
+  }
+  return [];
+}
+
 Future<List<WebsiteInfo>> websiteInfoGetWebPagesWordpress(WebPortal web) async {
   List<WebsiteInfo> websCheckList = [];
   try {
@@ -79,7 +98,7 @@ Future<List<WebsiteInfo>> websiteInfoGetWebPagesWordpress(WebPortal web) async {
             String _articleDesc = "N/A";
             String _postComments = "N/A";
             String _id = "";
-
+            List _contentImgList = [];
             try {
               imaSrc = items['_embedded']['wp:featuredmedia'][0]
                   ['media_details']['sizes']['medium']['source_url'];
@@ -96,6 +115,7 @@ Future<List<WebsiteInfo>> websiteInfoGetWebPagesWordpress(WebPortal web) async {
             try {
               _id = _id = items['id'].toString();
             } catch (ex) {}
+
 
             websCheckList.add(new WebsiteInfo(
               url: items['link'],
@@ -128,6 +148,7 @@ Future<List<WebsiteInfo>> websiteInfoGetWebPagesWordpress(WebPortal web) async {
   return websCheckList;
 }
 
+
 Future<WebsiteInfo> websiteInfoGetAllWebInfoWordpress(WebsiteInfo web) async {
   WebsiteInfo websCheckList = WebsiteInfo(portalType: PortalType.Other);
   try {
@@ -139,12 +160,14 @@ Future<WebsiteInfo> websiteInfoGetAllWebInfoWordpress(WebsiteInfo web) async {
       if (response.statusCode == 200) {
         dynamic retJson = json.decode(response.body);
         try {
+
           dynamic imaSrc = "";
           String _articleTittle = "N/A";
           String _articleDesc = "N/A";
           String _postComments = "N/A";
           String _id = "";
           String _webFullDes = "";
+          List<String> _contentImgList = [];
           try {
             imaSrc = retJson['_embedded']['wp:featuredmedia'][0]
                 ['media_details']['sizes']['medium']['source_url'];
@@ -166,6 +189,10 @@ Future<WebsiteInfo> websiteInfoGetAllWebInfoWordpress(WebsiteInfo web) async {
             _webFullDes = retJson['content'].toString();
           } catch (ex) {}
 
+          try {
+            _contentImgList = ExtractImgsFromString(retJson['content'].toString());
+          } catch (ex) {}
+
           WebsiteInfoDetails webDetails =
               new WebsiteInfoDetails(fullArticle: _webFullDes);
 
@@ -180,6 +207,7 @@ Future<WebsiteInfo> websiteInfoGetAllWebInfoWordpress(WebsiteInfo web) async {
             domain: web.domain,
             articleDetails: webDetails,
             portalType: web.portalType,
+            imgsInArticle: _contentImgList,
           );
 
           return websCheckList;
